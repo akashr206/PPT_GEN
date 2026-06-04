@@ -157,60 +157,34 @@ export default function DashboardPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-44 bg-popover border-border text-popover-foreground rounded-xl p-1.5 shadow-2xl z-50">
-                      {item.url ? (
-                        <>
-                          <DropdownMenuItem
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              try {
-                                toast.info("Downloading PDF...");
-                                const response = await fetch(item.url);
-                                const blob = await response.blob();
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement("a");
-                                a.href = url;
-                                a.download = (item.title || "presentation").split(" ").join("_") + ".pdf";
-                                a.click();
-                                URL.revokeObjectURL(url);
-                                toast.success("PDF downloaded");
-                              } catch (err) {
-                                toast.error("Failed to download PDF");
-                              }
-                            }}
-                            className="cursor-pointer gap-2 py-2"
-                          >
-                            <FileDown size={14} />
-                            <span>Download PDF</span>
-                          </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast.info("Preparing PDF download...");
+                          setTimeout(() => {
+                            toast.success("PDF downloaded successfully (simulation).");
+                          }, 1000);
+                        }}
+                        className="cursor-pointer gap-2 py-2"
+                      >
+                        <FileDown size={14} />
+                        <span>Download PDF</span>
+                      </DropdownMenuItem>
 
-                          {item.ppt_url && (
-                            <DropdownMenuItem
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                try {
-                                  toast.info("Downloading PPTX...");
-                                  const response = await fetch(item.ppt_url);
-                                  const blob = await response.blob();
-                                  const url = URL.createObjectURL(blob);
-                                  const a = document.createElement("a");
-                                  a.href = url;
-                                  a.download = (item.title || "presentation").split(" ").join("_") + ".pptx";
-                                  a.click();
-                                  URL.revokeObjectURL(url);
-                                  toast.success("PPTX downloaded");
-                                } catch (err) {
-                                  toast.error("Failed to download PPTX");
-                                }
-                              }}
-                              className="cursor-pointer gap-2 py-2"
-                            >
-                              <PresentationIcon size={14} />
-                              <span>Download PPTX</span>
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator className="bg-border" />
-                        </>
-                      ) : null}
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast.info("Preparing PPTX download...");
+                          setTimeout(() => {
+                            toast.success("PPTX downloaded successfully (simulation).");
+                          }, 1000);
+                        }}
+                        className="cursor-pointer gap-2 py-2"
+                      >
+                        <PresentationIcon size={14} />
+                        <span>Download PPTX</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-border" />
 
                       <DropdownMenuItem
                         onClick={(e) => {

@@ -1,0 +1,206 @@
+{
+  "themes": [
+    {
+      "id": "default",
+      "name": "Default (Modern Light)",
+      "description": "Clean, light design with blue accents and Inter typography."
+    },
+    {
+      "id": "dark",
+      "name": "Dark Mode",
+      "description": "Vibrant dark design with blue/indigo accents and Inter typography."
+    },
+    {
+      "id": "corporate",
+      "name": "Corporate",
+      "description": "Professional light design with slate/sky blue accents and Roboto typography."
+    },
+    {
+      "id": "creative",
+      "name": "Creative (Vibrant)",
+      "description": "Colorful pink/rose background with deep violet accents and Outfit typography."
+    },
+    {
+      "id": "elegant",
+      "name": "Elegant (Serif)",
+      "description": "Sophisticated warm grey design with Merriweather headings and Inter body."
+    },
+    {
+      "id": "playful",
+      "name": "Playful",
+      "description": "Fun, warm yellow design with orange accents and Quicksand typography."
+    },
+    {
+      "id": "nature",
+      "name": "Nature (Earthy)",
+      "description": "Calming earthy green and cream design with Lora headings and Inter body."
+    },
+    {
+      "id": "cyberpunk",
+      "name": "Cyberpunk (Neon Midnight)",
+      "description": "Dark neon cyberpunk theme with cyan, pink accents and Outfit/Roboto typography."
+    },
+    {
+      "id": "sunset",
+      "name": "Sunset (Warm)",
+      "description": "Warm orange/clay peach design with Outfit/Inter typography."
+    },
+    {
+      "id": "ocean",
+      "name": "Ocean",
+      "description": "Fresh sea breeze blue design with Outfit/Inter typography."
+    },
+    {
+      "id": "minimalist",
+      "name": "Minimalist",
+      "description": "Stark monochrome black & white design with Playfair Display/Inter typography."
+    },
+    {
+      "id": "lavender",
+      "name": "Lavender",
+      "description": "Modern lavender geometric design with Poppins typography."
+    }
+  ],
+  "layoutCategories": {
+    "title": {
+      "name": "Title Layouts",
+      "description": "Layouts designed for opening slides, section breaks, and presentations headers.",
+      "fields": ["title", "subtitle", "presenter", "company", "date"],
+      "types": [
+        {
+          "id": "main",
+          "name": "Main Title",
+          "description": "Centered title slide layout with metadata fields and a separator line."
+        },
+        {
+          "id": "split",
+          "name": "Split Title",
+          "description": "Split column/row layout designed for title slides."
+        },
+        {
+          "id": "section",
+          "name": "Section Divider",
+          "description": "Layout designed for introducing a new presentation section."
+        }
+      ]
+    },
+    "bullets": {
+      "name": "Bullet Points",
+      "description": "Standard lists or grids containing multiple sequential headers and descriptions.",
+      "fields": ["title", "subtitle", "items"],
+      "itemFields": ["header", "description"],
+      "types": [
+        {
+          "id": "standard",
+          "name": "Standard List",
+          "description": "A classic vertical list of items, splitting into a 2-column layout when there are more than 4 items."
+        },
+        {
+          "id": "big",
+          "name": "Big Bullets",
+          "description": "Bold text bullets with larger typography for emphasizing key points."
+        },
+        {
+          "id": "grid",
+          "name": "Bullets Grid",
+          "description": "A structured grid of bullet items with headers and descriptions."
+        },
+        {
+          "id": "timeline",
+          "name": "Vertical Bullets Timeline",
+          "description": "A layout displaying bullet items connected along a vertical timeline line."
+        }
+      ],
+      "constraints": {
+        "maxItems": 8,
+        "recommendedItems": "3 to 6"
+      }
+    },
+    "cards": {
+      "name": "Card Layouts",
+      "description": "Grid or block cards to visually separate and present group data.",
+      "fields": ["title", "subtitle", "items"],
+      "itemFields": ["header", "description"],
+      "types": [
+        {
+          "id": "simple",
+          "name": "Simple Cards",
+          "description": "Clean border-based card grid for showcasing features or items."
+        },
+        {
+          "id": "leftAccent",
+          "name": "Left Accent Cards",
+          "description": "Cards with colored left-border accent indicators."
+        },
+        {
+          "id": "numbered",
+          "name": "Numbered Cards",
+          "description": "Cards displaying an auto-incrementing index number on the left."
+        },
+        {
+          "id": "filled",
+          "name": "Filled Cards",
+          "description": "Cards styled with a light alternative theme background."
+        }
+      ],
+      "constraints": {
+        "maxItems": 6,
+        "recommendedItems": "2 to 4"
+      }
+    },
+    "stats": {
+      "name": "Key Metrics & Statistics",
+      "description": "Large text indicators highlighting critical figures or metrics.",
+      "fields": ["title", "subtitle", "items"],
+      "itemFields": ["header", "description"],
+      "types": [
+        {
+          "id": "grid",
+          "name": "Stats Grid",
+          "description": "Grid display of big numbers and their descriptions. Automatically switches layout configurations depending on item count."
+        },
+        {
+          "id": "row",
+          "name": "Stats Row",
+          "description": "A single row/column layout displaying statistics side-by-side or stacked."
+        },
+        {
+          "id": "callout",
+          "name": "Large Stat Callout",
+          "description": "Emphasizes a single massive key metric with a detailed text callout description."
+        }
+      ],
+      "constraints": {
+        "maxItems": 6,
+        "recommendedItems": "1 to 4"
+      }
+    },
+    "timelines": {
+      "name": "Timelines",
+      "description": "Display events, steps, or progression sequences chronologically.",
+      "fields": ["title", "subtitle", "items"],
+      "itemFields": ["header", "description"],
+      "types": [
+        {
+          "id": "horizontal",
+          "name": "Horizontal Timeline",
+          "description": "Steps placed horizontally on a timeline track line, scaling from 2 to 6 items."
+        },
+        {
+          "id": "vertical",
+          "name": "Vertical Timeline",
+          "description": "Steps oriented along a vertical track line with dots."
+        },
+        {
+          "id": "alternating",
+          "name": "Alternating Timeline",
+          "description": "Steps arranged in an alternating left-to-right zigzag fashion along a central axis."
+        }
+      ],
+      "constraints": {
+        "maxItems": 6,
+        "recommendedItems": "3 to 5"
+      }
+    }
+  }
+}

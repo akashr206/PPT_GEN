@@ -26,6 +26,7 @@ function GeneratePageContent() {
   const { refreshHistory } = useHistory();
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [activePptId, setActivePptId] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [theme, setTheme] = useState("Modern");
   const [tone, setTone] = useState("Professional");
@@ -37,10 +38,8 @@ function GeneratePageContent() {
   useEffect(() => {
     if (urlprompt) {
       setPrompt(urlprompt);
-      setAutoFocus(true)
-      
+      setAutoFocus(true);
     }
-    api.get("/api/ppt/history")
   }, [urlprompt]);
 
   if (status === "loading") {
@@ -55,31 +54,16 @@ function GeneratePageContent() {
     return null;
   }
 
-  const handleGenerate = async (e) => {
+  const handleGenerate = (e) => {
     e.preventDefault();
     if (!prompt.trim()) return;
     setIsGenerating(true);
     
-    try {
-      const response = await api.post("/api/ppt/generate", {
-        prompt,
-        tone: tone.toLowerCase(),
-        slides: parseInt(slides) || 10,
-        theme: theme.toLowerCase(),
-      });
-      
-      const data = response.data;
-      if (data && data.ppt_id) {
-        refreshHistory(true);
-        router.push(`/generate/${data.ppt_id}`);
-      } else {
-        throw new Error("No ppt ID returned");
-      }
-    } catch (error) {
-      console.error("Failed to generate outline:", error);
+    // Simulate generation with a 2-second timeout
+    setTimeout(() => {
       setIsGenerating(false);
-      toast.error("Failed to generate presentation. Please try again.");
-    }
+      router.push("/generate/quarterly-review");
+    }, 2000);
   };
 
   return (

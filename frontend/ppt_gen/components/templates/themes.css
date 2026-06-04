@@ -1,0 +1,317 @@
+/* 
+    PPT Gen Themes
+    Usage: Add data-theme="<theme-name>" to a wrapper element (like a slide container).
+    */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Merriweather:wght@300;400;700&family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap");
+
+/* Default (Modern Light) */
+[data-theme="default"] {
+    --theme-bg: #ffffff;
+    --theme-bg-alt: #f9fafb;
+    --theme-fg: #1f2937;
+    --theme-fg-muted: #4b5563;
+    --theme-primary: #3b82f6;
+    --theme-secondary: #f3f4f6;
+    --theme-accent: #8b5cf6;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #e5e7eb;
+    --theme-bullet: #3b82f6;
+    --theme-font-heading: "Inter", sans-serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+    --theme-bg: #111827;
+    --theme-bg-alt: #1f2937;
+    --theme-fg: #f9fafb;
+    --theme-fg-muted: #9ca3af;
+    --theme-primary: #60a5fa;
+    --theme-secondary: #374151;
+    --theme-accent: #a78bfa;
+    --theme-card-bg: #1f2937;
+    --theme-card-border: #374151;
+    --theme-bullet: #60a5fa;
+    --theme-font-heading: "Inter", sans-serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Corporate */
+[data-theme="corporate"] {
+    --theme-bg: #f8fafc;
+    --theme-bg-alt: #e2e8f0;
+    --theme-fg: #0f172a;
+    --theme-fg-muted: #475569;
+    --theme-primary: #0369a1;
+    --theme-secondary: #cbd5e1;
+    --theme-accent: #0284c7;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #cbd5e1;
+    --theme-bullet: #0369a1;
+    --theme-font-heading: "Roboto", sans-serif;
+    --theme-font-body: "Roboto", sans-serif;
+}
+
+/* Creative (Vibrant) */
+[data-theme="creative"] {
+    --theme-bg: #fff1f2;
+    --theme-bg-alt: #ffe4e6;
+    --theme-fg: #4c1d95;
+    --theme-fg-muted: #7c3aed;
+    --theme-primary: #f43f5e;
+    --theme-secondary: #fce7f3;
+    --theme-accent: #ec4899;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #fbcfe8;
+    --theme-bullet: #f43f5e;
+    --theme-font-heading: "Outfit", sans-serif;
+    --theme-font-body: "Outfit", sans-serif;
+}
+
+/* Elegant (Serif) */
+[data-theme="elegant"] {
+    --theme-bg: #fafaf9;
+    --theme-bg-alt: #f5f5f4;
+    --theme-fg: #44403c;
+    --theme-fg-muted: #78716c;
+    --theme-primary: #78716c;
+    --theme-secondary: #e7e5e4;
+    --theme-accent: #a8a29e;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #e7e5e4;
+    --theme-bullet: #78716c;
+    --theme-font-heading: "Merriweather", serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Playful */
+[data-theme="playful"] {
+    --theme-bg: #fefce8;
+    --theme-bg-alt: #fef9c3;
+    --theme-fg: #3f6212;
+    --theme-fg-muted: #4d7c0f;
+    --theme-primary: #eab308;
+    --theme-secondary: #fef08a;
+    --theme-accent: #fb923c;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #fde047;
+    --theme-bullet: #eab308;
+    --theme-font-heading: "Quicksand", sans-serif;
+    --theme-font-body: "Quicksand", sans-serif;
+}
+
+/* Nature (Earthy Green & Cream) */
+[data-theme="nature"] {
+    --theme-bg: #f4f6f0;
+    --theme-bg-alt: #e9ece1;
+    --theme-fg: #1c2e24;
+    --theme-fg-muted: #4e5f54;
+    --theme-primary: #2d5a3c;
+    --theme-secondary: #dbe4cb;
+    --theme-accent: #8fa882;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #d3dbcb;
+    --theme-bullet: #2d5a3c;
+    --theme-font-heading: "Lora", serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Cyberpunk (Neon Midnight) */
+[data-theme="cyberpunk"] {
+    --theme-bg: #0a0b10;
+    --theme-bg-alt: #131422;
+    --theme-fg: #f3f4f6;
+    --theme-fg-muted: #9ca3af;
+    --theme-primary: #00f0ff;
+    --theme-secondary: #1f1d36;
+    --theme-accent: #ff007f;
+    --theme-card-bg: #131422;
+    --theme-card-border: #2c284e;
+    --theme-bullet: #00f0ff;
+    --theme-font-heading: "Outfit", sans-serif;
+    --theme-font-body: "Roboto", sans-serif;
+}
+
+/* Sunset (Warm Clay & Peach) */
+[data-theme="sunset"] {
+    --theme-bg: #fdf8f5;
+    --theme-bg-alt: #fbece4;
+    --theme-fg: #451a03;
+    --theme-fg-muted: #78350f;
+    --theme-primary: #ea580c;
+    --theme-secondary: #ffedd5;
+    --theme-accent: #f97316;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #fed7aa;
+    --theme-bullet: #ea580c;
+    --theme-font-heading: "Outfit", sans-serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Ocean (Fresh Sea Breeze) */
+[data-theme="ocean"] {
+    --theme-bg: #f0f7fa;
+    --theme-bg-alt: #e0f2fe;
+    --theme-fg: #0c4a6e;
+    --theme-fg-muted: #0369a1;
+    --theme-primary: #0284c7;
+    --theme-secondary: #e0f2fe;
+    --theme-accent: #06b6d4;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #bae6fd;
+    --theme-bullet: #0284c7;
+    --theme-font-heading: "Outfit", sans-serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Minimalist (Stark Monochrome) */
+[data-theme="minimalist"] {
+    --theme-bg: #ffffff;
+    --theme-bg-alt: #f3f4f6;
+    --theme-fg: #111827;
+    --theme-fg-muted: #6b7280;
+    --theme-primary: #111827;
+    --theme-secondary: #e5e7eb;
+    --theme-accent: #374151;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #111827;
+    --theme-bullet: #111827;
+    --theme-font-heading: "Playfair Display", serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Lavender (Modern Geometric) */
+[data-theme="lavender"] {
+    --theme-bg: #faf9fe;
+    --theme-bg-alt: #f3f0ff;
+    --theme-fg: #1e1b4b;
+    --theme-fg-muted: #4f46e5;
+    --theme-primary: #6366f1;
+    --theme-secondary: #e0e7ff;
+    --theme-accent: #d946ef;
+    --theme-card-bg: #ffffff;
+    --theme-card-border: #e0e7ff;
+    --theme-bullet: #6366f1;
+    --theme-font-heading: "Poppins", sans-serif;
+    --theme-font-body: "Poppins", sans-serif;
+}
+
+/* =========================================
+    Utility Classes for the Presentation 
+    ========================================= */
+
+/* Base Container */
+.theme-container {
+    background-color: var(--theme-bg);
+    color: var(--theme-fg);
+    font-family: var(--theme-font-body);
+    transition: all 0.3s ease;
+}
+
+/* Typography */
+.theme-heading {
+    font-family: var(--theme-font-heading);
+    color: var(--theme-primary);
+}
+
+.theme-text-primary {
+    color: var(--theme-primary);
+}
+
+.theme-text-accent {
+    color: var(--theme-accent);
+}
+
+.theme-text-muted {
+    color: var(--theme-fg-muted);
+}
+
+/* Backgrounds */
+.theme-bg-primary {
+    background-color: var(--theme-primary);
+    color: var(--theme-bg);
+}
+
+.theme-bg-secondary {
+    background-color: var(--theme-secondary);
+    color: var(--theme-fg);
+}
+
+.theme-bg-alt {
+    background-color: var(--theme-bg-alt);
+}
+
+/* Components: Cards */
+.theme-card {
+    background-color: var(--theme-card-bg);
+    border: 1px solid var(--theme-card-border);
+    border-radius: 0.5cqw;
+    padding: 1.5cqw;
+}
+
+.theme-menu-button {
+    background-color: var(--theme-card-bg);
+    border: 1px solid var(--theme-card-border);
+    border-radius: 0.5cqw;
+    padding: 0.25cqw;
+}
+
+/* Components: Lists */
+.theme-bullet-list {
+    list-style: none;
+    padding-left: 1.5cqw;
+    margin: 1cqw 0;
+}
+
+.theme-bullet-list li {
+    position: relative;
+    margin-bottom: 0.75cqw;
+}
+
+.theme-bullet-list li::before {
+    content: "•";
+    color: var(--theme-bullet);
+    font-size: 2.5cqw;
+    position: absolute;
+    left: -2cqw;
+    top: -0.5cqw;
+}
+
+/* Components: Badges/Pills */
+.theme-badge {
+    display: inline-block;
+    padding: 0.5cqw 1cqw;
+    border-radius: 99cqw;
+    font-size: 1.2cqw;
+    font-weight: 500;
+    background-color: var(--theme-secondary);
+    color: var(--theme-primary);
+}
+
+/* Layout & Borders */
+.theme-border {
+    border-color: var(--theme-card-border);
+}
+
+.theme-divider {
+    height: 0.1cqw;
+    background-color: var(--theme-card-border);
+    margin: 1.5cqw 0;
+    border: none;
+}
+
+/* Item highlight when actions menu is open */
+[data-menu-open="true"] {
+    outline: 2px solid var(--theme-primary);
+    outline-offset: 4px;
+    border-radius: 0.4cqw;
+    transition: outline 0.15s ease;
+}
+
+/* Keep the menu button visible while the dropdown is open */
+[data-menu-open="true"] > div[class*="opacity-0"],
+[data-menu-open="true"] div[class*="opacity-0"] {
+    opacity: 1 !important;
+}
+

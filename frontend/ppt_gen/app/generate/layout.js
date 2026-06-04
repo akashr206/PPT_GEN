@@ -16,7 +16,7 @@ export default function GenerateLayout({ children }) {
 
       <main className="h-full w-full flex flex-col relative bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] overflow-hidden">
         <div 
-          className="absolute inset-0 z-0 opacity-15 dark:opacity-10 pointer-events-none"
+          className="absolute inset-0 z-0 opacity-15 dark:opacity-25 pointer-events-none"
           style={{
             backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
             backgroundSize: '32px 32px'
@@ -37,7 +37,7 @@ export default function GenerateLayout({ children }) {
         />
 
         {/* Added top padding of 72px (pt-18) to offset floating navbar */}
-        <div className="flex-1 min-h-0 relative z-10 pt-18">
+        <div className="flex-1 min-h-0 flex relative z-10 pt-18">
           {children}
         </div>
       </main>

@@ -1,0 +1,36 @@
+.slide {
+    container-type: inline-size;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.group\/item {
+    transition: outline 0.2s ease, outline-offset 0.2s ease;
+}
+
+.group\/item:hover {
+    outline: 1.5px dashed color-mix(in srgb, var(--theme-primary) 50%, transparent);
+    outline-offset: 4px;
+    border-radius: 0.5cqw;
+}
+
+/* Disable hover highlights when an element is currently being edited (focused) */
+/* .slide:has(:focus) .group\/item:hover {
+    outline: none !important;
+} */
+
+.slide:has(:focus) .editable-el:hover:not(:focus) {
+    outline: none !important;
+}
+
+/* Ensure delete buttons are visible on touch devices and when the item is focused */
+@media (hover: none) {
+    .group\/item button {
+        opacity: 0.8 !important;
+    }
+}
+.group\/item:focus-within button {
+    opacity: 1 !important;
+}
