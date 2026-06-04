@@ -155,7 +155,7 @@ class OutlineUpdateRequest(BaseModel):
     title: str = None
     presenter: str = None
 
-@router.put("/{ppt_id}/outline")
+@router.put("/{ppt_id}")
 async def update_outline_endpoint(request: Request, ppt_id: str, payload: OutlineUpdateRequest):
     try:
         presentation = await anyio.to_thread.run_sync(get_presentation_by_id, ppt_id)
@@ -193,7 +193,7 @@ async def regenerate_ppt(request: Request, ppt_id: str, payload: RegenerateReque
             raise HTTPException(status_code=403, detail="Not authorized")
             
         await anyio.to_thread.run_sync(update_ppt_status, ppt_id, "EDITING")
-        background_tasks.add_task(regenerate_ppt_content_bg, ppt_id, payload.prompt)
+        background_tasks.add_task(regenerate_ppt_conteznt_bg, ppt_id, payload.prompt)
         
         return success_response(message="Regeneration started", data={"ppt_id": ppt_id, "status": "EDITING"})
     except HTTPException:
