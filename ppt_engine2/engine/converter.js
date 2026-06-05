@@ -159,7 +159,8 @@ function scaleCoordinates(el, slideWidthPx = VIEWPORT_WIDTH, slideHeightPx = VIE
 function drawBackgroundShape(slide, el, coords, designWidth = VIEWPORT_WIDTH, designHeight = VIEWPORT_HEIGHT) {
   const fillColor = rgbToHex(el.backgroundColor);
   const borderColor = rgbToHex(el.borderColor);
-  const borderWidthPx = parseFloat(el.borderWidth) || 0;
+  const BORDER_SCALE_FACTOR = 0.2;
+  const borderWidthPx = (parseFloat(el.borderWidth) || 0) * BORDER_SCALE_FACTOR;
   const borderStyle = el.borderStyle;
 
   const hasBorder = borderColor && borderWidthPx > 0 && borderStyle !== 'none' && borderStyle !== 'hidden';
@@ -226,7 +227,8 @@ async function drawImageLayer(slide, el, coords, baseDir, designWidth = VIEWPORT
   let imgW = coords.w;
   let imgH = coords.h;
 
-  const borderWidthPx = parseFloat(el.borderWidth) || 0;
+  const BORDER_SCALE_FACTOR = 0.5;
+  const borderWidthPx = (parseFloat(el.borderWidth) || 0) * BORDER_SCALE_FACTOR;
   const borderColor = rgbToHex(el.borderColor);
   const borderStyle = el.borderStyle;
   const hasBorder = borderColor && borderWidthPx > 0 && borderStyle !== 'none' && borderStyle !== 'hidden';
@@ -320,7 +322,8 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
   let txtW = coords.w;
   let txtH = coords.h;
 
-  const borderWidthPx = parseFloat(el.borderWidth) || 0;
+  const BORDER_SCALE_FACTOR = 0.5;
+  const borderWidthPx = (parseFloat(el.borderWidth) || 0) * BORDER_SCALE_FACTOR;
   const borderColor = rgbToHex(el.borderColor);
   const borderStyle = el.borderStyle;
   const hasBorder = borderColor && borderWidthPx > 0 && borderStyle !== 'none' && borderStyle !== 'hidden';
