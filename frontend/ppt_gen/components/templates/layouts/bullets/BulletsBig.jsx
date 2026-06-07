@@ -10,22 +10,37 @@ const BulletsBig = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     
     const rows = isTwoCol ? Math.ceil(n / 2) : (n === 3 ? 1 : n);
 
+    // Adjust layout density based on text length to prevent vertical overflows
+    const maxChars = content.reduce((max, ele) => {
+        const len = (ele.header?.length || 0) + (ele.description?.length || 0);
+        return len > max ? len : max;
+    }, 0);
+    
+    let textInflation = 0;
+    if (maxChars > 220) {
+        textInflation = 2;
+    } else if (maxChars > 120) {
+        textInflation = 1;
+    }
+    
+    const effectiveRows = rows + textInflation;
+
     let gapClass = "gap-[2cqw]";
     let numSize = "w-[3.5cqw] h-[3.5cqw] text-[1.5cqw]";
     let headerSize = "text-[2.5cqw]";
     let descSize = "text-[1.75cqw]";
     
-    if (rows >= 5) {
+    if (effectiveRows >= 5) {
         gapClass = "gap-[0.6cqw]";
         numSize = "w-[2.2cqw] h-[2.2cqw] text-[1.0cqw]";
         headerSize = "text-[1.5cqw]";
         descSize = "text-[1.1cqw]";
-    } else if (rows >= 4) {
+    } else if (effectiveRows >= 4) {
         gapClass = "gap-[1.0cqw]";
         numSize = "w-[2.6cqw] h-[2.6cqw] text-[1.2cqw]";
         headerSize = "text-[1.8cqw]";
         descSize = "text-[1.3cqw]";
-    } else if (rows >= 3) {
+    } else if (effectiveRows >= 3) {
         gapClass = "gap-[1.4cqw]";
         numSize = "w-[3.0cqw] h-[3.0cqw] text-[1.4cqw]";
         headerSize = "text-[2.1cqw]";
@@ -61,7 +76,7 @@ const BulletsBig = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                             placeholder="Description..."
                         />
                         {onDeleteItem && (
-                        <div className="absolute -top-[1.2cqw] -right-[1.2cqw] opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                        <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
                             <ItemActionsMenu
                                 onAddBefore={() => onAddItem?.(i, "before")}
                                 onAddAfter={() => onAddItem?.(i, "after")}

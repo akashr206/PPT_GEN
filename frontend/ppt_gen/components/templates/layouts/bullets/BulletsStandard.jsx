@@ -7,6 +7,21 @@ const BulletsStandard = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
     
     const gridCols = n > 4 ? "grid-cols-2" : "grid-cols-1";
     const itemsPerCol = n > 4 ? Math.ceil(n / 2) : n;
+
+    // Adjust layout density based on text length to prevent vertical overflows
+    const maxChars = content.reduce((max, ele) => {
+        const len = (ele.header?.length || 0) + (ele.description?.length || 0);
+        return len > max ? len : max;
+    }, 0);
+    
+    let textInflation = 0;
+    if (maxChars > 220) {
+        textInflation = 2;
+    } else if (maxChars > 120) {
+        textInflation = 1;
+    }
+    
+    const effectiveItemsPerCol = itemsPerCol + textInflation;
     
     let gapClass = "gap-[2cqw]";
     let bulletSize = "w-[1.2cqw] h-[1.2cqw] mt-[0.8cqw]";
@@ -14,19 +29,19 @@ const BulletsStandard = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
     let descSize = "text-[1.6cqw]";
     let marginClass = "mb-[0.3cqw]";
     
-    if (itemsPerCol >= 6) {
+    if (effectiveItemsPerCol >= 6) {
         gapClass = "gap-[0.5cqw]";
         bulletSize = "w-[0.8cqw] h-[0.8cqw] mt-[0.6cqw]";
         headerSize = "text-[1.5cqw]";
         descSize = "text-[1.1cqw]";
         marginClass = "mb-[0.1cqw]";
-    } else if (itemsPerCol >= 5) {
+    } else if (effectiveItemsPerCol >= 5) {
         gapClass = "gap-[0.8cqw]";
         bulletSize = "w-[1.0cqw] h-[1.0cqw] mt-[0.7cqw]";
         headerSize = "text-[1.7cqw]";
         descSize = "text-[1.3cqw]";
         marginClass = "mb-[0.2cqw]";
-    } else if (itemsPerCol >= 4) {
+    } else if (effectiveItemsPerCol >= 4) {
         gapClass = "gap-[1.2cqw]";
         bulletSize = "w-[1.1cqw] h-[1.1cqw] mt-[0.7cqw]";
         headerSize = "text-[2.0cqw]";
@@ -58,7 +73,7 @@ const BulletsStandard = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
                                 placeholder="Description..."
                             />
                             {onDeleteItem && (
-                        <div className="absolute -top-[1.2cqw] -right-[1.2cqw] opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                        <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
                             <ItemActionsMenu
                                 onAddBefore={() => onAddItem?.(i, "before")}
                                 onAddAfter={() => onAddItem?.(i, "after")}

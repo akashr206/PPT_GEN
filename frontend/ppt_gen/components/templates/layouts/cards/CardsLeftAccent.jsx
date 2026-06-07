@@ -7,6 +7,21 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
     const gridCols = n === 3 ? "grid-cols-3" : (n >= 4 ? "grid-cols-2" : "grid-cols-1");
     const rows = n === 3 ? 1 : (n >= 4 ? Math.ceil(n / 2) : n);
     
+    // Adjust layout density based on text length to prevent vertical overflows
+    const maxChars = content.reduce((max, ele) => {
+        const len = (ele.header?.length || 0) + (ele.description?.length || 0);
+        return len > max ? len : max;
+    }, 0);
+    
+    let textInflation = 0;
+    if (maxChars > 220) {
+        textInflation = 2;
+    } else if (maxChars > 120) {
+        textInflation = 1;
+    }
+    
+    const effectiveRows = rows + textInflation;
+    
     let gapClass = "gap-[2.5cqw]";
     let padClass = "p-[2.0cqw]";
     let marginSize = "my-[2.0cqw] ml-[2.0cqw]";
@@ -16,7 +31,7 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
     let descSize = "text-[1.6cqw]";
     let marginClass = "mb-[0.4cqw]";
 
-    if (rows >= 5) {
+    if (effectiveRows >= 5) {
         gapClass = "gap-[0.6cqw] gap-x-[3cqw]";
         padClass = "p-[1.0cqw]";
         marginSize = "my-[1.0cqw] ml-[1.0cqw]";
@@ -25,7 +40,7 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
         headerSize = "text-[1.5cqw]";
         descSize = "text-[1.1cqw]";
         marginClass = "mb-[0.1cqw]";
-    } else if (rows >= 4) {
+    } else if (effectiveRows >= 4) {
         gapClass = "gap-[1.0cqw] gap-x-[3cqw]";
         padClass = "p-[1.4cqw]";
         marginSize = "my-[1.4cqw] ml-[1.4cqw]";
@@ -34,7 +49,7 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
         headerSize = "text-[1.8cqw]";
         descSize = "text-[1.3cqw]";
         marginClass = "mb-[0.2cqw]";
-    } else if (rows >= 3) {
+    } else if (effectiveRows >= 3) {
         gapClass = "gap-[1.6cqw] gap-x-[3cqw]";
         padClass = "p-[1.8cqw]";
         marginSize = "my-[1.8cqw] ml-[1.8cqw]";
@@ -78,7 +93,7 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
                             placeholder="Description..."
                         />
                         {onDeleteItem && (
-                        <div className="absolute -top-[1.2cqw] -right-[1.2cqw] opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                        <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
                             <ItemActionsMenu
                                 onAddBefore={() => onAddItem?.(i, "before")}
                                 onAddAfter={() => onAddItem?.(i, "after")}
