@@ -1,7 +1,7 @@
 import BulletsBig from "./bullets/BulletsBig";
 import BulletsStandard from "./bullets/BulletsStandard";
 import BulletsGrid from "./bullets/BulletsGrid";
-import BulletsTimeline from "./bullets/BulletsTimeline";
+import BulletsNumbered from "./bullets/BulletsNumbered";
 
 import CardsSimple from "./cards/CardsSimple";
 import CardsLeftAccent from "./cards/CardsLeftAccent";
@@ -12,13 +12,21 @@ import StatsGrid from "./stats/StatsGrid";
 import StatsRow from "./stats/StatsRow";
 import StatsCallout from "./stats/StatsCallout";
 
-import TimelineVertical from "./timelines/TimelineVertical";
 import TimelineHorizontal from "./timelines/TimelineHorizontal";
-import TimelineAlternating from "./timelines/TimelineAlternating";
+import TimelineChevron from "./timelines/TimelineChevron";
 
-import TitleMain from "./title/TitleMain";
+import TitleAsymmetric from "./title/TitleAsymmetric";
 import TitleSplit from "./title/TitleSplit";
-import TitleSection from "./title/TitleSection";
+import TitleImage from "./title/TitleImage";
+
+import IconsGrid from "./icons/IconsGrid";
+
+import ImageSplit from "./images/ImageSplit";
+import ImageGrid from "./images/ImageGrid";
+
+import ClosingThankYou from "./closing/ClosingThankYou";
+import ClosingQA from "./closing/ClosingQA";
+import ClosingContact from "./closing/ClosingContact";
 
 export const layout_map = {
     "bullets": {
@@ -26,7 +34,7 @@ export const layout_map = {
         "small": BulletsStandard,
         "standard": BulletsStandard,
         "grid": BulletsGrid,
-        "timeline": BulletsTimeline,
+        "numbered": BulletsNumbered,
     },
     "cards": {
         "simple": CardsSimple,
@@ -40,13 +48,39 @@ export const layout_map = {
         "callout": StatsCallout,
     },
     "timelines": {
-        "vertical": TimelineVertical,
         "horizontal": TimelineHorizontal,
-        "alternating": TimelineAlternating,
+        "chevron": TimelineChevron,
+        "vertical": TimelineChevron,
+        "alternating": TimelineChevron,
     },
     "title": {
-        "main": TitleMain,
+        "asymmetric": TitleAsymmetric,
+        "main": TitleAsymmetric,
         "split": TitleSplit,
-        "section": TitleSection,
+        "image": TitleImage,
+    },
+    "icons": {
+        "grid": IconsGrid,
+        "row": IconsGrid,
+        "list": IconsGrid,
+    },
+    "images": {
+        "split": ImageSplit,
+        "grid": ImageGrid,
+    },
+    "closing": {
+        "thankyou": ClosingThankYou,
+        "qa": ClosingQA,
+        "contact": ClosingContact,
     }
 };
+
+// Aliases for singular/plural consistency
+layout_map.bullet = layout_map.bullets;
+layout_map.card = layout_map.cards;
+layout_map.stat = layout_map.stats;
+layout_map.timeline = layout_map.timelines;
+layout_map.icon = layout_map.icons;
+layout_map.image = layout_map.images;
+layout_map.titles = layout_map.title;
+layout_map.closings = layout_map.closing;

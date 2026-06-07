@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Send, Sparkles, LayoutTemplate, Type, FileStack, Loader2, ChevronDown, ArrowUp } from "lucide-react";
+import { Send, Sparkles, AlignLeft, Type, FileStack, Loader2, ChevronDown, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -16,8 +16,8 @@ export function PromptBox({
   setPrompt, 
   isGenerating, 
   handleGenerate, 
-  theme, 
-  setTheme, 
+  layoutStyle, 
+  setLayoutStyle, 
   tone, 
   setTone, 
   slides, 
@@ -47,14 +47,14 @@ export function PromptBox({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-zinc-600 dark:text-zinc-300">
-                  <LayoutTemplate size={14} className="text-blue-500 dark:text-blue-400" />
-                  {theme}
+                  <AlignLeft size={14} className="text-blue-500 dark:text-blue-400" />
+                  {layoutStyle}
                   <ChevronDown size={14} className="opacity-50 ml-0.5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {["Modern", "Professional", "Creative"].map((t) => (
-                  <DropdownMenuItem key={t} onClick={() => setTheme(t)}>{t}</DropdownMenuItem>
+                {["Concise", "Balanced", "Detailed"].map((t) => (
+                  <DropdownMenuItem key={t} onClick={() => setLayoutStyle(t)}>{t}</DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>

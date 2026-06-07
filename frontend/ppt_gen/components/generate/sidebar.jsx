@@ -105,7 +105,7 @@ export function Sidebar() {
                             asChild
                             className="w-full justify-start gap-3 px-3 font-normal text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors group"
                         >
-                            <Link href={`/generate/${item.id}`}>
+                            <Link href={`/generate/${item.id}/view`}>
                                 <span className="truncate">{item.title || "Untitled"}</span>
                             </Link>
                         </Button>

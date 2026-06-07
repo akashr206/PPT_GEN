@@ -16,11 +16,6 @@
     border-radius: 0.5cqw;
 }
 
-/* Disable hover highlights when an element is currently being edited (focused) */
-/* .slide:has(:focus) .group\/item:hover {
-    outline: none !important;
-} */
-
 .slide:has(:focus) .editable-el:hover:not(:focus) {
     outline: none !important;
 }
@@ -33,4 +28,35 @@
 }
 .group\/item:focus-within button {
     opacity: 1 !important;
+}
+
+/* Shimmer sweep skeleton animation */
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton-sweep {
+    background: linear-gradient(
+        90deg,
+        rgba(229, 231, 235, 0.3) 25%,
+        rgba(243, 244, 246, 0.7) 50%,
+        rgba(229, 231, 235, 0.3) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite linear;
+}
+
+.dark .skeleton-sweep {
+    background: linear-gradient(
+        90deg,
+        rgba(63, 63, 70, 0.3) 25%,
+        rgba(82, 82, 91, 0.6) 50%,
+        rgba(63, 63, 70, 0.3) 75%
+    );
+    background-size: 200% 100%;
 }

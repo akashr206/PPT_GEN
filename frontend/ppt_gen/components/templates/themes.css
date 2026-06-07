@@ -117,21 +117,6 @@
     --theme-font-body: "Inter", sans-serif;
 }
 
-/* Cyberpunk (Neon Midnight) */
-[data-theme="cyberpunk"] {
-    --theme-bg: #0a0b10;
-    --theme-bg-alt: #131422;
-    --theme-fg: #f3f4f6;
-    --theme-fg-muted: #9ca3af;
-    --theme-primary: #00f0ff;
-    --theme-secondary: #1f1d36;
-    --theme-accent: #ff007f;
-    --theme-card-bg: #131422;
-    --theme-card-border: #2c284e;
-    --theme-bullet: #00f0ff;
-    --theme-font-heading: "Outfit", sans-serif;
-    --theme-font-body: "Roboto", sans-serif;
-}
 
 /* Sunset (Warm Clay & Peach) */
 [data-theme="sunset"] {
@@ -195,6 +180,70 @@
     --theme-bullet: #6366f1;
     --theme-font-heading: "Poppins", sans-serif;
     --theme-font-body: "Poppins", sans-serif;
+}
+
+/* Dracula (Orchid Accent) */
+[data-theme="dracula"] {
+    --theme-bg: #1e1e2e;
+    --theme-bg-alt: #252538;
+    --theme-fg: #f8f8f2;
+    --theme-fg-muted: #a6adc8;
+    --theme-primary: #cba6f7;
+    --theme-secondary: #313244;
+    --theme-accent: #f5c2e7;
+    --theme-card-bg: #252538;
+    --theme-card-border: #45475a;
+    --theme-bullet: #cba6f7;
+    --theme-font-heading: "Poppins", sans-serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Nord Dark (Frost Blue) */
+[data-theme="nord-dark"] {
+    --theme-bg: #2e3440;
+    --theme-bg-alt: #242933;
+    --theme-fg: #eceff4;
+    --theme-fg-muted: #d8dee9;
+    --theme-primary: #88c0d0;
+    --theme-secondary: #3b4252;
+    --theme-accent: #81a1c1;
+    --theme-card-bg: #242933;
+    --theme-card-border: #434c5e;
+    --theme-bullet: #88c0d0;
+    --theme-font-heading: "Outfit", sans-serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Forest Dark (Pine/Emerald) */
+[data-theme="forest-dark"] {
+    --theme-bg: #0f1715;
+    --theme-bg-alt: #17221e;
+    --theme-fg: #e6ede9;
+    --theme-fg-muted: #a3b899;
+    --theme-primary: #52b788;
+    --theme-secondary: #1a2f27;
+    --theme-accent: #74c69d;
+    --theme-card-bg: #17221e;
+    --theme-card-border: #2d4a3e;
+    --theme-bullet: #52b788;
+    --theme-font-heading: "Lora", serif;
+    --theme-font-body: "Inter", sans-serif;
+}
+
+/* Luxury Dark (Obsidian Gold) */
+[data-theme="luxury-dark"] {
+    --theme-bg: #141414;
+    --theme-bg-alt: #1e1e1e;
+    --theme-fg: #f5f5f0;
+    --theme-fg-muted: #a3a39e;
+    --theme-primary: #d4af37;
+    --theme-secondary: #2a2a28;
+    --theme-accent: #c5a880;
+    --theme-card-bg: #1e1e1e;
+    --theme-card-border: #333330;
+    --theme-bullet: #d4af37;
+    --theme-font-heading: "Playfair Display", serif;
+    --theme-font-body: "Roboto", sans-serif;
 }
 
 /* =========================================
