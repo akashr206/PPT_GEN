@@ -8,25 +8,102 @@
 export async function rasterizeSvgToPng(svgElement) {
   return new Promise((resolve, reject) => {
     try {
-      const svgString = new XMLSerializer().serializeToString(svgElement);
+      const rect = svgElement.getBoundingClientRect();
+      const width = rect.width || svgElement.clientWidth || parseFloat(svgElement.getAttribute('width')) || 100;
+      const height = rect.height || svgElement.clientHeight || parseFloat(svgElement.getAttribute('height')) || 100;
+
+      // Clone the SVG so we don't mutate the active page DOM
+      const clonedSvg = svgElement.cloneNode(true);
+
+      // Ensure xmlns is present for standalone rendering
+      if (!clonedSvg.getAttribute('xmlns')) {
+        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      }
+
+      // If no viewBox is present, create one based on current dimensions
+      if (!clonedSvg.getAttribute('viewBox')) {
+        clonedSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      }
+
+      // High-resolution scaling (12x) for crystal-clear snapshots
+      const scale = 12;
+      
+      // Override HTML attributes
+      clonedSvg.setAttribute('width', width * scale);
+      clonedSvg.setAttribute('height', height * scale);
+
+      // Force inline styles so CSS rules (like w-full, h-full, max-width) don't override the scaled attributes
+      clonedSvg.style.width = `${width * scale}px`;
+      clonedSvg.style.height = `${height * scale}px`;
+      clonedSvg.style.maxWidth = 'none';
+      clonedSvg.style.maxHeight = 'none';
+
+      // Inline computed styles from the original SVG elements to the cloned SVG.
+      // This is crucial because external stylesheets (like Tailwind) and CSS variables 
+      // (like currentColor) are lost when rendering a standalone SVG image blob.
+      const originalElements = [svgElement, ...Array.from(svgElement.querySelectorAll('*'))];
+      const clonedElements = [clonedSvg, ...Array.from(clonedSvg.querySelectorAll('*'))];
+
+      for (let i = 0; i < originalElements.length; i++) {
+        const origEl = originalElements[i];
+        const cloneEl = clonedElements[i];
+        if (!cloneEl) continue;
+
+        const computed = window.getComputedStyle(origEl);
+        
+        // Key SVG attributes and properties that could be styled via CSS/Tailwind
+        const styleKeys = [
+          'fill',
+          'stroke',
+          'strokeWidth',
+          'strokeDasharray',
+          'strokeDashoffset',
+          'strokeLinecap',
+          'strokeLinejoin',
+          'opacity',
+          'color',
+          'display',
+          'visibility'
+        ];
+
+        for (const key of styleKeys) {
+          const val = computed[key];
+          if (val) {
+            if (val === 'currentColor') {
+              cloneEl.style[key] = computed.color;
+            } else {
+              cloneEl.style[key] = val;
+            }
+          }
+        }
+
+        const fillAttr = origEl.getAttribute('fill');
+        if (fillAttr === 'currentColor') {
+          cloneEl.setAttribute('fill', computed.color);
+        }
+        const strokeAttr = origEl.getAttribute('stroke');
+        if (strokeAttr === 'currentColor') {
+          cloneEl.setAttribute('stroke', computed.color);
+        }
+      }
+
+      const svgString = new XMLSerializer().serializeToString(clonedSvg);
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
       const URL = window.URL || window.webkitURL || window;
       const blobURL = URL.createObjectURL(svgBlob);
 
       const img = new Image();
+      img.width = width * scale;
+      img.height = height * scale;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const rect = svgElement.getBoundingClientRect();
-
-        // Use clientWidth/clientHeight or getBoundingClientRect, fallback to attributes
-        const width = rect.width || svgElement.clientWidth || parseFloat(svgElement.getAttribute('width')) || 100;
-        const height = rect.height || svgElement.clientHeight || parseFloat(svgElement.getAttribute('height')) || 100;
-
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = width * scale;
+        canvas.height = height * scale;
 
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width * scale, height * scale);
 
         const pngBase64 = canvas.toDataURL('image/png');
         URL.revokeObjectURL(blobURL);

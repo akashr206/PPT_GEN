@@ -14,11 +14,24 @@ export class APIError extends Error {
 
 
 async function apiCall(endpoint, options = {}) {
-  const url = endpoint.startsWith("http") 
+  let url = endpoint.startsWith("http") 
     ? endpoint 
     : `${BASE_URL.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
 
-  const { headers = {}, body, ...customOptions } = options;
+  const { headers = {}, body, params, ...customOptions } = options;
+
+  if (params && typeof params === "object") {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) {
+        searchParams.append(key, val);
+      }
+    });
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url += (url.includes("?") ? "&" : "?") + queryString;
+    }
+  }
   
   let session = null;
   if (typeof window !== "undefined") {
@@ -56,6 +69,23 @@ async function apiCall(endpoint, options = {}) {
 
   try {
     const response = await fetch(url, config);
+
+    if (!response.ok) {
+      let data = null;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+      const errorMessage = data?.message || data?.error || `HTTP error! Status: ${response.status}`;
+      throw new APIError(errorMessage, response.status, data);
+    }
+
+    if (options.responseType === "blob") {
+      return await response.blob();
+    }
+
     let data = null;
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
@@ -64,22 +94,15 @@ async function apiCall(endpoint, options = {}) {
       data = await response.text();
     }
 
-    if (!response.ok) {
-      const errorMessage = data?.message || data?.error || `HTTP error! Status: ${response.status}`;
-      throw new APIError(errorMessage, response.status, data);
-    }
-
     return data;
   } catch (error) {
     if (error instanceof APIError) {
       throw error;
     }
-    // Network or other fetch-related errors
     throw new APIError(error.message || "Network Error occurred", 0, null);
   }
 }
 
-// API helper methods
 export const api = {
   get: (endpoint, options = {}) => apiCall(endpoint, { ...options, method: "GET" }),
   post: (endpoint, body, options = {}) => apiCall(endpoint, { ...options, method: "POST", body }),
