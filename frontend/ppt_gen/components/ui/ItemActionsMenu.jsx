@@ -6,7 +6,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-    MoreVertical,
+    MoreHorizontal,
     Trash2,
     ArrowLeftToLine,
     ArrowRightToLine,
@@ -40,7 +40,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         variant="outline"
                         className="h-6 w-6 theme-menu-button theme-text-primary"
                     >
-                        <MoreVertical size={13} />
+                        <MoreHorizontal size={13} />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent

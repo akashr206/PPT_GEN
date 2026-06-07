@@ -10,6 +10,21 @@ export function EditableElement({
     placeholder = "Type here...",
     readOnly = false,
 }) {
+    if (readOnly) {
+        return (
+            <Component 
+                className={`${
+                    !value
+                        ? "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50 empty:before:pointer-events-none empty:before:block"
+                        : ""
+                } ${className}`}
+                data-placeholder={placeholder}
+            >
+                {value}
+            </Component>
+        );
+    }
+
     const contentRef = useRef(null);
     const prevValue = useRef(value);
 
@@ -58,8 +73,8 @@ export function EditableElement({
             onBlur={handleBlur}
             onPaste={handlePaste}
             onKeyDown={handleKeyDown}
-            className={` outline-none transition-all ${
-                !readOnly ? "cursor-text hover:outline-dashed hover:outline-[1px] hover:outline-primary/40 focus:outline-dashed focus:outline-2 focus:outline-primary focus:bg-primary/5 rounded-[0.5cqw]" : ""
+            className={` outline-none ${
+                !readOnly ? "cursor-text hover:outline hover:outline-[1px] hover:outline-blue-500/90 focus:outline focus:outline-2 focus:outline-blue-500 focus:bg-blue-500/5 rounded-[0.2cqw]" : ""
             } ${
                 !value
                     ? "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50 empty:before:pointer-events-none empty:before:block"
