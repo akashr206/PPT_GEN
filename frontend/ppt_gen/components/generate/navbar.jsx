@@ -3,7 +3,16 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, User, LayoutDashboard, Download, FileText, Presentation, Palette, Play } from "lucide-react";
+import {
+    LogOut,
+    User,
+    LayoutDashboard,
+    Download,
+    FileText,
+    Presentation,
+    Palette,
+    Play,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/generate/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useSession, signOut } from "next-auth/react";
@@ -32,10 +41,11 @@ export function Navbar() {
     const pathname = usePathname();
 
     const pathSegments = pathname.split("/");
-    const isDetailPage = pathname.startsWith("/generate/") && (pathSegments.length === 3 || pathSegments.length === 4);
+    const isDetailPage =
+        pathname.startsWith("/generate/") &&
+        (pathSegments.length === 3 || pathSegments.length === 4);
     const [pptInfo, setPptInfo] = useState({ title: "", appState: "" });
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-
 
     useEffect(() => {
         if (!isDetailPage) return;
@@ -46,11 +56,14 @@ export function Navbar() {
             }
         };
         window.addEventListener("ppt-info-changed", handleInfoChange);
-        
-        window.dispatchEvent(new CustomEvent("request-ppt-info"));
-        
+
+        const timer = setTimeout(() => {
+            window.dispatchEvent(new CustomEvent("request-ppt-info"));
+        }, 0);
+
         return () => {
             window.removeEventListener("ppt-info-changed", handleInfoChange);
+            clearTimeout(timer);
         };
     }, [pathname, isDetailPage]);
 
@@ -63,7 +76,11 @@ export function Navbar() {
     };
 
     const handleThemeChange = (themeName) => {
-        window.dispatchEvent(new CustomEvent("trigger-change-theme", { detail: { theme: themeName } }));
+        window.dispatchEvent(
+            new CustomEvent("trigger-change-theme", {
+                detail: { theme: themeName },
+            }),
+        );
     };
 
     const handlePresentClick = () => {
@@ -74,17 +91,26 @@ export function Navbar() {
         <div className="w-full bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-50 px-6">
             <div className="w-full h-14 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <Link href="/dashboard" className="hover:opacity-90 transition-opacity shrink-0">
-                        <img src="/logo.png" alt="iota AI Logo" className="w-7 h-7 object-contain dark:invert" />
+                    <Link
+                        href="/dashboard"
+                        className="hover:opacity-90 transition-opacity shrink-0"
+                    >
+                        <img
+                            src="/logo.png"
+                            alt="iota AI Logo"
+                            className="w-7 h-7 object-contain dark:invert"
+                        />
                     </Link>
-                    {isDetailPage && pptInfo.title && (
-                        <>
-                            <div className="h-4 w-[1px] bg-black/10 dark:bg-white/10" />
-                            <span className="text-sm font-semibold truncate max-w-[200px] sm:max-w-[300px] text-foreground/90">
-                                {pptInfo.title}
-                            </span>
-                        </>
-                    )}
+                    {isDetailPage
+                        ? pptInfo.title && (
+                              <>
+                                  <div className="h-4 w-[1px] bg-black/10 dark:bg-white/10" />
+                                  <span className="text-sm font-semibold truncate max-w-[200px] sm:max-w-[300px] text-foreground/90">
+                                      {pptInfo.title}
+                                  </span>
+                              </>
+                          )
+                        : "iota AI"}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -98,7 +124,13 @@ export function Navbar() {
                                 className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200"
                             >
                                 <Palette size={13} className="text-primary" />
-                                <span className="capitalize">{themesList.find(t => t.id === pptInfo.theme)?.name || pptInfo.theme || "Theme"}</span>
+                                <span className="capitalize">
+                                    {themesList.find(
+                                        (t) => t.id === pptInfo.theme,
+                                    )?.name ||
+                                        pptInfo.theme ||
+                                        "Theme"}
+                                </span>
                             </Button>
 
                             {/* Export Dropdown */}
@@ -121,31 +153,34 @@ export function Navbar() {
                                         onClick={handleDownloadPDF}
                                         className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-lg"
                                     >
-                                        <FileText size={14} /> 
+                                        <FileText size={14} />
                                         <span>Download as PDF</span>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                         onClick={handleDownloadPPT}
                                         className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-lg"
                                     >
-                                        <Presentation size={14} /> 
+                                        <Presentation size={14} />
                                         <span>Download as PPTX</span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            {/* Present Button */}
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={handlePresentClick}
                                 className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200"
                             >
-                                <Play size={13} className="fill-current text-primary" />
-                                <span className="hidden sm:inline">Present</span>
+                                <Play
+                                    size={13}
+                                    className="fill-current text-primary"
+                                />
+                                <span className="hidden sm:inline">
+                                    Present
+                                </span>
                             </Button>
 
-                            {/* Separator between Present and Dashboard */}
                             <div className="h-4 w-[1px] bg-black/10 dark:bg-white/10" />
                         </>
                     )}
@@ -163,14 +198,23 @@ export function Navbar() {
                     </Link>
 
                     <ThemeToggle />
-                    
+
                     {session?.user ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Avatar className="w-7.5 h-7.5 cursor-pointer border border-border/60 hover:opacity-90 transition-opacity">
-                                    <AvatarImage src={session.user.image} alt={session.user.name || "User"} />
+                                    <AvatarImage
+                                        src={session.user.image}
+                                        alt={session.user.name || "User"}
+                                    />
                                     <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                                        {(session.user.name || session.user.email || "U").charAt(0).toUpperCase()}
+                                        {(
+                                            session.user.name ||
+                                            session.user.email ||
+                                            "U"
+                                        )
+                                            .charAt(0)
+                                            .toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
                             </DropdownMenuTrigger>
@@ -205,14 +249,17 @@ export function Navbar() {
                     )}
                 </div>
             </div>
-            
+
             {/* Theme Selector Modal */}
             <Dialog open={isThemeModalOpen} onOpenChange={setIsThemeModalOpen}>
                 <DialogContent className="max-w-4xl sm:max-w-4xl bg-popover border-border text-popover-foreground rounded-xl p-6 shadow-2xl z-50">
                     <DialogHeader>
-                        <DialogTitle className="text-lg font-bold">Select Presentation Theme</DialogTitle>
+                        <DialogTitle className="text-lg font-bold">
+                            Select Presentation Theme
+                        </DialogTitle>
                         <DialogDescription className="text-xs text-muted-foreground">
-                            Choose a global visual style for all slides in this presentation.
+                            Choose a global visual style for all slides in this
+                            presentation.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -236,9 +283,9 @@ export function Navbar() {
                                     <span className="font-semibold text-foreground capitalize text-[11px] truncate w-full px-0.5 mb-0.5">
                                         {t.name}
                                     </span>
-                                    
+
                                     {/* Miniature slide layout preview */}
-                                    <div 
+                                    <div
                                         data-theme={t.id}
                                         className="theme-container w-full aspect-[16/10] rounded-lg border theme-border p-2.5 flex flex-col justify-between overflow-hidden shadow-xs relative"
                                     >
@@ -251,7 +298,7 @@ export function Navbar() {
                                                 Subtitle styling
                                             </div>
                                         </div>
-                                        
+
                                         {/* Miniature Card visualization */}
                                         <div className="theme-card p-1 rounded-md border theme-border flex flex-col gap-0.5 mt-1.5">
                                             <div className="theme-text-primary font-semibold text-[6px] leading-none truncate">

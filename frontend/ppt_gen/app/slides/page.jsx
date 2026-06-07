@@ -119,11 +119,14 @@ const page = () => {
                             <option value="elegant">Elegant</option>
                             <option value="playful">Playful</option>
                             <option value="nature">Nature</option>
-                            <option value="cyberpunk">Cyberpunk</option>
                             <option value="sunset">Sunset</option>
                             <option value="ocean">Ocean</option>
                             <option value="minimalist">Minimalist</option>
                             <option value="lavender">Lavender (Poppins)</option>
+                            <option value="dracula">Dracula (Orchid)</option>
+                            <option value="nord-dark">Nord Dark (Frost)</option>
+                            <option value="forest-dark">Forest Dark (Emerald)</option>
+                            <option value="luxury-dark">Luxury Dark (Gold)</option>
                         </select>
                     </div>
                     <div>
@@ -137,7 +140,7 @@ const page = () => {
                                     newCat === "bullets" ? "standard" : 
                                     newCat === "cards" ? "simple" : 
                                     newCat === "stats" ? "grid" : 
-                                    newCat === "timelines" ? "vertical" : "main"
+                                    newCat === "timelines" ? "vertical" : "asymmetric"
                                 );
                             }}
                             className="w-full p-2 border rounded-md bg-background"
@@ -161,7 +164,7 @@ const page = () => {
                                     <option value="standard">Standard</option>
                                     <option value="big">Big (Numbered)</option>
                                     <option value="grid">Grid (Square)</option>
-                                    <option value="timeline">Timeline</option>
+                                    <option value="numbered">Numbered List</option>
                                 </>
                             ) : category === "cards" ? (
                                 <>
@@ -184,7 +187,7 @@ const page = () => {
                                 </>
                             ) : (
                                 <>
-                                    <option value="main">Minimal Centered</option>
+                                    <option value="asymmetric">Asymmetric Focus</option>
                                     <option value="split">Split Screen Accent</option>
                                     <option value="section">Section Divider</option>
                                 </>

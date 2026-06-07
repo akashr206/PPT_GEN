@@ -4,9 +4,9 @@ import { List } from "lucide-react";
 import { Diamond } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
  
-export function OutlineGenerationBox() {
+export function     OutlineGenerationBox() {
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center h-full gap-8 z-10 animate-in fade-in zoom-in duration-500 relative select-none">
+    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center h-full gap-6 z-10 animate-in fade-in zoom-in duration-500 relative select-none">
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes sweep {
           0% {
@@ -49,31 +49,35 @@ export function OutlineGenerationBox() {
         }
       `}} />
  
-      <div className="w-full max-w-xl relative bg-card/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)] border border-border/50 overflow-hidden p-8">
+      <div className="w-full max-w-[800px] aspect-[16/9] relative bg-card/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)] border border-border/50 overflow-hidden p-8 flex flex-col justify-between">
         
         <div className="sweep-glow" />
-        <div className="w-full space-y-6 z-10 relative mb-10">
-          <Skeleton className="h-12 w-1/2 bg-muted/40 rounded-lg animate-pulse" />
+        
+        <div className="w-full space-y-2 z-10 relative">
+          <Skeleton className="h-4 w-24 rounded-full" />
+          <Skeleton className="h-8 w-3/5 rounded-lg mt-2" />
+          <Skeleton className="h-4 w-2/5 rounded-md mt-1" />
         </div>
  
-        <div className="w-full space-y-4 z-10 relative">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex items-center gap-4">
-              <Skeleton className="w-2.5 h-2.5 rounded-full bg-primary/20 shrink-0" />
-              <Skeleton 
-                className="h-3.5 w-full bg-muted/20 rounded-md animate-pulse" 
-                style={{ 
-                  maxWidth: `${85 - (i % 3) * 15}%` 
-                }}
-              />
+        <div className="grid grid-cols-3 gap-6 my-6 z-10 relative">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="p-4 rounded-xl border border-border/30 bg-card/20 space-y-3">
+              <Skeleton className="h-4 w-1/2 rounded" />
+              <Skeleton className="h-3.5 w-full rounded" />
+              <Skeleton className="h-3.5 w-5/6 rounded" />
             </div>
           ))}
+        </div>
+
+        <div className="flex justify-between items-center border-t border-border/20 pt-4 z-10 relative">
+          <Skeleton className="h-4 w-32 rounded" />
+          <Skeleton className="h-4 w-24 rounded" />
         </div>
  
       </div>
       
       <p className="text-muted-foreground flex gap-2 items-center font-medium tracking-wide text-sm">
-        Our AI is drafting your presentation outline <Diamond size={16} className="animate-spin-pause text-primary" />
+        Our AI is generating your presentation slides <Diamond size={16} className="animate-spin-pause text-primary" />
       </p>
  
     </div>

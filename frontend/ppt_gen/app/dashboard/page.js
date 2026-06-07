@@ -25,8 +25,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import api from "@/lib/api";
 import { useHistory } from "@/contexts/history-context";
 import { Loader } from "lucide-react";
+import Slide from "@/components/templates/Slide";
 
 export default function DashboardPage() {
   const { data: session, status: authStatus } = useSession();
@@ -41,7 +43,6 @@ export default function DashboardPage() {
       router.push("/");
       return;
     }
-    // refreshHistory();
   }, [authStatus, router]);
 
   if (authStatus === "loading") {
@@ -67,17 +68,17 @@ export default function DashboardPage() {
             backgroundSize: '32px 32px'
           }}
         />
-        <motion.div 
+        <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 4.5, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute top-[10%] -left-[10%] w-[50%] h-[50%] bg-gradient-to-r from-violet-600/30 to-blue-600/30 blur-[130px] rounded-full mix-blend-screen transform -rotate-12 dark:opacity-70 opacity-40" 
+          className="absolute top-[10%] -left-[10%] w-[50%] h-[50%] bg-gradient-to-r from-violet-600/30 to-blue-600/30 blur-[130px] rounded-full mix-blend-screen transform -rotate-12 dark:opacity-70 opacity-40"
         />
-        <motion.div 
+        <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 4.5, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="absolute bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-gradient-to-l from-violet-600/25 to-blue-600/25 blur-[140px] rounded-full mix-blend-screen transform rotate-12 dark:opacity-70 opacity-40" 
+          className="absolute bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-gradient-to-l from-violet-600/25 to-blue-600/25 blur-[140px] rounded-full mix-blend-screen transform rotate-12 dark:opacity-70 opacity-40"
         />
       </div>
 
@@ -90,13 +91,13 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="px-6 md:px-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
 
           {!isLoading && history.length > 0 && (
             <Link href="/generate" className="h-full">
               <motion.div
                 whileHover={{ y: -4 }}
-                className="h-60 border-2 border-dashed border-border hover:border-muted-foreground/30 bg-card/30 hover:bg-card/60 transition-all rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none group"
+                className="h-full border-2 border-dashed border-border hover:border-muted-foreground/30 bg-card/30 hover:bg-card/60 transition-all rounded-lg flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none group"
               >
                 <div className="w-12 h-12 rounded-full border border-border group-hover:border-muted-foreground/20 bg-muted/20 group-hover:bg-muted/40 transition-colors flex items-center justify-center mb-3">
                   <Plus size={20} className="text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -108,7 +109,7 @@ export default function DashboardPage() {
           )}
 
           {isLoading && Array.from({ length: 4 }).map((_, idx) => (
-            <div key={idx} className="h-60 border border-border bg-card rounded-2xl p-5 flex flex-col justify-between shadow-sm animate-pulse">
+            <div key={idx} className="h-full border border-border bg-card rounded-2xl p-5 flex flex-col justify-between shadow-sm animate-pulse">
               <div className="space-y-3 flex-1">
                 <Skeleton className="h-24 w-full bg-muted/30 rounded-xl" />
                 <div className="space-y-2 mt-3">
@@ -129,21 +130,14 @@ export default function DashboardPage() {
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.2 }}
-              onClick={() => router.push(`/generate/${item.id}`)}
-              className="h-60 border border-border bg-card hover:bg-card/80 transition-all rounded-2xl flex flex-col cursor-pointer select-none overflow-hidden shadow-sm group hover:shadow-md relative"
+              onClick={() => router.push(`/generate/${item.id}/view`)}
+              className="border border-border bg-card hover:bg-card/80 transition-all rounded-lg flex flex-col cursor-pointer select-none overflow-hidden shadow-sm group hover:shadow-md relative"
             >
-              <div className="h-32 w-full relative bg-muted/30 border-b border-border/50 overflow-hidden flex items-center justify-center shrink-0">
-                {item.thumbnail ? (
-                  <img
-                    src={item.thumbnail}
-                    alt={item.title || "Presentation Preview"}
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-muted/10 to-muted/30 dark:from-zinc-900/30 dark:to-zinc-900/70 flex items-center justify-center relative">
-                    <Presentation size={24} className="text-muted-foreground/40 group-hover:scale-110 transition-transform duration-300" />
-                  </div>
-                )}
+              <div className="aspect-video relative bg-muted/30 border-b border-border/50 overflow-hidden flex items-center justify-center shrink-0">
+                <Slide
+                  theme={item.theme}
+                  slide_content={item.first_slide}
+                />
 
                 <div onClick={(e) => e.stopPropagation()} className="absolute top-2.5 right-2.5 z-20">
                   <DropdownMenu>
@@ -174,10 +168,42 @@ export default function DashboardPage() {
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          toast.info("Preparing PPTX download...");
-                          setTimeout(() => {
-                            toast.success("PPTX downloaded successfully (simulation).");
-                          }, 1000);
+                          const toastId = toast.loading("Converting presentation to PPTX...");
+                          
+                          const fetchAndDownload = async () => {
+                            try {
+                              // Fetch full presentation to get all slides
+                              const res = await api.get(`/api/ppt/${item.id}`);
+                              const presentation = (res && res.data && res.data[0]) || res[0] || res;
+                              
+                              if (!presentation || !presentation.slides) {
+                                throw new Error("Presentation slides not found");
+                              }
+
+                              const blob = await api.post("/api/ppt/convert", {
+                                slides: presentation.slides
+                              }, {
+                                responseType: "blob"
+                              });
+                              const downloadUrl = window.URL.createObjectURL(blob);
+                              const link = document.createElement("a");
+                              link.href = downloadUrl;
+                              link.setAttribute("download", `${presentation.title || "presentation"}.pptx`);
+                              document.body.appendChild(link);
+                              link.click();
+                              link.parentNode.removeChild(link);
+                              window.URL.revokeObjectURL(downloadUrl);
+
+                              toast.success("PPTX downloaded successfully!");
+                            } catch (err) {
+                              console.error("Failed to convert slides to PowerPoint:", err);
+                              toast.error(err.message || "Failed to export slides to PPTX");
+                            } finally {
+                              toast.dismiss(toastId);
+                            }
+                          };
+                          
+                          fetchAndDownload();
                         }}
                         className="cursor-pointer gap-2 py-2"
                       >
@@ -228,15 +254,15 @@ export default function DashboardPage() {
         </div>
 
         {!isLoading && history.length === 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="mt-12 text-center py-16 border border-border/60 dark:border-border/30 bg-gradient-to-b from-card/60 to-card/20 rounded-[32px] backdrop-blur-md max-w-lg mx-auto flex flex-col items-center p-8 md:p-10 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden group/empty"
           >
             {/* Soft decorative glow behind icon */}
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none group-hover/empty:bg-primary/15 transition-colors duration-500" />
-            
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-40 dark:bg-blue-950/80 bg-blue-500/50 rounded-full blur-3xl pointer-events-none group-hover/empty:bg-blue-500/35 dark:group-hover/empty:bg-blue-950/50 transition-colors duration-300" />
+
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/5 border border-primary/20 dark:border-primary/30 flex items-center justify-center text-primary mb-6 relative shadow-inner group-hover/empty:scale-105 transition-transform duration-300">
               <Presentation size={28} className="text-primary drop-shadow-[0_2px_8px_rgba(var(--primary),0.3)]" />
               <div className="absolute inset-0 rounded-2xl bg-primary/5 opacity-0 group-hover/empty:opacity-100 transition-opacity duration-300" />
@@ -246,9 +272,9 @@ export default function DashboardPage() {
             <p className="text-muted-foreground text-sm max-w-sm mb-8 font-light leading-relaxed">
               Unlock the power of AI to design stunning slide decks. Tell us your topic and watch the magic happen in seconds.
             </p>
-            
+
             <Link href="/generate" className="w-full sm:w-auto">
-              <Button className="rounded-xl px-6 py-6 font-medium text-sm cursor-pointer shadow-lg hover:shadow-primary/20 transition-all w-full sm:w-auto flex items-center justify-center gap-2 group/btn bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button className="rounded-md p-4 font-medium text-sm cursor-pointer transition-all w-full sm:w-auto flex items-center justify-center gap-2 group/btn bg-primary text-primary-foreground hover:bg-primary/90">
                 <span>Create First Presentation</span>
                 <ArrowRight size={15} className="transition-transform group-hover/btn:translate-x-1 duration-300" />
               </Button>

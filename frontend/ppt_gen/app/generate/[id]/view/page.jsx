@@ -3,8 +3,9 @@
 import React, { useState, useEffect, use, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Loader2, Layout, Check, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Layout, Check, Plus, ChevronLeft, ChevronRight, Undo, Redo } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import {
     Dialog,
@@ -17,103 +18,7 @@ import Slide from "@/components/templates/Slide";
 import metadata from "@/components/templates/metadata.json";
 import { toast } from "sonner";
 import { extractSlideData } from "@/utils/extractor";
-
-const MOCK_PRESENTATIONS = {
-    "quarterly-review": {
-        id: "quarterly-review",
-        title: "Quarterly Business Review",
-        theme: "sunset",
-        slides_count: 3,
-        slides: [
-            {
-                title: "Q2 Business Performance",
-                subtitle: "Key metrics and strategic initiatives overview.",
-                layout: { category: "title", type: "main" },
-                presenter: "Akash Ramakrishnan",
-                company: "Iota AI",
-                date: "June 2026",
-            },
-            {
-                title: "Growth Metrics",
-                subtitle:
-                    "Analyzing user retention and sales performance over Q2.",
-                layout: { category: "stats", type: "grid" },
-                items: [
-                    {
-                        header: "10x Speed",
-                        description: "Increase in rendering performance.",
-                    },
-                    {
-                        header: "99% Success",
-                        description:
-                            "Production pipeline deployment pass rate.",
-                    },
-                    {
-                        header: "24/7 Support",
-                        description: "Active system health monitoring.",
-                    },
-                ],
-            },
-            {
-                title: "Roadmap to Q3",
-                subtitle:
-                    "Next steps for product enhancements and scaling operations.",
-                layout: { category: "timelines", type: "horizontal" },
-                items: [
-                    {
-                        header: "Phase 1: Design",
-                        description: "Establish premium design components.",
-                    },
-                    {
-                        header: "Phase 2: Alpha Test",
-                        description:
-                            "Deploy local testing suite to beta group.",
-                    },
-                    {
-                        header: "Phase 3: Launch",
-                        description:
-                            "Public deployment on high-speed global CDN.",
-                    },
-                ],
-            },
-        ],
-    },
-    "ai-future": {
-        id: "ai-future",
-        title: "AI and Future of Web Development",
-        theme: "cyberpunk",
-        slides_count: 2,
-        slides: [
-            {
-                title: "AI and Future of Web Dev",
-                subtitle:
-                    "How generative technologies are changing developer workflows.",
-                layout: { category: "title", type: "split" },
-                presenter: "Akash R.",
-                company: "Vercel & DeepMind",
-                date: "Q2 2026",
-            },
-            {
-                title: "Core Technologies",
-                subtitle:
-                    "Crucial stack decisions for next generation AI products.",
-                layout: { category: "cards", type: "simple" },
-                items: [
-                    {
-                        header: "React Server Components",
-                        description:
-                            "Optimizing initial load and streaming HTML.",
-                    },
-                    {
-                        header: "Edge Functions",
-                        description:
-                            "Low latency executions globally distributed.",
-                    },
-                ],
-            },
-        ],
-    },
-};
+import api from "@/lib/api";
 
 const CURSOR_LEFT = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none'><path d='M19 12H5M12 19l-7-7 7-7' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M19 12H5M12 19l-7-7 7-7' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") 16 16, w-resize`;
 const CURSOR_RIGHT = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none'><path d='M5 12h14M12 5l7 7-7 7' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M5 12h14M12 5l7 7-7 7' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") 16 16, e-resize`;
@@ -130,9 +35,260 @@ export default function PPTSlidesViewerPage({ params }) {
     const [editableSlides, setEditableSlides] = useState([]);
     const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+    const [isExtractingPPTX, setIsExtractingPPTX] = useState(false);
+    const [shouldRenderLayouts, setShouldRenderLayouts] = useState(false);
+    
+    // Undo / Redo history state
+    const [past, setPast] = useState([]);
+    const [future, setFuture] = useState([]);
+
+    const editableSlidesRef = useRef(editableSlides);
+    const pastRef = useRef(past);
+    const futureRef = useRef(future);
+    const activeSlideIndexRef = useRef(activeSlideIndex);
+
+    useEffect(() => {
+        editableSlidesRef.current = editableSlides;
+    }, [editableSlides]);
+
+    useEffect(() => {
+        pastRef.current = past;
+    }, [past]);
+
+    useEffect(() => {
+        futureRef.current = future;
+    }, [future]);
+
+    useEffect(() => {
+        activeSlideIndexRef.current = activeSlideIndex;
+    }, [activeSlideIndex]);
+
+    const isFirstLoadRef = useRef(true);
+
+    // Image fetching states
+    const [fetchedImages, setFetchedImages] = useState({});
+    const [imageLoading, setImageLoading] = useState({});
+    const fetchQueueRef = useRef(new Set());
+
+    // Sidebar image editor states
+    const [isImageSidebarOpen, setIsImageSidebarOpen] = useState(false);
+    const [imageEditContext, setImageEditContext] = useState(null);
+    const [sidebarSearchQuery, setSidebarSearchQuery] = useState("");
+    const [sidebarSearchResults, setSidebarSearchResults] = useState([]);
+    const [isSidebarSearching, setIsSidebarSearching] = useState(false);
+
+    const fetchImage = useCallback(async (key, query) => {
+        setImageLoading((prev) => ({ ...prev, [key]: true }));
+        try {
+            const res = await api.get(`/api/ppt/images/search`, {
+                params: { description: query }
+            });
+            if (res?.success && res.data && res.data.length > 0) {
+                const imageUrl = res.data[0].imageURL;
+                setFetchedImages((prev) => ({ ...prev, [key]: imageUrl }));
+            } else {
+                throw new Error("No images found in search results");
+            }
+        } catch (err) {
+            console.error(`Failed to fetch image for key ${key}:`, err);
+            // Fallback placeholder
+            const fallback = `https://picsum.photos/seed/${encodeURIComponent(query)}/800/600`;
+            setFetchedImages((prev) => ({ ...prev, [key]: fallback }));
+        } finally {
+            setImageLoading((prev) => ({ ...prev, [key]: false }));
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!editableSlides || editableSlides.length === 0) return;
+
+        editableSlides.forEach((slide, sIndex) => {
+            const isImageCategory = slide.layout?.category === "images" || slide.layout?.category === "image";
+            if (!isImageCategory) return;
+
+            const lType = slide.layout?.type;
+
+            if (lType === "split" || lType === "overlay") {
+                const sKey = `slide_${sIndex}`;
+                const hasUrl = slide.image && (slide.image.startsWith("http://") || slide.image.startsWith("https://"));
+                const query = slide.imageDescription || (!hasUrl ? slide.image : null);
+
+                if (query && !fetchQueueRef.current.has(sKey)) {
+                    fetchQueueRef.current.add(sKey);
+                    fetchImage(sKey, query);
+                }
+            } else if (lType === "grid") {
+                if (slide.items) {
+                    slide.items.forEach((item, iIndex) => {
+                        const itemKey = `slide_${sIndex}_item_${iIndex}`;
+                        const hasUrl = item.image && (item.image.startsWith("http://") || item.image.startsWith("https://"));
+                        const query = item.imageDescription || (!hasUrl ? item.image : null);
+
+                        if (query && !fetchQueueRef.current.has(itemKey)) {
+                            fetchQueueRef.current.add(itemKey);
+                            fetchImage(itemKey, query);
+                        }
+                    });
+                }
+            }
+        });
+    }, [editableSlides, fetchImage]);
+
+    const resolveSlideContent = useCallback((slide, index) => {
+        if (!slide) return null;
+        
+        const resolved = { ...slide };
+        const sKey = `slide_${index}`;
+        
+        if (fetchedImages[sKey]) {
+            resolved.image = fetchedImages[sKey];
+        }
+        if (imageLoading[sKey]) {
+            resolved.imageLoading = true;
+        }
+
+        if (resolved.items) {
+            resolved.items = resolved.items.map((item, itemIdx) => {
+                const itemKey = `slide_${index}_item_${itemIdx}`;
+                const newItem = { ...item };
+                if (fetchedImages[itemKey]) {
+                    newItem.image = fetchedImages[itemKey];
+                }
+                if (imageLoading[itemKey]) {
+                    newItem.imageLoading = true;
+                }
+                return newItem;
+            });
+        }
+        
+        return resolved;
+    }, [fetchedImages, imageLoading]);
+
+    const handleSidebarSearch = useCallback(async (query) => {
+        if (!query || query.trim() === "") {
+            setSidebarSearchResults([]);
+            return;
+        }
+        setIsSidebarSearching(true);
+        try {
+            const res = await api.get(`/api/ppt/images/search`, {
+                params: { q: query }
+            });
+            if (res?.success && res.data) {
+                setSidebarSearchResults(res.data);
+            } else {
+                setSidebarSearchResults([]);
+            }
+        } catch (err) {
+            console.error("Failed to search images for sidebar:", err);
+            setSidebarSearchResults([]);
+            toast.error("Failed to load images from Pexels.");
+        } finally {
+            setIsSidebarSearching(false);
+        }
+    }, []);
+
+    const handleEditImage = useCallback((context) => {
+        setImageEditContext(context);
+        
+        const isUrl = context.currentQuery && (context.currentQuery.startsWith("http://") || context.currentQuery.startsWith("https://"));
+        const initialQuery = isUrl ? "" : (context.currentQuery || "");
+        setSidebarSearchQuery(initialQuery);
+        
+        setIsImageSidebarOpen(true);
+        setSidebarSearchResults([]);
+        
+        if (initialQuery) {
+            handleSidebarSearch(initialQuery);
+        }
+    }, [handleSidebarSearch]);
+
+    const handleSelectSidebarImage = useCallback((imageUrl) => {
+        if (!imageEditContext || !editableSlides || !editableSlides[activeSlideIndex]) return;
+        
+        const updatedSlides = [...editableSlides];
+        const slide = updatedSlides[activeSlideIndex];
+        
+        if (imageEditContext.type === "slide") {
+            slide.image = imageUrl;
+            slide.imageDescription = sidebarSearchQuery;
+        } else if (imageEditContext.type === "item" && imageEditContext.itemIndex !== undefined) {
+            const itemIndex = imageEditContext.itemIndex;
+            if (slide.items && slide.items[itemIndex]) {
+                slide.items[itemIndex] = {
+                    ...slide.items[itemIndex],
+                    image: imageUrl,
+                    imageDescription: sidebarSearchQuery
+                };
+            }
+        }
+        
+        const cacheKey = imageEditContext.type === "slide" 
+            ? `slide_${activeSlideIndex}` 
+            : `slide_${activeSlideIndex}_item_${imageEditContext.itemIndex}`;
+        
+        setFetchedImages((prev) => ({ ...prev, [cacheKey]: imageUrl }));
+        
+        updateSlidesState(updatedSlides);
+        toast.success("Image updated successfully");
+    }, [imageEditContext, editableSlides, activeSlideIndex, sidebarSearchQuery]);
     
     const slideRefs = useRef([]);
     const presentationRef = useRef(null);
+    const previewScrollRef = useRef(null);
+
+    useEffect(() => {
+        const el = previewScrollRef.current;
+        if (!el) return;
+
+        let animationFrameId = null;
+        let targetScrollLeft = el.scrollLeft;
+
+        const interpolateScroll = () => {
+            const current = el.scrollLeft;
+            const diff = targetScrollLeft - current;
+            
+            if (Math.abs(diff) < 0.5) {
+                el.scrollLeft = targetScrollLeft;
+                animationFrameId = null;
+            } else {
+                el.scrollLeft = current + diff * 0.15;
+                animationFrameId = requestAnimationFrame(interpolateScroll);
+            }
+        };
+
+        const handleWheel = (e) => {
+            const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+            if (delta !== 0) {
+                e.preventDefault();
+                const maxScrollLeft = el.scrollWidth - el.clientWidth;
+                targetScrollLeft = Math.max(0, Math.min(targetScrollLeft + delta, maxScrollLeft));
+                
+                if (animationFrameId === null) {
+                    animationFrameId = requestAnimationFrame(interpolateScroll);
+                }
+            }
+        };
+
+        const handleScroll = () => {
+            if (animationFrameId === null) {
+                targetScrollLeft = el.scrollLeft;
+            }
+        };
+
+        el.addEventListener("wheel", handleWheel, { passive: false });
+        el.addEventListener("scroll", handleScroll);
+
+        return () => {
+            el.removeEventListener("wheel", handleWheel);
+            el.removeEventListener("scroll", handleScroll);
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        };
+    }, [isLoading]);
+
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -141,6 +297,17 @@ export default function PPTSlidesViewerPage({ params }) {
         document.addEventListener("fullscreenchange", handleFullscreenChange);
         return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
     }, []);
+
+    useEffect(() => {
+        if (isLayoutModalOpen) {
+            const timer = setTimeout(() => {
+                setShouldRenderLayouts(true);
+            }, 300);
+            return () => clearTimeout(timer);
+        } else {
+            setShouldRenderLayouts((prev) => (prev ? false : prev));
+        }
+    }, [isLayoutModalOpen]);
 
     const handlePresent = useCallback(async () => {
         if (presentationRef.current) {
@@ -157,14 +324,140 @@ export default function PPTSlidesViewerPage({ params }) {
         }
     }, []);
 
+    const updateSlidesState = (newSlides) => {
+        setPast((prev) => [...prev, JSON.parse(JSON.stringify(editableSlidesRef.current))]);
+        setFuture([]);
+        setEditableSlides(newSlides);
+        setPptData((prev) => ({
+            ...prev,
+            slides: newSlides
+        }));
+    };
+
+    const handleUndo = useCallback(() => {
+        const currentPast = pastRef.current;
+        if (currentPast.length === 0) return;
+
+        const previous = currentPast[currentPast.length - 1];
+
+        // Find modified slide index to set as active
+        const currentSlides = editableSlidesRef.current;
+        let diffIndex = -1;
+        if (currentSlides && previous) {
+            for (let i = 0; i < Math.min(currentSlides.length, previous.length); i++) {
+                if (JSON.stringify(currentSlides[i]) !== JSON.stringify(previous[i])) {
+                    diffIndex = i;
+                    break;
+                }
+            }
+            if (diffIndex === -1) {
+                diffIndex = Math.min(previous.length - 1, Math.max(0, Math.min(currentSlides.length, previous.length)));
+            }
+        } else {
+            diffIndex = 0;
+        }
+
+        const executeUndo = () => {
+            const latestPast = pastRef.current;
+            if (latestPast.length === 0) return;
+            const latestPrevious = latestPast[latestPast.length - 1];
+            const newPast = latestPast.slice(0, latestPast.length - 1);
+
+            setPast(newPast);
+            setFuture((prev) => [JSON.parse(JSON.stringify(editableSlidesRef.current)), ...prev]);
+
+            setEditableSlides(latestPrevious);
+            setPptData((prev) => ({
+                ...prev,
+                slides: latestPrevious
+            }));
+        };
+
+        // UX: If current active slide is not the modified slide, first take them there and perform undo after a brief delay
+        if (activeSlideIndexRef.current !== diffIndex) {
+            setActiveSlideIndex(diffIndex);
+            setTimeout(() => {
+                executeUndo();
+            }, 300);
+        } else {
+            executeUndo();
+        }
+    }, []);
+
+    const handleRedo = useCallback(() => {
+        const currentFuture = futureRef.current;
+        if (currentFuture.length === 0) return;
+
+        const next = currentFuture[0];
+
+        // Find modified slide index to set as active
+        const currentSlides = editableSlidesRef.current;
+        let diffIndex = -1;
+        if (currentSlides && next) {
+            for (let i = 0; i < Math.min(currentSlides.length, next.length); i++) {
+                if (JSON.stringify(currentSlides[i]) !== JSON.stringify(next[i])) {
+                    diffIndex = i;
+                    break;
+                }
+            }
+            if (diffIndex === -1) {
+                diffIndex = Math.min(next.length - 1, Math.max(0, Math.min(currentSlides.length, next.length)));
+            }
+        } else {
+            diffIndex = 0;
+        }
+
+        const executeRedo = () => {
+            const latestFuture = futureRef.current;
+            if (latestFuture.length === 0) return;
+            const latestNext = latestFuture[0];
+            const newFuture = latestFuture.slice(1);
+
+            setFuture(newFuture);
+            setPast((prev) => [...prev, JSON.parse(JSON.stringify(editableSlidesRef.current))]);
+
+            setEditableSlides(latestNext);
+            setPptData((prev) => ({
+                ...prev,
+                slides: latestNext
+            }));
+        };
+
+        // UX: If current active slide is not the modified slide, first take them there and perform redo after a brief delay
+        if (activeSlideIndexRef.current !== diffIndex) {
+            setActiveSlideIndex(diffIndex);
+            setTimeout(() => {
+                executeRedo();
+            }, 300);
+        } else {
+            executeRedo();
+        }
+    }, []);
+
     useEffect(() => {
-        if (pptData?.slides) {
+        if (pptData?.slides && isFirstLoadRef.current) {
             setEditableSlides(JSON.parse(JSON.stringify(pptData.slides)));
+            isFirstLoadRef.current = false;
         }
     }, [pptData]);
 
     useEffect(() => {
         const handleKeyDown = (e) => {
+            // Check for Undo / Redo shortcuts
+            const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey;
+            const isRedo = (e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"));
+
+            if (isUndo) {
+                e.preventDefault();
+                handleUndo();
+                return;
+            }
+            if (isRedo) {
+                e.preventDefault();
+                handleRedo();
+                return;
+            }
+
             // Do not trigger slide change if user is typing in an input or editable element
             if (
                 e.target.tagName === "INPUT" ||
@@ -185,7 +478,9 @@ export default function PPTSlidesViewerPage({ params }) {
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [editableSlides.length]);
+    }, [editableSlides.length, handleUndo, handleRedo]);
+
+    const initialDataRef = useRef(null);
 
     useEffect(() => {
         if (authStatus === "loading") return;
@@ -196,54 +491,105 @@ export default function PPTSlidesViewerPage({ params }) {
 
         if (!pptId) return;
 
-        // Simulate fetching presentation data
-        const timer = setTimeout(() => {
-            const localData = localStorage.getItem(`ppt_${pptId}`);
-            if (localData) {
-                try {
-                    setPptData(JSON.parse(localData));
+        let active = true;
+
+        const fetchPPT = async () => {
+            setIsLoading((prev) => (prev !== true ? true : prev));
+            try {
+                const res = await api.get(`/api/ppt/${pptId}`);
+                if (!active) return;
+                if (res?.data && res.data.length > 0) {
+                    const presentation = res.data[0];
+                    setPptData(presentation);
+                    initialDataRef.current = JSON.stringify(presentation);
+                } else {
+                    toast.error("Presentation not found");
+                }
+            } catch (err) {
+                console.error("Failed to fetch presentation:", err);
+                if (active) {
+                    toast.error(err.message || "Failed to load presentation");
+                }
+            } finally {
+                if (active) {
                     setIsLoading(false);
-                    return;
-                } catch (e) {
-                    console.error("Failed to parse local data", e);
                 }
             }
-            
-            const mockData =
-                MOCK_PRESENTATIONS[pptId] ||
-                MOCK_PRESENTATIONS["quarterly-review"];
-            setPptData(JSON.parse(JSON.stringify(mockData)));
-            setIsLoading(false);
-        }, 1000);
+        };
 
-        return () => clearTimeout(timer);
+        fetchPPT();
+
+        return () => {
+            active = false;
+        };
     }, [pptId, authStatus, router]);
 
-    // Save to local storage whenever pptData changes
+    // Debounced auto-save to backend database whenever pptData changes
     useEffect(() => {
-        if (pptData && !isLoading && pptId) {
-            localStorage.setItem(`ppt_${pptId}`, JSON.stringify(pptData));
-        }
+        if (!pptData || isLoading || !pptId || !initialDataRef.current) return;
+
+        const currentDataStr = JSON.stringify(pptData);
+        if (currentDataStr === initialDataRef.current) return;
+
+        const delayDebounce = setTimeout(async () => {
+            try {
+                await api.patch(`/api/ppt/${pptId}`, {
+                    theme: pptData.theme,
+                    slides: pptData.slides
+                });
+                initialDataRef.current = currentDataStr;
+            } catch (err) {
+                console.error("Failed to auto-save presentation to backend:", err);
+                toast.error(err.message || "Failed to save presentation changes");
+            }
+        }, 1000);
+
+        return () => clearTimeout(delayDebounce);
     }, [pptData, isLoading, pptId]);
 
     const handleDownloadAsPPT = async (e) => {
-        if (slideRefs.current) {
-            const slideElements = slideRefs.current.filter((el) => el !== null);
+        const toastId = toast.loading("Preparing slides for PowerPoint export...");
+        
+        // 1. Mount the full-size slides off-screen
+        setIsExtractingPPTX(true);
+        
+        // 2. Give the browser time to render the hidden slides at full size (1280x720)
+        await new Promise((resolve) => setTimeout(resolve, 800));
 
-            const allSlidesData = await Promise.all(
-                Array.from(slideElements).map(async (element) => {
-                    return await extractSlideData(element.firstChild);
-                }),
-            );
-            await fetch("http://localhost:8000/api/convert", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    slides: allSlidesData,
-                }),
+        try {
+            // 3. Extract layout data from the full-size elements
+            const allSlidesData = [];
+            for (let i = 0; i < editableSlides.length; i++) {
+                const element = document.getElementById(`pptx-slide-${i}`);
+                if (!element) {
+                    throw new Error(`Failed to find off-screen slide container for slide ${i + 1}`);
+                }
+                const slideData = await extractSlideData(element.firstChild || element);
+                allSlidesData.push(slideData);
+            }
+
+            // 4. Send the request to backend
+            const blob = await api.post("/api/ppt/convert", {
+                slides: allSlidesData
+            }, {
+                responseType: "blob"
             });
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = downloadUrl;
+            link.setAttribute("download", `${pptData?.title || "presentation"}.pptx`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+
+            toast.success("PPTX downloaded successfully!");
+        } catch (err) {
+            console.error("Failed to convert slides to PowerPoint:", err);
+            toast.error(err.message || "Failed to export slides to PPTX");
+        } finally {
+            setIsExtractingPPTX(false);
+            toast.dismiss(toastId);
         }
     };
 
@@ -256,12 +602,7 @@ export default function PPTSlidesViewerPage({ params }) {
             type: type
         };
         
-        setEditableSlides(updatedSlides);
-        setPptData((prev) => ({
-            ...prev,
-            slides: updatedSlides
-        }));
-        
+        updateSlidesState(updatedSlides);
         toast.success(`Layout changed to ${category} (${type})`);
     };
 
@@ -274,12 +615,7 @@ export default function PPTSlidesViewerPage({ params }) {
             [field]: value
         };
         
-        setEditableSlides(updatedSlides);
-        // Save to local storage or state
-        setPptData((prev) => ({
-            ...prev,
-            slides: updatedSlides
-        }));
+        updateSlidesState(updatedSlides);
     };
 
     const handleUpdateItem = (itemIndex, field, value) => {
@@ -300,11 +636,7 @@ export default function PPTSlidesViewerPage({ params }) {
             items: updatedItems
         };
         
-        setEditableSlides(updatedSlides);
-        setPptData((prev) => ({
-            ...prev,
-            slides: updatedSlides
-        }));
+        updateSlidesState(updatedSlides);
     };
 
     const handleAddItem = () => {
@@ -314,16 +646,17 @@ export default function PPTSlidesViewerPage({ params }) {
         const slide = updatedSlides[activeSlideIndex];
         const currentItems = slide.items || [];
         
+        if (currentItems.length >= 10) {
+            toast.error("Maximum of 10 points allowed per slide");
+            return;
+        }
+        
         updatedSlides[activeSlideIndex] = {
             ...slide,
             items: [...currentItems, { header: "New Item", description: "Item description" }]
         };
         
-        setEditableSlides(updatedSlides);
-        setPptData((prev) => ({
-            ...prev,
-            slides: updatedSlides
-        }));
+        updateSlidesState(updatedSlides);
         toast.success("Item added");
     };
 
@@ -334,6 +667,11 @@ export default function PPTSlidesViewerPage({ params }) {
         const slide = updatedSlides[activeSlideIndex];
         const currentItems = [...(slide.items || [])];
         
+        if (currentItems.length >= 10) {
+            toast.error("Maximum of 10 points allowed per slide");
+            return;
+        }
+        
         const newItem = { header: "New Point", description: "Point description" };
         const insertIndex = direction === "before" ? itemIndex : itemIndex + 1;
         currentItems.splice(insertIndex, 0, newItem);
@@ -343,11 +681,7 @@ export default function PPTSlidesViewerPage({ params }) {
             items: currentItems
         };
         
-        setEditableSlides(updatedSlides);
-        setPptData((prev) => ({
-            ...prev,
-            slides: updatedSlides
-        }));
+        updateSlidesState(updatedSlides);
         toast.success(`Point added ${direction}`);
     };
 
@@ -365,31 +699,14 @@ export default function PPTSlidesViewerPage({ params }) {
             items: updatedItems
         };
         
-        setEditableSlides(updatedSlides);
-        setPptData((prev) => ({
-            ...prev,
-            slides: updatedSlides
-        }));
+        updateSlidesState(updatedSlides);
         toast.success("Item deleted");
     };
 
     // Synchronize information with the header/navbar
     useEffect(() => {
         if (pptData) {
-            const event = new CustomEvent("ppt-info-changed", {
-                detail: {
-                    title: pptData.title || "Untitled Presentation",
-                    appState: "viewing_slides",
-                    theme: pptData.theme || "sunset"
-                }
-            });
-            window.dispatchEvent(event);
-        }
-    }, [pptData]);
-
-    useEffect(() => {
-        const handleRequest = () => {
-            if (pptData) {
+            const timer = setTimeout(() => {
                 const event = new CustomEvent("ppt-info-changed", {
                     detail: {
                         title: pptData.title || "Untitled Presentation",
@@ -398,14 +715,29 @@ export default function PPTSlidesViewerPage({ params }) {
                     }
                 });
                 window.dispatchEvent(event);
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+    }, [pptData]);
+
+    useEffect(() => {
+        const handleRequest = () => {
+            if (pptData) {
+                setTimeout(() => {
+                    const event = new CustomEvent("ppt-info-changed", {
+                        detail: {
+                            title: pptData.title || "Untitled Presentation",
+                            appState: "viewing_slides",
+                            theme: pptData.theme || "sunset"
+                        }
+                    });
+                    window.dispatchEvent(event);
+                }, 0);
             }
         };
 
         const handlePDF = () => {
-            toast.info("Preparing PDF download...");
-            setTimeout(() => {
-                toast.success("PDF Downloaded successfully (simulation).");
-            }, 1000);
+            setIsGeneratingPDF(true);
         };
 
         const handlePPT = (e) => {
@@ -439,21 +771,95 @@ export default function PPTSlidesViewerPage({ params }) {
         };
     }, [pptData, handleDownloadAsPPT, handlePresent]);
 
+    useEffect(() => {
+        if (!isGeneratingPDF) return;
+
+        let active = true;
+
+        const generate = async () => {
+            const toastId = toast.loading("Preparing slides for high-res PDF export...");
+            
+            // Give browser time to render the hidden slides
+            await new Promise((resolve) => setTimeout(resolve, 800));
+
+            if (!active) return;
+
+            try {
+                const { jsPDF } = await import("jspdf");
+                const html2canvas = (await import("html2canvas-pro")).default;
+
+                const pdf = new jsPDF({
+                    orientation: "landscape",
+                    unit: "px",
+                    format: [1280, 720]
+                });
+
+                for (let i = 0; i < editableSlides.length; i++) {
+                    if (!active) return;
+                    
+                    const element = document.getElementById(`pdf-slide-${i}`);
+                    if (!element) {
+                        console.error(`Element pdf-slide-${i} not found`);
+                        continue;
+                    }
+
+                    const canvas = await html2canvas(element, {
+                        scale: 2, 
+                        useCORS: true,
+                        logging: false,
+                        width: 1280,
+                        height: 720,
+                        windowWidth: 1280,
+                        windowHeight: 720
+                    });
+
+                    if (!active) return;
+                    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+                    if (i > 0) {
+                        pdf.addPage([1280, 720], "landscape");
+                    }
+                    pdf.addImage(imgData, "JPEG", 0, 0, 1280, 720);
+                }
+
+                if (!active) return;
+                pdf.save(`${pptData?.title || "presentation"}.pdf`);
+                toast.success("PDF Downloaded successfully!");
+            } catch (err) {
+                console.error("PDF generation failed:", err);
+                if (active) {
+                    toast.error("Failed to generate PDF. Please try again.");
+                }
+            } finally {
+                toast.dismiss(toastId);
+                if (active) {
+                    setIsGeneratingPDF(false);
+                }
+            }
+        };
+
+        generate();
+
+        return () => {
+            active = false;
+        };
+    }, [isGeneratingPDF, editableSlides, pptData]);
+
     if (isLoading || authStatus === "loading") {
         return (
             <div className="w-full flex-1 flex flex-col justify-center items-center p-8 min-h-[60vh]">
-                <div className="w-full max-w-[1000px] aspect-[16/9] bg-card/25 border border-border/30 rounded-xl p-6 flex flex-col justify-between relative overflow-hidden animate-pulse">
+                <div className="w-full max-w-[1000px] aspect-[16/9] bg-card/25 border border-border/30 rounded-xl p-6 flex flex-col justify-between relative overflow-hidden">
                     <div className="space-y-3">
-                        <div className="h-5 w-20 bg-muted/30 rounded-md" />
-                        <div className="h-7 w-3/4 max-w-[450px] bg-muted/40 rounded-lg" />
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-7 w-3/4 max-w-[450px]" />
                     </div>
                     <div className="space-y-2 my-4">
-                        <div className="h-3.5 w-full bg-muted/15 rounded-md" />
-                        <div className="h-3.5 w-11/12 bg-muted/10 rounded-md" />
+                        <Skeleton className="h-3.5 w-full" />
+                        <Skeleton className="h-3.5 w-11/12" />
                     </div>
                     <div className="flex justify-between items-center pt-3 border-t border-border/20">
-                        <div className="h-5 w-20 bg-muted/20 rounded-md" />
-                        <div className="h-5 w-24 bg-muted/30 rounded-md" />
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-5 w-24" />
                     </div>
                 </div>
             </div>
@@ -461,17 +867,33 @@ export default function PPTSlidesViewerPage({ params }) {
     }
 
     return (
-        <div className="w-full flex-1 flex flex-col items-center justify-center p-2 md:p-8 min-h-0 select-none overflow-hidden">
-            <div className="flex-1 flex flex-col items-center justify-between md:justify-center w-full h-full p-2 sm:p-4 pb-4 md:pb-4 relative min-h-0">
+        <div className="w-full flex-grow flex flex-row min-h-0 select-none overflow-hidden relative">
+            {/* Left Panel: Main slide editor preview */}
+            <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-8 min-h-0 overflow-y-auto">
+                <div className="flex-1 flex flex-col items-center justify-between md:justify-center w-full h-full p-2 sm:p-4 pb-4 md:pb-4 relative min-h-0">
                 
-                {/* Vertical Centering Wrapper */}
                 <div className="w-full flex-1 md:flex-none flex flex-col items-center justify-center min-h-0 gap-3">
                     
-                    {/* Top Action Bar */}
                     <div className="w-full max-w-[1000px] flex justify-end gap-2 px-1">
+                        <button
+                            onClick={handleUndo}
+                            disabled={past.length === 0}
+                            className="h-8 w-8 rounded-lg bg-secondary/50 hover:bg-secondary disabled:opacity-50 text-secondary-foreground flex items-center justify-center transition-colors cursor-pointer border border-border/50 shadow-sm disabled:cursor-not-allowed"
+                            title="Undo (Ctrl+Z)"
+                        >
+                            <Undo size={14} className="text-primary" />
+                        </button>
+                        <button
+                            onClick={handleRedo}
+                            disabled={future.length === 0}
+                            className="h-8 w-8 rounded-lg bg-secondary/50 hover:bg-secondary disabled:opacity-50 text-secondary-foreground flex items-center justify-center transition-colors cursor-pointer border border-border/50 shadow-sm disabled:cursor-not-allowed"
+                            title="Redo (Ctrl+Y)"
+                        >
+                            <Redo size={14} className="text-primary" />
+                        </button>
 
-
-                        {editableSlides && editableSlides[activeSlideIndex] && editableSlides[activeSlideIndex].layout?.category !== "title" && (
+                        {editableSlides && editableSlides[activeSlideIndex] && 
+                            !["title", "titles"].includes(editableSlides[activeSlideIndex].layout?.category?.toLowerCase()) && (
                             <button
                                 onClick={handleAddItem}
                                 className="h-8 px-3 rounded-md bg-secondary/50 hover:bg-secondary text-secondary-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs font-medium border border-border/50 shadow-sm"
@@ -506,18 +928,19 @@ export default function PPTSlidesViewerPage({ params }) {
                             </button>
                         )}
                         
-                        <div className={`w-full relative overflow-hidden ${isFullscreen ? 'max-h-screen max-w-[calc(100vh*16/9)] bg-background' : 'shadow-xl rounded-xl ring-1 ring-border/20'}`}>
+                        <div className={`w-full relative overflow-hidden ${isFullscreen ? 'max-h-screen max-w-[calc(100vh*16/9)] bg-background' : 'shadow-xl rounded-xl overflow-hidden ring-1 ring-border/20'}`}>
                             {editableSlides &&
                                 editableSlides[activeSlideIndex] && (
                                     <Slide
                                         slide_content={{
-                                            ...editableSlides[activeSlideIndex],
+                                            ...resolveSlideContent(editableSlides[activeSlideIndex], activeSlideIndex),
                                             theme: pptData?.theme || "sunset",
                                         }}
                                         onUpdateSlide={handleUpdateSlide}
                                         onUpdateItem={handleUpdateItem}
                                         onDeleteItem={handleDeleteItem}
                                         onAddItem={handleAddItemAtIndex}
+                                        onEditImage={handleEditImage}
                                     />
                                 )}
                         </div>
@@ -559,7 +982,10 @@ export default function PPTSlidesViewerPage({ params }) {
                 </div>
 
                 {/* Previews */}
-                <div className="mt-4 md:mt-6 w-full max-w-[1000px] shrink-0 overflow-x-auto flex gap-4 py-2 px-1 scrollbar-thin scrollbar-thumb-muted justify-start md:justify-center">
+                <div 
+                    ref={previewScrollRef}
+                    className="mt-4 md:mt-6 w-full max-w-[1000px] shrink-0 overflow-x-auto flex gap-4 py-2 px-1 scrollbar-thin scrollbar-thumb-muted justify-start"
+                >
                     {editableSlides.map((slide, idx) => (
                         <button
                             key={idx}
@@ -578,7 +1004,7 @@ export default function PPTSlidesViewerPage({ params }) {
                             >
                                 <Slide
                                     slide_content={{
-                                        ...slide,
+                                        ...resolveSlideContent(slide, idx),
                                         theme: pptData?.theme || "sunset",
                                     }}
                                 />
@@ -590,6 +1016,98 @@ export default function PPTSlidesViewerPage({ params }) {
                     ))}
                 </div>
             </div>
+        </div>
+
+            {/* Right Panel: Sidebar Image Editor */}
+            {isImageSidebarOpen && (
+                <div className="w-[360px] md:w-[400px] border-l border-border bg-card flex flex-col shrink-0 animate-in slide-in-from-right duration-200">
+                    {/* Sidebar Header */}
+                    <div className="p-4 border-b border-border flex items-center justify-between shrink-0 bg-secondary/25">
+                        <div className="flex flex-col">
+                            <h3 className="font-bold text-sm">Edit Slide Image</h3>
+                            <span className="text-[10px] text-muted-foreground">Select an image from Pexels</span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setIsImageSidebarOpen(false);
+                                setImageEditContext(null);
+                            }}
+                            className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-secondary border border-border/50 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+
+                    {/* Search Bar & Credits */}
+                    <div className="p-4 border-b border-border shrink-0 flex flex-col gap-2">
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleSidebarSearch(sidebarSearchQuery);
+                            }}
+                            className="flex gap-2"
+                        >
+                            <input
+                                type="text"
+                                value={sidebarSearchQuery}
+                                onChange={(e) => setSidebarSearchQuery(e.target.value)}
+                                placeholder="Search Pexels..."
+                                className="flex-grow p-2 border border-border rounded-md text-xs bg-background"
+                            />
+                            <button
+                                type="submit"
+                                disabled={isSidebarSearching}
+                                className="px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold cursor-pointer disabled:opacity-50 hover:bg-primary/95 transition-colors"
+                            >
+                                {isSidebarSearching ? "..." : "Search"}
+                            </button>
+                        </form>
+                        
+                        <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                            <span>Photos provided by</span>
+                            <a
+                                href="https://www.pexels.com/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:underline inline-flex items-center gap-0.5 font-semibold"
+                            >
+                                Pexels
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* Grid of Search Results */}
+                    <div className="flex-grow overflow-y-auto p-4">
+                        {isSidebarSearching ? (
+                            <div className="grid grid-cols-2 gap-3">
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <div key={i} className="aspect-[16/9] rounded-lg skeleton-sweep border border-border/50" />
+                                ))}
+                            </div>
+                        ) : sidebarSearchResults.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-3">
+                                {sidebarSearchResults.map((img, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleSelectSidebarImage(img.imageURL)}
+                                        className="relative aspect-[16/9] rounded-lg overflow-hidden border border-border hover:border-blue-500 shadow-sm cursor-pointer group bg-muted transition-colors"
+                                    >
+                                        <img
+                                            src={img.previewURL}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                            alt="Search result"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                <span className="text-xs text-muted-foreground">No images found. Try a different query.</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Layout Selector Modal */}
             <Dialog open={isLayoutModalOpen} onOpenChange={setIsLayoutModalOpen}>
@@ -603,77 +1121,157 @@ export default function PPTSlidesViewerPage({ params }) {
 
                     {/* Scrollable grid area */}
                     <div className="flex-1 overflow-y-auto pr-1">
-                        {Object.entries(metadata.layoutCategories)
-                            .filter(([catKey]) => {
-                                const isTitleSlide = editableSlides[activeSlideIndex]?.layout?.category === "title";
-                                return isTitleSlide ? catKey === "title" : catKey !== "title";
-                            })
-                            .map(([catKey, category]) => (
-                            <div key={catKey} className="mb-6">
-                                <h3 className="text-[11px] font-bold tracking-wider text-primary uppercase mb-3 border-b border-border/40 pb-1.5">
-                                    {category.name}
-                                </h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
-                                    {category.types.map((type) => {
-                                        const activeSlide = editableSlides[activeSlideIndex];
-                                        const isSelected = 
-                                            activeSlide?.layout?.category === catKey &&
-                                            activeSlide?.layout?.type === type.id;
-
-                                        // Fallback items in case the active slide has no items (e.g. Title slides)
-                                        const previewItems = activeSlide?.items?.length ? activeSlide.items : [
-                                            { header: "Key Highlight 1", description: "This is a detailed description of the first key highlight item." },
-                                            { header: "Key Highlight 2", description: "This is a detailed description of the second key highlight item." },
-                                            { header: "Key Highlight 3", description: "This is a detailed description of the third key highlight item." }
-                                        ];
-
-                                        return (
-                                            <button
-                                                key={type.id}
-                                                onClick={() => {
-                                                    handleLayoutChange(catKey, type.id);
-                                                    setIsLayoutModalOpen(false);
-                                                }}
-                                                className={`flex flex-col text-left p-2.5 rounded-xl border transition-all text-xs cursor-pointer gap-2 bg-card ${
-                                                    isSelected
-                                                        ? "border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)] ring-1 ring-blue-500/20 opacity-100"
-                                                        : "border-border hover:border-muted-foreground/20 opacity-75 hover:opacity-100"
-                                                }`}
-                                            >
-                                                {/* Mini Slide Preview */}
-                                                <div className="w-full aspect-[16/9] rounded-lg overflow-hidden border theme-border shadow-xs bg-background/50 relative pointer-events-none">
-                                                    <Slide
-                                                        slide_content={{
-                                                            ...activeSlide,
-                                                            items: previewItems,
-                                                            layout: { category: catKey, type: type.id },
-                                                            theme: pptData?.theme || "sunset",
-                                                        }}
-                                                    />
-                                                    {isSelected && (
-                                                        <div className="absolute top-1.5 right-1.5 z-10 bg-blue-500 text-white rounded-full w-4 h-4 shadow-sm flex items-center justify-center animate-in fade-in zoom-in-75 duration-200">
-                                                            <Check size={10} strokeWidth={3} className="text-white" />
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex flex-col gap-0.5 px-0.5 mt-0.5">
-                                                    <span className="font-semibold text-foreground text-[11px] leading-tight">
-                                                        {type.name}
-                                                    </span>
-                                                    <span className="text-[9px] text-muted-foreground leading-normal line-clamp-2">
-                                                        {type.description}
-                                                    </span>
-                                                </div>
-                                            </button>
-                                        );
-                                    })}
+                        {shouldRenderLayouts ? (
+                            Object.entries(metadata.layoutCategories)
+                                .filter(([catKey]) => {
+                                    const activeSlide = editableSlides[activeSlideIndex];
+                                    const activeCat = activeSlide?.layout?.category?.toLowerCase() || "";
+                                    const isTitleOrClosing = 
+                                        activeCat === "title" || 
+                                        activeCat === "titles" || 
+                                        activeCat === "closing" || 
+                                        activeCat === "closings";
+                                    return isTitleOrClosing 
+                                        ? (catKey === "title" || catKey === "closing") 
+                                        : (catKey !== "title" && catKey !== "closing");
+                                })
+                                .map(([catKey, category]) => (
+                                <div key={catKey} className="mb-6">
+                                    <h3 className="text-[11px] font-bold tracking-wider text-primary uppercase mb-3 border-b border-border/40 pb-1.5">
+                                        {category.name}
+                                    </h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
+                                        {category.types.map((type) => {
+                                            const activeSlide = editableSlides[activeSlideIndex];
+                                            const activeCat = activeSlide?.layout?.category || "";
+                                            const normalizeCat = (c) => c.toLowerCase().replace(/s$/, "");
+                                            const isSelected = 
+                                                normalizeCat(activeCat) === normalizeCat(catKey) &&
+                                                activeSlide?.layout?.type === type.id;
+    
+                                            // Fallback items in case the active slide has no items (e.g. Title slides)
+                                            const previewItems = activeSlide?.items?.length ? activeSlide.items : [
+                                                { header: "Key Highlight 1", description: "This is a detailed description of the first key highlight item." },
+                                                { header: "Key Highlight 2", description: "This is a detailed description of the second key highlight item." },
+                                                { header: "Key Highlight 3", description: "This is a detailed description of the third key highlight item." }
+                                            ];
+    
+                                            return (
+                                                <button
+                                                    key={type.id}
+                                                    onClick={() => {
+                                                        handleLayoutChange(catKey, type.id);
+                                                        setIsLayoutModalOpen(false);
+                                                    }}
+                                                    className={`flex flex-col text-left p-2.5 rounded-xl border transition-all text-xs cursor-pointer gap-2 bg-card ${
+                                                        isSelected
+                                                            ? "border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)] ring-1 ring-blue-500/20 opacity-100"
+                                                            : "border-border hover:border-muted-foreground/20 opacity-75 hover:opacity-100"
+                                                    }`}
+                                                >
+                                                    <div className="w-full aspect-[16/9] rounded-lg overflow-hidden border theme-border shadow-xs bg-background/50 relative pointer-events-none">
+                                                        <Slide
+                                                            slide_content={{
+                                                                ...resolveSlideContent(activeSlide, activeSlideIndex),
+                                                                items: previewItems,
+                                                                layout: { category: catKey, type: type.id },
+                                                                theme: pptData?.theme || "sunset",
+                                                            }}
+                                                        />
+                                                        {isSelected && (
+                                                            <div className="absolute top-1.5 right-1.5 z-10 bg-blue-500 text-white rounded-full w-4 h-4 shadow-sm flex items-center justify-center animate-in fade-in zoom-in-75 duration-200">
+                                                                <Check size={10} strokeWidth={3} className="text-white" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+    
+                                                    <div className="flex flex-col gap-0.5 px-0.5 mt-0.5">
+                                                        <span className="font-semibold text-foreground text-[11px] leading-tight">
+                                                            {type.name}
+                                                        </span>
+                                                        <span className="text-[9px] text-muted-foreground leading-normal line-clamp-2">
+                                                            {type.description}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
+                            ))
+                        ) : (
+                            <div className="w-full flex-1 flex flex-col items-center justify-center min-h-[300px] gap-3 py-12">
+                                <Loader2 className="animate-spin text-primary w-6 h-6" />
+                                <span className="text-xs text-muted-foreground font-medium">Loading layout options</span>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>
+            
+            {isGeneratingPDF && (
+                <div
+                    style={{
+                        position: "absolute",
+                        left: "-9999px",
+                        top: "-9999px",
+                        width: "1280px",
+                        zIndex: -9999,
+                        pointerEvents: "none"
+                    }}
+                >
+                    {editableSlides.map((slide, idx) => (
+                        <div
+                            key={idx}
+                            id={`pdf-slide-${idx}`}
+                            style={{
+                                width: "1280px",
+                                height: "720px",
+                                overflow: "hidden"
+                            }}
+                        >
+                            <Slide
+                                slide_content={{
+                                    ...resolveSlideContent(slide, idx),
+                                    theme: pptData?.theme || "sunset",
+                                }}
+                            />
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {isExtractingPPTX && (
+                <div
+                    style={{
+                        position: "absolute",
+                        left: "-9999px",
+                        top: "-9999px",
+                        width: "1280px",
+                        zIndex: -9999,
+                        pointerEvents: "none"
+                    }}
+                >
+                    {editableSlides.map((slide, idx) => (
+                        <div
+                            key={idx}
+                            id={`pptx-slide-${idx}`}
+                            style={{
+                                width: "1280px",
+                                height: "720px",
+                                overflow: "hidden"
+                            }}
+                        >
+                            <Slide
+                                slide_content={{
+                                    ...resolveSlideContent(slide, idx),
+                                    theme: pptData?.theme || "sunset",
+                                }}
+                            />
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

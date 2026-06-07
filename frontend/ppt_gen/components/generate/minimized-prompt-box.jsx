@@ -12,7 +12,7 @@ export function MinimizedPromptBox({
   handleGenerate 
 }) {
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-3 relative z-10 group mt-auto mb-8">
+    <div className="w-full mt-2 max-w-3xl mx-auto flex flex-col gap-3 relative z-10 group mt-auto mb-8">
       <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-violet-600 rounded-3xl blur opacity-0 group-focus-within:opacity-20 transition duration-500"></div>
 
       <form 
@@ -23,7 +23,7 @@ export function MinimizedPromptBox({
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Refine your prompt..."
-          className="w-full min-h-[44px] max-h-[120px] border-none focus-visible:ring-0 resize-none px-4 py-3 bg-transparent text-base leading-relaxed rounded-none"
+          className="w-full min-h-[44px] max-h-[120px] border-none focus-visible:ring-0 resize-none px-4 py-3 bg-transparent rounded-lg text-base leading-relaxed"
           disabled={isGenerating}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
