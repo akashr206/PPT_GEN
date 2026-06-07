@@ -1,7 +1,7 @@
 import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 
-const TitleSplit = ({ title, subtitle, presenter, company, date, onUpdateSlide }) => {
+const TitleSplit = ({ title, subtitle, presenter, onUpdateSlide }) => {
     return (
         <div className="flex items-stretch justify-between h-full min-h-[30cqw] gap-[4cqw]">
             {/* Left accent block with solid primary color */}
@@ -44,26 +44,6 @@ const TitleSplit = ({ title, subtitle, presenter, company, date, onUpdateSlide }
                             onChange={(val) => onUpdateSlide?.("presenter", val)}
                             readOnly={!onUpdateSlide}
                             placeholder="Presenter"
-                        />
-                    )}
-                    {company && (
-                        <EditableElement
-                            as="div"
-                            className="text-[1.4cqw] theme-text-muted font-medium"
-                            value={company}
-                            onChange={(val) => onUpdateSlide?.("company", val)}
-                            readOnly={!onUpdateSlide}
-                            placeholder="Company"
-                        />
-                    )}
-                    {date && (
-                        <EditableElement
-                            as="div"
-                            className="text-[1.4cqw] theme-text-muted"
-                            value={date}
-                            onChange={(val) => onUpdateSlide?.("date", val)}
-                            readOnly={!onUpdateSlide}
-                            placeholder="Date"
                         />
                     )}
                 </div>
