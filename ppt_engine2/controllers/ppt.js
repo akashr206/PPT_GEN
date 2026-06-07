@@ -1,4 +1,5 @@
-import { chat } from "../utils/llmChat.js";
+import { chat, chatStream } from "../utils/llmChat.js";
+import partialJsonParser from "partial-json-parser";
 import { pptSystemPrompt } from "../utils/prompts.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import { nanoid } from "nanoid";
@@ -52,6 +53,83 @@ export const generatePPT = async (req, res) => {
     } catch (error) {
         console.error(error);
         return sendError(res, "Failed to start PPT generation", null, 500);
+    }
+};
+
+const getPartialSlides = (accumulatedText) => {
+    const start = accumulatedText.indexOf("{");
+    if (start === -1) return [];
+
+    let jsonStr = accumulatedText.slice(start);
+    jsonStr = jsonStr.replace(/```json\s*$/g, "").replace(/```\s*$/g, "").trim();
+
+    try {
+        const parsed = partialJsonParser(jsonStr);
+        if (parsed && parsed.slides && Array.isArray(parsed.slides)) {
+            return parsed.slides;
+        }
+    } catch (err) {
+        // Ignore parsing errors on incomplete JSON fragments
+    }
+    return [];
+};
+
+export const streamPPT = async (req, res) => {
+    const { ppt_id } = req.params;
+    const { prompt, tone, slidesCount, layoutStyle } = req.query;
+
+    if (!prompt || !tone || !slidesCount) {
+        return sendError(res, "Required query parameters (prompt, tone, slidesCount) are missing", null, 400);
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    let accumulatedText = "";
+
+    try {
+        try {
+            await initPPT({ ppt_id, userId: req.user?.userId });
+        } catch (initErr) {
+            console.log(`[Stream] PPT ${ppt_id} already initialized or error:`, initErr.message);
+        }
+
+        const fullPrompt = `${prompt}\nTone: ${tone}\n Text content preference: ${layoutStyle || 'balanced'}\n User name: ${req.user?.name || 'User'}`.trim();
+        const newSysPrompt = pptSystemPrompt +
+            `\nStrictly output exactly ${slidesCount} slides. Do not generate more or fewer slides under any circumstance.`;
+
+        await chatStream(newSysPrompt, fullPrompt, (token) => {
+            accumulatedText += token;
+            const partialSlides = getPartialSlides(accumulatedText);
+            res.write(`data: ${JSON.stringify({ slides: partialSlides })}\n\n`);
+        });
+
+        const completedResponse = parseLLMJson(accumulatedText);
+
+        await insertIconsToContent(completedResponse);
+
+        await addPPTContent({
+            ppt_id,
+            ...completedResponse,
+            tone,
+            status: "SUCCESS"
+        });
+
+        res.write('event: complete\ndata: {"status": "SUCCESS"}\n\n');
+        res.end();
+    } catch (error) {
+        console.error(`Streaming PPT ${ppt_id} generation failed:`, error);
+        
+        try {
+            await updateStatus({ ppt_id, status: "FAILED" });
+        } catch (dbError) {
+            console.error("Failed to update PPT status to FAILED in DB:", dbError);
+        }
+
+        res.write(`event: error\ndata: ${JSON.stringify({ message: error.message || "Generation failed" })}\n\n`);
+        res.end();
     }
 };
 

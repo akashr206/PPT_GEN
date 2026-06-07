@@ -8,7 +8,12 @@ const TitleAsymmetric = ({ title, subtitle, presenter, onUpdateSlide }) => {
             <div className="col-span-7 flex flex-col justify-center text-left">
                 <EditableElement
                     as="h1"
-                    className="text-[5.5cqw] font-bold theme-heading leading-tight mb-[2cqw] tracking-tight"
+                    className={`font-bold theme-heading leading-tight mb-[2cqw] tracking-tight w-full ${(() => {
+                        const len = title?.length || 0;
+                        if (len > 35) return "text-[3cqw]";
+                        if (len > 22) return "text-[4.2cqw]";
+                        return "text-[5.5cqw]";
+                    })()}`}
                     value={title}
                     onChange={(val) => onUpdateSlide?.("title", val)}
                     readOnly={!onUpdateSlide}

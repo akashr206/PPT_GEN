@@ -8,7 +8,12 @@ const TitleSplit = ({ title, subtitle, presenter, onUpdateSlide }) => {
             <div className="w-[48%] theme-bg-primary rounded-[1.4cqw] p-[4cqw] flex flex-col justify-center relative overflow-hidden">
                 <EditableElement
                     as="h1"
-                    className="text-[5cqw] font-bold leading-tight"
+                    className={`font-bold leading-tight w-full ${(() => {
+                        const len = title?.length || 0;
+                        if (len > 35) return "text-[2.8cqw]";
+                        if (len > 22) return "text-[3.8cqw]";
+                        return "text-[5cqw]";
+                    })()}`}
                     style={{ color: "var(--theme-bg)" }}
                     value={title}
                     onChange={(val) => onUpdateSlide?.("title", val)}

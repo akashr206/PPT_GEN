@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { generatePPT, getStatus, getPPTById, getAllPPTs, deletePPT, updateTemplate, searchImages, searchIcons, convertPPT } from "../controllers/ppt.js";
+import { generatePPT, getStatus, getPPTById, getAllPPTs, deletePPT, updateTemplate, searchImages, searchIcons, streamPPT, convertPPT } from "../controllers/ppt.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 const router = Router();
 
@@ -9,6 +9,7 @@ router.use(authMiddleware)
 // /api/ppt/images/search - GET: searches matching images from Pixabay
 // /api/ppt/icons/search - GET: searches matching icons from Supabase
 // /api/ppt/convert - POST: converts slides array to pptx and streams it to client
+// /api/ppt/stream/ppt_id - GET: streams generated slides content (SSE)
 // /api/ppt/ppt_id - GET: gets ppt of sent id
 // /api/ppt/ppt_id - DELETE: deletes the ppt of sent id
 // /api/ppt/ppt_id - PATCH: Updates theme or slides array
@@ -18,6 +19,7 @@ router.post("/", generatePPT);
 router.get("/", getAllPPTs);
 router.get("/images/search", searchImages);
 router.get("/icons/search", searchIcons);
+router.get("/stream/:ppt_id", streamPPT);
 router.post("/convert", convertPPT);
 router.get("/:ppt_id", getPPTById);
 router.delete("/:ppt_id", deletePPT);

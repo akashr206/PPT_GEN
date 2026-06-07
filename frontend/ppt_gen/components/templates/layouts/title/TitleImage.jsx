@@ -69,7 +69,12 @@ const TitleImage = ({
                 <div className="flex flex-col gap-[1cqw] z-10">
                     <EditableElement
                         as="h1"
-                        className="text-[4.2cqw] font-bold leading-tight theme-text-primary"
+                        className={`font-bold leading-tight theme-text-primary w-full ${(() => {
+                            const len = title?.length || 0;
+                            if (len > 35) return "text-[2.4cqw]";
+                            if (len > 22) return "text-[3.2cqw]";
+                            return "text-[4.2cqw]";
+                        })()}`}
                         value={title}
                         onChange={(val) => onUpdateSlide?.("title", val)}
                         readOnly={!onUpdateSlide}

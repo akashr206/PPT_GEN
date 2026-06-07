@@ -44,7 +44,7 @@ export function Navbar() {
     const isDetailPage =
         pathname.startsWith("/generate/") &&
         (pathSegments.length === 3 || pathSegments.length === 4);
-    const [pptInfo, setPptInfo] = useState({ title: "", appState: "" });
+    const [pptInfo, setPptInfo] = useState({ title: "", appState: "", isBusy: false });
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
 
     useEffect(() => {
@@ -121,7 +121,8 @@ export function Navbar() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setIsThemeModalOpen(true)}
-                                className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200"
+                                disabled={pptInfo.isBusy}
+                                className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Palette size={13} className="text-primary" />
                                 <span className="capitalize">
@@ -139,7 +140,8 @@ export function Navbar() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200"
+                                        disabled={pptInfo.isBusy}
+                                        className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <Download size={13} />
                                         <span>Export</span>
@@ -170,7 +172,8 @@ export function Navbar() {
                                 variant="outline"
                                 size="sm"
                                 onClick={handlePresentClick}
-                                className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200"
+                                disabled={pptInfo.isBusy}
+                                className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Play
                                     size={13}
@@ -251,7 +254,7 @@ export function Navbar() {
             </div>
 
             {/* Theme Selector Modal */}
-            <Dialog open={isThemeModalOpen} onOpenChange={setIsThemeModalOpen}>
+            <Dialog open={isThemeModalOpen && !pptInfo.isBusy} onOpenChange={pptInfo.isBusy ? undefined : setIsThemeModalOpen}>
                 <DialogContent className="max-w-4xl sm:max-w-4xl bg-popover border-border text-popover-foreground rounded-xl p-6 shadow-2xl z-50">
                     <DialogHeader>
                         <DialogTitle className="text-lg font-bold">
