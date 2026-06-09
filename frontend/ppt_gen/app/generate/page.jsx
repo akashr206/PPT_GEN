@@ -46,78 +46,6 @@ function GeneratePageContent() {
         }
     }, [urlprompt]);
 
-    useEffect(() => {
-        if (!activePptId) return;
-
-        const currentPptId = activePptId;
-        let isMounted = true;
-        let pollTries = 0;
-        let timeoutId = null;
-
-        const pollStatus = async () => {
-            if (!isMounted) return;
-
-            pollTries++;
-
-            if (pollTries > 40) {
-                if (isMounted) {
-                    setIsGenerating(false);
-                    setActivePptId(null);
-                    toast.error("Generation timed out. Please try again.");
-                }
-                return;
-            }
-
-            try {
-                const res = await api.get(`/api/ppt/status/${currentPptId}`);
-                if (!isMounted) return;
-                
-                const statusData = res?.data?.[0] || res?.data;
-                const status = statusData?.status;
-
-                if (status === "SUCCESS") {
-                    const targetUrl = `/generate/${currentPptId}/view`;
-                    toast.success("Presentation generated successfully!");
-                    try {
-                        refreshHistory();
-                    } catch (e) {
-                        console.error("Error refreshing history", e);
-                    }
-                    window.location.href = targetUrl;
-                    return;
-                }
-
-                if (status === "FAILED") {
-                    setIsGenerating(false);
-                    setActivePptId(null);
-                    toast.error(
-                        "Failed to generate presentation. Please try a different prompt.",
-                    );
-                    return;
-                }
-
-                if (isMounted) {
-                    timeoutId = setTimeout(pollStatus, 2000);
-                }
-            } catch (err) {
-                console.error("Error polling generation status:", err);
-
-                if (isMounted) {
-                    setIsGenerating(false);
-                    setActivePptId(null);
-                    toast.error("Network error while checking status.");
-                }
-            }
-        };
-
-        timeoutId = setTimeout(pollStatus, 2000);
-
-        return () => {
-            isMounted = false;
-            if (timeoutId) clearTimeout(timeoutId);
-        };
-    }, [activePptId]);
-
     if (status === "loading") {
         return (
             <div className="flex h-screen w-screen items-center justify-center bg-[#050505] text-white">
@@ -130,33 +58,24 @@ function GeneratePageContent() {
         return null;
     }
 
-    const handleGenerate = async (e) => {
+    const handleGenerate = (e) => {
         e.preventDefault();
         if (!prompt.trim()) return;
         setIsGenerating(true);
 
-        try {
-            const res = await api.post("/api/ppt/", {
-                prompt: prompt,
-                tone: tone.toLowerCase(),
-                slidesCount: Number(slides),
-                layoutStyle: layoutStyle.toLowerCase(),
-            });
-
-            const pptId = res?.data?.data?.ppt_id || res?.data?.ppt_id;
-
-            if (pptId) {
-                setActivePptId(pptId);
-            } else {
-                throw new Error("Failed to get presentation ID from server");
-            }
-        } catch (err) {
-            console.error("Failed to generate presentation:", err);
-            toast.error(
-                err.message || "Failed to start presentation generation",
-            );
-            setIsGenerating(false);
+        // Generate a random 10-character ID for the presentation
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let pptId = "";
+        for (let i = 0; i < 10; i++) {
+            pptId += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+
+        // Immediately redirect to the editor view page, passing parameters in query string for SSE stream
+        window.location.href = `/generate/${pptId}/view?generating=true` +
+            `&prompt=${encodeURIComponent(prompt)}` +
+            `&tone=${encodeURIComponent(tone.toLowerCase())}` +
+            `&slidesCount=${Number(slides)}` +
+            `&layoutStyle=${encodeURIComponent(layoutStyle.toLowerCase())}`;
     };
 
     return (

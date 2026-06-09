@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, use, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Loader2, Layout, Check, Plus, ChevronLeft, ChevronRight, Undo, Redo } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,11 @@ export default function PPTSlidesViewerPage({ params }) {
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [isExtractingPPTX, setIsExtractingPPTX] = useState(false);
     const [shouldRenderLayouts, setShouldRenderLayouts] = useState(false);
+
+    const searchParams = useSearchParams();
+    const isGeneratingParam = searchParams?.get("generating") === "true";
+    const [isStreamGenerating, setIsStreamGenerating] = useState(isGeneratingParam);
+    const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX;
     
     // Undo / Redo history state
     const [past, setPast] = useState([]);
@@ -443,6 +448,9 @@ export default function PPTSlidesViewerPage({ params }) {
 
     useEffect(() => {
         const handleKeyDown = (e) => {
+            if (isBusy) {
+                return;
+            }
             // Check for Undo / Redo shortcuts
             const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey;
             const isRedo = (e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"));
@@ -478,7 +486,7 @@ export default function PPTSlidesViewerPage({ params }) {
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [editableSlides.length, handleUndo, handleRedo]);
+    }, [editableSlides.length, handleUndo, handleRedo, isBusy]);
 
     const initialDataRef = useRef(null);
 
@@ -490,6 +498,14 @@ export default function PPTSlidesViewerPage({ params }) {
         }
 
         if (!pptId) return;
+
+        // Skip fetching presentation from database on mount if we are actively generating it.
+        // The SSE streaming connection will initialize the record, and the complete event will trigger final refetch.
+        if (isStreamGenerating) {
+            setPptData({ id: pptId, title: "Generating...", slides: [] });
+            setIsLoading(false);
+            return;
+        }
 
         let active = true;
 
@@ -522,11 +538,148 @@ export default function PPTSlidesViewerPage({ params }) {
         return () => {
             active = false;
         };
-    }, [pptId, authStatus, router]);
+    }, [pptId, authStatus, router, isStreamGenerating]);
+ 
+    // Effect to handle Server-Sent Events (SSE) streaming during generation via fetch
+    useEffect(() => {
+        if (!pptId || !isStreamGenerating || !session?.accessToken) return;
+
+        let active = true;
+        const abortController = new AbortController();
+
+        const startStream = async () => {
+            const token = session.accessToken;
+            
+            // Extract generation parameters from URL
+            const promptParam = searchParams?.get("prompt") || "";
+            const toneParam = searchParams?.get("tone") || "";
+            const slidesCountParam = searchParams?.get("slidesCount") || "";
+            const layoutStyleParam = searchParams?.get("layoutStyle") || "";
+
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+            const streamUrl = `${backendUrl.replace(/\/$/, "")}/api/ppt/stream/${pptId}?` +
+                `prompt=${encodeURIComponent(promptParam)}` +
+                `&tone=${encodeURIComponent(toneParam)}` +
+                `&slidesCount=${encodeURIComponent(slidesCountParam)}` +
+                `&layoutStyle=${encodeURIComponent(layoutStyleParam)}`;
+
+            console.log(`[Stream] Establishing fetch stream connection to: ${streamUrl}`);
+            
+            try {
+                const response = await fetch(streamUrl, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    signal: abortController.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let buffer = "";
+
+                while (active) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        const cleanLine = line.trim();
+                        if (!cleanLine) continue;
+
+                        if (cleanLine.startsWith("event: complete")) {
+                            handleComplete();
+                            break;
+                        } else if (cleanLine.startsWith("event: error")) {
+                            handleError();
+                            break;
+                        } else if (cleanLine.startsWith("data: ")) {
+                            try {
+                                const data = JSON.parse(cleanLine.slice(6));
+                                if (data.slides && Array.isArray(data.slides)) {
+                                    setEditableSlides(data.slides);
+                                    setPptData((prev) => ({
+                                        ...prev,
+                                        slides: data.slides
+                                    }));
+                                    if (data.slides.length > 0) {
+                                        setActiveSlideIndex(data.slides.length - 1);
+                                    }
+                                }
+                            } catch (e) {
+                                console.error("[Stream] Error parsing SSE chunk:", e);
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                if (active && err.name !== "AbortError") {
+                    console.error("[Stream] SSE connection error:", err);
+                    handleError();
+                }
+            }
+        };
+
+        const handleComplete = () => {
+            if (!active) return;
+            console.log("[Stream] Complete event received.");
+            toast.success("Presentation generated successfully!");
+            setIsStreamGenerating(false);
+            clearQueryParams();
+
+            // Refetch final DB representation of the presentation (sets parsed images, author, author details, status)
+            const refetch = async () => {
+                try {
+                    const res = await api.get(`/api/ppt/${pptId}`);
+                    if (res?.data && res.data.length > 0) {
+                        const presentation = res.data[0];
+                        setPptData(presentation);
+                        setEditableSlides(presentation.slides || []);
+                        initialDataRef.current = JSON.stringify(presentation);
+                    }
+                } catch (err) {
+                    console.error("[Stream] Failed refetching presentation on complete:", err);
+                }
+            };
+            refetch();
+        };
+
+        const handleError = () => {
+            if (!active) return;
+            toast.error("Generation failed. Please try again or check prompt.");
+            setIsStreamGenerating(false);
+            clearQueryParams();
+        };
+
+        const clearQueryParams = () => {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("generating");
+            url.searchParams.delete("prompt");
+            url.searchParams.delete("tone");
+            url.searchParams.delete("slidesCount");
+            url.searchParams.delete("layoutStyle");
+            window.history.replaceState({}, "", url.pathname);
+        };
+
+        startStream();
+
+        return () => {
+            active = false;
+            abortController.abort();
+        };
+    }, [pptId, isStreamGenerating, session]);
 
     // Debounced auto-save to backend database whenever pptData changes
     useEffect(() => {
         if (!pptData || isLoading || !pptId || !initialDataRef.current) return;
+        if (isStreamGenerating) return; // Do not auto-save while actively receiving SSE stream
 
         const currentDataStr = JSON.stringify(pptData);
         if (currentDataStr === initialDataRef.current) return;
@@ -545,7 +698,7 @@ export default function PPTSlidesViewerPage({ params }) {
         }, 1000);
 
         return () => clearTimeout(delayDebounce);
-    }, [pptData, isLoading, pptId]);
+    }, [pptData, isLoading, pptId, isStreamGenerating]);
 
     const handleDownloadAsPPT = async (e) => {
         const toastId = toast.loading("Preparing slides for PowerPoint export...");
@@ -711,14 +864,15 @@ export default function PPTSlidesViewerPage({ params }) {
                     detail: {
                         title: pptData.title || "Untitled Presentation",
                         appState: "viewing_slides",
-                        theme: pptData.theme || "sunset"
+                        theme: pptData.theme || "sunset",
+                        isBusy: isBusy
                     }
                 });
                 window.dispatchEvent(event);
             }, 0);
             return () => clearTimeout(timer);
         }
-    }, [pptData]);
+    }, [pptData, isBusy]);
 
     useEffect(() => {
         const handleRequest = () => {
@@ -728,7 +882,8 @@ export default function PPTSlidesViewerPage({ params }) {
                         detail: {
                             title: pptData.title || "Untitled Presentation",
                             appState: "viewing_slides",
-                            theme: pptData.theme || "sunset"
+                            theme: pptData.theme || "sunset",
+                            isBusy: isBusy
                         }
                     });
                     window.dispatchEvent(event);
@@ -737,14 +892,17 @@ export default function PPTSlidesViewerPage({ params }) {
         };
 
         const handlePDF = () => {
+            if (isBusy) return;
             setIsGeneratingPDF(true);
         };
 
         const handlePPT = (e) => {
+            if (isBusy) return;
             handleDownloadAsPPT(e);
         };
 
         const handleTheme = (e) => {
+            if (isBusy) return;
             if (e.detail && e.detail.theme) {
                 const newTheme = e.detail.theme;
                 setPptData((prev) => ({ ...prev, theme: newTheme }));
@@ -753,6 +911,7 @@ export default function PPTSlidesViewerPage({ params }) {
         };
 
         const handlePresentEvent = () => {
+            if (isBusy) return;
             handlePresent();
         };
 
@@ -769,7 +928,7 @@ export default function PPTSlidesViewerPage({ params }) {
             window.removeEventListener("trigger-change-theme", handleTheme);
             window.removeEventListener("trigger-present", handlePresentEvent);
         };
-    }, [pptData, handleDownloadAsPPT, handlePresent]);
+    }, [pptData, handleDownloadAsPPT, handlePresent, isBusy]);
 
     useEffect(() => {
         if (!isGeneratingPDF) return;
@@ -877,7 +1036,7 @@ export default function PPTSlidesViewerPage({ params }) {
                     <div className="w-full max-w-[1000px] flex justify-end gap-2 px-1">
                         <button
                             onClick={handleUndo}
-                            disabled={past.length === 0}
+                            disabled={past.length === 0 || isBusy}
                             className="h-8 w-8 rounded-lg bg-secondary/50 hover:bg-secondary disabled:opacity-50 text-secondary-foreground flex items-center justify-center transition-colors cursor-pointer border border-border/50 shadow-sm disabled:cursor-not-allowed"
                             title="Undo (Ctrl+Z)"
                         >
@@ -885,7 +1044,7 @@ export default function PPTSlidesViewerPage({ params }) {
                         </button>
                         <button
                             onClick={handleRedo}
-                            disabled={future.length === 0}
+                            disabled={future.length === 0 || isBusy}
                             className="h-8 w-8 rounded-lg bg-secondary/50 hover:bg-secondary disabled:opacity-50 text-secondary-foreground flex items-center justify-center transition-colors cursor-pointer border border-border/50 shadow-sm disabled:cursor-not-allowed"
                             title="Redo (Ctrl+Y)"
                         >
@@ -896,7 +1055,8 @@ export default function PPTSlidesViewerPage({ params }) {
                             !["title", "titles"].includes(editableSlides[activeSlideIndex].layout?.category?.toLowerCase()) && (
                             <button
                                 onClick={handleAddItem}
-                                className="h-8 px-3 rounded-md bg-secondary/50 hover:bg-secondary text-secondary-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs font-medium border border-border/50 shadow-sm"
+                                disabled={isBusy}
+                                className="h-8 px-3 rounded-md bg-secondary/50 hover:bg-secondary text-secondary-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs font-medium border border-border/50 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Add New Point"
                             >
                                 <Plus size={14} className="text-primary" />
@@ -905,7 +1065,8 @@ export default function PPTSlidesViewerPage({ params }) {
                         )}
                         <button
                             onClick={() => setIsLayoutModalOpen(true)}
-                            className="h-8 px-3 rounded-md bg-secondary/50 hover:bg-secondary text-secondary-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs font-medium border border-border/50 shadow-sm"
+                            disabled={isBusy}
+                            className="h-8 px-3 rounded-md bg-secondary/50 hover:bg-secondary text-secondary-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs font-medium border border-border/50 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Change Slide Layout"
                         >
                             <Layout size={14} className="text-primary" />
@@ -920,7 +1081,7 @@ export default function PPTSlidesViewerPage({ params }) {
                         {!isFullscreen && (
                             <button
                                 onClick={() => setActiveSlideIndex((prev) => Math.max(prev - 1, 0))}
-                                disabled={activeSlideIndex === 0}
+                                disabled={activeSlideIndex === 0 || isBusy}
                                 className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:!opacity-0 shadow-sm backdrop-blur-sm cursor-pointer -left-4 md:-left-12"
                                 title="Previous Slide (Left Arrow)"
                             >
@@ -929,20 +1090,31 @@ export default function PPTSlidesViewerPage({ params }) {
                         )}
                         
                         <div className={`w-full relative overflow-hidden ${isFullscreen ? 'max-h-screen max-w-[calc(100vh*16/9)] bg-background' : 'shadow-xl rounded-xl overflow-hidden ring-1 ring-border/20'}`}>
-                            {editableSlides &&
-                                editableSlides[activeSlideIndex] && (
-                                    <Slide
-                                        slide_content={{
-                                            ...resolveSlideContent(editableSlides[activeSlideIndex], activeSlideIndex),
-                                            theme: pptData?.theme || "sunset",
-                                        }}
-                                        onUpdateSlide={handleUpdateSlide}
-                                        onUpdateItem={handleUpdateItem}
-                                        onDeleteItem={handleDeleteItem}
-                                        onAddItem={handleAddItemAtIndex}
-                                        onEditImage={handleEditImage}
-                                    />
-                                )}
+                            {editableSlides && editableSlides[activeSlideIndex] ? (
+                                <Slide
+                                    slide_content={{
+                                        ...resolveSlideContent(editableSlides[activeSlideIndex], activeSlideIndex),
+                                        theme: pptData?.theme || "sunset",
+                                    }}
+                                    onUpdateSlide={isBusy ? undefined : handleUpdateSlide}
+                                    onUpdateItem={isBusy ? undefined : handleUpdateItem}
+                                    onDeleteItem={isBusy ? undefined : handleDeleteItem}
+                                    onAddItem={isBusy ? undefined : handleAddItemAtIndex}
+                                    onEditImage={isBusy ? undefined : handleEditImage}
+                                />
+                            ) : isStreamGenerating ? (
+                                <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-white gap-4 p-8 text-center rounded-xl border border-neutral-800">
+                                    <Loader2 className="animate-spin text-primary w-8 h-8" />
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-sm font-semibold text-neutral-200">Generating presentation...</p>
+                                        <p className="text-xs text-neutral-500 max-w-sm">AI is creating and styling slides. This will take a few moments.</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-neutral-500 rounded-xl border border-neutral-800">
+                                    <p className="text-sm">No slides available</p>
+                                </div>
+                            )}
                         </div>
 
                         {isFullscreen && (
@@ -971,7 +1143,7 @@ export default function PPTSlidesViewerPage({ params }) {
                         {!isFullscreen && (
                             <button
                                 onClick={() => setActiveSlideIndex((prev) => Math.min(prev + 1, editableSlides.length - 1))}
-                                disabled={activeSlideIndex === editableSlides.length - 1}
+                                disabled={activeSlideIndex === editableSlides.length - 1 || isBusy}
                                 className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:!opacity-0 shadow-sm backdrop-blur-sm cursor-pointer -right-4 md:-right-12"
                                 title="Next Slide (Right Arrow)"
                             >
@@ -989,12 +1161,13 @@ export default function PPTSlidesViewerPage({ params }) {
                     {editableSlides.map((slide, idx) => (
                         <button
                             key={idx}
-                            onClick={() => setActiveSlideIndex(idx)}
+                            onClick={() => !isBusy && setActiveSlideIndex(idx)}
+                            disabled={isBusy}
                             className={`relative flex w-[120px] aspect-video rounded-lg overflow-hidden border-2 text-left shrink-0 transition-all ${
                                 activeSlideIndex === idx
                                     ? "border-primary ring-2 ring-primary/20 shadow-md"
                                     : "border-border hover:border-muted-foreground/30 opacity-70 hover:opacity-100"
-                            }`}
+                            } ${isBusy ? "cursor-not-allowed opacity-50" : ""}`}
                         >
                             <div
                                 ref={(el) => {
@@ -1019,7 +1192,7 @@ export default function PPTSlidesViewerPage({ params }) {
         </div>
 
             {/* Right Panel: Sidebar Image Editor */}
-            {isImageSidebarOpen && (
+            {isImageSidebarOpen && !isBusy && (
                 <div className="w-[360px] md:w-[400px] border-l border-border bg-card flex flex-col shrink-0 animate-in slide-in-from-right duration-200">
                     {/* Sidebar Header */}
                     <div className="p-4 border-b border-border flex items-center justify-between shrink-0 bg-secondary/25">
@@ -1110,7 +1283,7 @@ export default function PPTSlidesViewerPage({ params }) {
             )}
 
             {/* Layout Selector Modal */}
-            <Dialog open={isLayoutModalOpen} onOpenChange={setIsLayoutModalOpen}>
+            <Dialog open={isLayoutModalOpen && !isBusy} onOpenChange={isBusy ? undefined : setIsLayoutModalOpen}>
                 <DialogContent className="max-w-4xl sm:max-w-4xl max-h-[90vh] flex flex-col bg-popover border-border text-popover-foreground rounded-xl p-6 shadow-2xl z-50">
                     <DialogHeader className="shrink-0 mb-4">
                         <DialogTitle className="text-lg font-bold">Select Slide Layout</DialogTitle>

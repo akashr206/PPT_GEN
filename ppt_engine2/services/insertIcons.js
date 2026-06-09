@@ -1,6 +1,34 @@
 import { supabase } from "../utils/getClient.js";
 
 /**
+ * Helper to parse/normalize keywords when the LLM returns a string instead of an array.
+ * e.g., "artificial intelligence | brain | research" -> ["artificial intelligence", "brain", "research"]
+ * 
+ * @param {any} input 
+ * @returns {Array<string>}
+ */
+export const parseIconKeywords = (input) => {
+    if (!input) return [];
+    if (Array.isArray(input)) {
+        return input.map(k => String(k).trim()).filter(Boolean);
+    }
+    if (typeof input === 'string') {
+        let keywords = [];
+        if (input.includes('|')) {
+            keywords = input.split('|');
+        } else if (input.includes(',')) {
+            keywords = input.split(',');
+        } else if (input.includes(';')) {
+            keywords = input.split(';');
+        } else {
+            keywords = [input];
+        }
+        return keywords.map(k => k.trim()).filter(Boolean);
+    }
+    return [];
+};
+
+/**
  * Searches and assigns matching icons for slide items based on their iconKeywords.
  * Uses Promise.all to fetch icons in parallel.
  * 
@@ -21,9 +49,10 @@ export const insertIconsToContent = async (slidesContent) => {
         }
 
         for (const item of slide.items) {
-            if (item.iconKeywords && Array.isArray(item.iconKeywords) && item.iconKeywords.length > 0) {
+            const parsedKeywords = parseIconKeywords(item.iconKeywords);
+            if (parsedKeywords.length > 0) {
                 // Ensure keywords are trimmed, lowercase, and unique
-                const keywords = [...new Set(item.iconKeywords.map(k => k.toLowerCase().trim()))];
+                const keywords = [...new Set(parsedKeywords.map(k => k.toLowerCase().trim()))];
 
                 tasks.push((async () => {
                     try {
@@ -63,17 +92,18 @@ export const insertIconsToContent = async (slidesContent) => {
 /**
  * Service to search icons in the database using list of keywords.
  * 
- * @param {Array<string>} keywords - List of search keywords
+ * @param {Array<string>|string} keywords - List of search keywords or a delimited string
  * @returns {Promise<Array>} List of matched icons
  */
 export const searchIconsByKeywords = async (keywords) => {
-    if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
+    const parsedKeywords = parseIconKeywords(keywords);
+    if (parsedKeywords.length === 0) {
         return [];
     }
 
     const { data, error } = await supabase
         .rpc('search_icons', { 
-            search_keywords: keywords 
+            search_keywords: parsedKeywords.map(k => k.toLowerCase().trim())
         });
 
     if (error) {
