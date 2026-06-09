@@ -9,23 +9,28 @@ import { supabase } from "../utils/getClient.js";
  */
 export const parseIconKeywords = (input) => {
     if (!input) return [];
+    let rawKeywords = [];
     if (Array.isArray(input)) {
-        return input.map(k => String(k).trim()).filter(Boolean);
-    }
-    if (typeof input === 'string') {
-        let keywords = [];
+        rawKeywords = input.map(k => String(k).trim()).filter(Boolean);
+    } else if (typeof input === 'string') {
         if (input.includes('|')) {
-            keywords = input.split('|');
+            rawKeywords = input.split('|');
         } else if (input.includes(',')) {
-            keywords = input.split(',');
+            rawKeywords = input.split(',');
         } else if (input.includes(';')) {
-            keywords = input.split(';');
+            rawKeywords = input.split(';');
         } else {
-            keywords = [input];
+            rawKeywords = [input];
         }
-        return keywords.map(k => k.trim()).filter(Boolean);
     }
-    return [];
+
+    // Split any keywords containing spaces into individual words
+    const keywords = [];
+    for (const kw of rawKeywords) {
+        const parts = kw.split(/\s+/).map(p => p.trim()).filter(Boolean);
+        keywords.push(...parts);
+    }
+    return keywords;
 };
 
 /**

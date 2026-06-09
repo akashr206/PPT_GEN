@@ -34,9 +34,10 @@ export const addPPTContent = async ({ ppt_id, title, author, theme, slides, tone
 export const initPPT = async ({ ppt_id, userId }) => {
     const { data, error } = await supabase
         .from("ppts")
-        .insert([
-            { id: ppt_id, user_id: userId, status: "GENERATING" }
-        ])
+        .upsert(
+            { id: ppt_id, user_id: userId, status: "GENERATING" },
+            { onConflict: 'id' }
+        )
     if (error) {
         throw error;
     }

@@ -40,15 +40,15 @@ To ensure high-quality decisions, your JSON output MUST start with a "_reasoning
 Example Structure:
 {
   "_reasoning": "The topic is a quarterly financial update, so the corporate theme fits best. I chose the 'split' title layout because its structured, balanced design suits analytical data better than the 'asymmetric' option.",
-  "title": "Quarterly Business Review",
   "theme": "corporate",
-  "slides_count": 3,
+  "title": "Quarterly Business Review",
   "author": "Akash R",
+  "slides_count": 3,
   "slides": [
     {
+      "layout": { "category": "title", "type": "split" },
       "title": "Q2 Business Performance",
       "subtitle": "Key metrics and strategic initiatives overview.",
-      "layout": { "category": "title", "type": "split" },
       "presenter": "Akash R",
       "company": "IOTA AI",
       "date": "June 2026"
