@@ -39,7 +39,7 @@ async function chat(systemPrompt, prompt) {
     return content;
 }
 
-async function chatStream(systemPrompt, prompt, onToken) {
+async function chatStream(systemPrompt, prompt, onToken, signal) {
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -62,7 +62,8 @@ async function chatStream(systemPrompt, prompt, onToken) {
             thinking: {
                 type: "disabled"
             }
-        })
+        }),
+        signal
     });
 
     if (!response.ok) {

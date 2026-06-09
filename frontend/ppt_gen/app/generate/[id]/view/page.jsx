@@ -41,7 +41,15 @@ export default function PPTSlidesViewerPage({ params }) {
 
     const searchParams = useSearchParams();
     const isGeneratingParam = searchParams?.get("generating") === "true";
-    const [isStreamGenerating, setIsStreamGenerating] = useState(isGeneratingParam);
+
+    // Detect if page was reloaded to prevent triggering new stream / generation on reload
+    const [isReloaded] = useState(() => {
+        if (typeof window === "undefined") return false;
+        const navigationEntries = window.performance?.getEntriesByType?.("navigation");
+        return navigationEntries && navigationEntries.length > 0 && navigationEntries[0].type === "reload";
+    });
+
+    const [isStreamGenerating, setIsStreamGenerating] = useState(isGeneratingParam && !isReloaded);
     const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX;
     
     // Undo / Redo history state
@@ -302,6 +310,29 @@ export default function PPTSlidesViewerPage({ params }) {
         document.addEventListener("fullscreenchange", handleFullscreenChange);
         return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
     }, []);
+
+    // Redirect reloads back to /generate (only if we were in generating mode)
+    useEffect(() => {
+        if (isReloaded && isGeneratingParam) {
+            router.replace("/generate");
+        }
+    }, [isReloaded, isGeneratingParam, router]);
+
+    // Handle warning before reload / tab close during generation
+    useEffect(() => {
+        if (!isStreamGenerating) return;
+
+        const handleBeforeUnload = (e) => {
+            e.preventDefault();
+            e.returnValue = "Reloading will abort the generation. Are you sure you want to leave?";
+            return e.returnValue;
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [isStreamGenerating]);
 
     useEffect(() => {
         if (isLayoutModalOpen) {
@@ -674,7 +705,7 @@ export default function PPTSlidesViewerPage({ params }) {
             active = false;
             abortController.abort();
         };
-    }, [pptId, isStreamGenerating, session]);
+    }, [pptId, isStreamGenerating, session?.accessToken]);
 
     // Debounced auto-save to backend database whenever pptData changes
     useEffect(() => {
@@ -937,7 +968,7 @@ export default function PPTSlidesViewerPage({ params }) {
 
         const generate = async () => {
             const toastId = toast.loading("Preparing slides for high-res PDF export...");
-            
+
             // Give browser time to render the hidden slides
             await new Promise((resolve) => setTimeout(resolve, 800));
 
@@ -1034,6 +1065,15 @@ export default function PPTSlidesViewerPage({ params }) {
                 <div className="w-full flex-1 md:flex-none flex flex-col items-center justify-center min-h-0 gap-3">
                     
                     <div className="w-full max-w-[1000px] flex justify-end gap-2 px-1">
+                        {isStreamGenerating && (
+                            <div className="mr-auto flex items-center gap-2 text-xs text-amber-500 font-medium px-3 py-1 rounded-lg">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                </span>
+                                <span>AI is generating. Please do not reload or close this tab.</span>
+                            </div>
+                        )}
                         <button
                             onClick={handleUndo}
                             disabled={past.length === 0 || isBusy}
@@ -1108,6 +1148,7 @@ export default function PPTSlidesViewerPage({ params }) {
                                     <div className="flex flex-col gap-1">
                                         <p className="text-sm font-semibold text-neutral-200">Generating presentation...</p>
                                         <p className="text-xs text-neutral-500 max-w-sm">AI is creating and styling slides. This will take a few moments.</p>
+                                        <p className="text-xs text-amber-500 font-medium mt-2">Please do not reload or close this tab while generation is in progress.</p>
                                     </div>
                                 </div>
                             ) : (

@@ -74,6 +74,8 @@ const getPartialSlides = (accumulatedText) => {
     return [];
 };
 
+const activeGenerations = new Map(); // ppt_id -> { abortController, res }
+
 export const streamPPT = async (req, res) => {
     const { ppt_id } = req.params;
     const { prompt, tone, slidesCount, layoutStyle } = req.query;
@@ -82,12 +84,32 @@ export const streamPPT = async (req, res) => {
         return sendError(res, "Required query parameters (prompt, tone, slidesCount) are missing", null, 400);
     }
 
+    // Abort existing running generation for the same ppt_id (handles React StrictMode / reconnections)
+    if (activeGenerations.has(ppt_id)) {
+        console.log(`[Stream] Aborting existing active generation for PPT: ${ppt_id}`);
+        const existing = activeGenerations.get(ppt_id);
+        existing.abortController.abort();
+        activeGenerations.delete(ppt_id);
+    }
+
+    const abortController = new AbortController();
+    activeGenerations.set(ppt_id, { abortController, res });
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
     let accumulatedText = "";
+
+    // Set up request close event listener to clean up if client disconnects
+    req.on('close', () => {
+        const current = activeGenerations.get(ppt_id);
+        if (current && current.res === res) {
+            console.log(`[Stream] Client closed connection for PPT: ${ppt_id}. Aborting stream.`);
+            abortController.abort();
+        }
+    });
 
     try {
         try {
@@ -100,11 +122,12 @@ export const streamPPT = async (req, res) => {
         const newSysPrompt = pptSystemPrompt +
             `\nStrictly output exactly ${slidesCount} slides. Do not generate more or fewer slides under any circumstance.`;
 
+        // Pass the abort signal to chatStream
         await chatStream(newSysPrompt, fullPrompt, (token) => {
             accumulatedText += token;
             const partialSlides = getPartialSlides(accumulatedText);
             res.write(`data: ${JSON.stringify({ slides: partialSlides })}\n\n`);
-        });
+        }, abortController.signal);
 
         const completedResponse = parseLLMJson(accumulatedText);
 
@@ -119,17 +142,46 @@ export const streamPPT = async (req, res) => {
 
         res.write('event: complete\ndata: {"status": "SUCCESS"}\n\n');
         res.end();
+
+        // Success cleanup
+        const current = activeGenerations.get(ppt_id);
+        if (current && current.res === res) {
+            activeGenerations.delete(ppt_id);
+        }
     } catch (error) {
         console.error(`Streaming PPT ${ppt_id} generation failed:`, error);
         
-        try {
-            await updateStatus({ ppt_id, status: "FAILED" });
-        } catch (dbError) {
-            console.error("Failed to update PPT status to FAILED in DB:", dbError);
+        // Handle AbortError vs other errors
+        if (error.name === 'AbortError') {
+            console.log(`[Stream] PPT ${ppt_id} stream was aborted.`);
+            // Only update DB status to FAILED if this is still the active generation (no new request took over)
+            const current = activeGenerations.get(ppt_id);
+            if (current && current.res === res) {
+                try {
+                    await updateStatus({ ppt_id, status: "FAILED" });
+                } catch (dbError) {
+                    console.error("Failed to update PPT status to FAILED in DB:", dbError);
+                }
+                activeGenerations.delete(ppt_id);
+            }
+        } else {
+            // Standard error
+            try {
+                await updateStatus({ ppt_id, status: "FAILED" });
+            } catch (dbError) {
+                console.error("Failed to update PPT status to FAILED in DB:", dbError);
+            }
+            // Clear from activeGenerations
+            const current = activeGenerations.get(ppt_id);
+            if (current && current.res === res) {
+                activeGenerations.delete(ppt_id);
+            }
         }
 
-        res.write(`event: error\ndata: ${JSON.stringify({ message: error.message || "Generation failed" })}\n\n`);
-        res.end();
+        if (!res.writableEnded) {
+            res.write(`event: error\ndata: ${JSON.stringify({ message: error.message || "Generation failed" })}\n\n`);
+            res.end();
+        }
     }
 };
 
