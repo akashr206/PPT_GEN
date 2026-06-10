@@ -150,6 +150,115 @@ export function rgbToHex(rgbStr) {
 }
 
 /**
+ * Parses rgb(...), rgba(...), lab(...), lch(...), or #hex color strings.
+ * Returns an object with { hex, alpha } or null if transparent.
+ * 
+ * @param {string} colorStr 
+ * @returns {object|null} { hex: string, alpha: number } or null
+ */
+export function parseColor(colorStr) {
+  if (!colorStr) return null;
+  const cleanStr = colorStr.trim().toLowerCase();
+  
+  if (cleanStr === 'transparent' || cleanStr === 'rgba(0, 0, 0, 0)' || cleanStr === 'none') {
+    return null;
+  }
+
+  // Handle CSS Color Level 4 lab(L a b [/ alpha])
+  const labMatch = cleanStr.match(/^lab\(([\d.-]+%?)\s+([\d.-]+)\s+([\d.-]+)(?:\s*\/\s*([\d.-]+%?))?\)$/);
+  if (labMatch) {
+    const l = parseFloat(labMatch[1]);
+    const a = parseFloat(labMatch[2]);
+    const b = parseFloat(labMatch[3]);
+    const alpha = labMatch[4] !== undefined 
+      ? (labMatch[4].endsWith('%') ? parseFloat(labMatch[4]) / 100 : parseFloat(labMatch[4])) 
+      : 1.0;
+
+    if (alpha === 0) return null;
+
+    const rgb = labToRgb(l, a, b);
+
+    const toHexStr = (c) => {
+      const h = c.toString(16).toUpperCase();
+      return h.length === 1 ? '0' + h : h;
+    };
+
+    return {
+      hex: toHexStr(rgb.r) + toHexStr(rgb.g) + toHexStr(rgb.b),
+      alpha: alpha
+    };
+  }
+
+  // Handle CSS Color Level 4 lch(L C H [/ alpha])
+  const lchMatch = cleanStr.match(/^lch\(([\d.-]+%?)\s+([\d.-]+)\s+([\d.-]+)(?:\s*\/\s*([\d.-]+%?))?\)$/);
+  if (lchMatch) {
+    const l = parseFloat(lchMatch[1]);
+    const c = parseFloat(lchMatch[2]);
+    const h = parseFloat(lchMatch[3]);
+    const alpha = lchMatch[4] !== undefined 
+      ? (lchMatch[4].endsWith('%') ? parseFloat(lchMatch[4]) / 100 : parseFloat(lchMatch[4])) 
+      : 1.0;
+
+    if (alpha === 0) return null;
+
+    // Convert LCH to LAB coordinates
+    const hueRad = h * Math.PI / 180;
+    const a = c * Math.cos(hueRad);
+    const b = c * Math.sin(hueRad);
+
+    const rgb = labToRgb(l, a, b);
+
+    const toHexStr = (c) => {
+      const h = c.toString(16).toUpperCase();
+      return h.length === 1 ? '0' + h : h;
+    };
+
+    return {
+      hex: toHexStr(rgb.r) + toHexStr(rgb.g) + toHexStr(rgb.b),
+      alpha: alpha
+    };
+  }
+
+  const match = cleanStr.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/);
+  if (!match) {
+    if (cleanStr.startsWith('#')) {
+      let hex = cleanStr.substring(1).toUpperCase();
+      let alpha = 1.0;
+      if (hex.length === 3) {
+        hex = hex.split('').map(char => char + char).join('');
+      } else if (hex.length === 4) {
+        const parts = hex.split('');
+        hex = parts.slice(0, 3).map(char => char + char).join('');
+        alpha = parseInt(parts[3] + parts[3], 16) / 255;
+      } else if (hex.length === 8) {
+        alpha = parseInt(hex.substring(6, 8), 16) / 255;
+        hex = hex.substring(0, 6);
+      }
+      return { hex, alpha };
+    }
+    return null;
+  }
+
+  const r = parseInt(match[1], 10);
+  const g = parseInt(match[2], 10);
+  const b = parseInt(match[3], 10);
+  const a = match[4] !== undefined ? parseFloat(match[4]) : 1.0;
+
+  if (a === 0) return null;
+
+  const toHexStr = (c) => {
+    const h = c.toString(16).toUpperCase();
+    return h.length === 1 ? '0' + h : h;
+  };
+
+  return {
+    hex: toHexStr(r) + toHexStr(g) + toHexStr(b),
+    alpha: a
+  };
+}
+
+
+/**
  * Parses a CSS box-shadow string and approximates it as a PowerPoint shadow configuration.
  * 
  * @param {string} shadowStr 

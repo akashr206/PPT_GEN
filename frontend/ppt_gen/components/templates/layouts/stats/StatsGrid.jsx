@@ -47,7 +47,7 @@ const StatsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
 
     return (
         <div
-            className={`grid ${gridCols} ${gapClass} max-w-[95cqw] mx-auto my-[2cqw] items-stretch text-center`}
+            className={`grid ${gridCols} ${gapClass} max-w-[95cqw] h-full justify-center items-center text-center`}
         >
             {content.map((ele, i) => (
                 <div key={i} className="flex flex-col items-center relative group/item">

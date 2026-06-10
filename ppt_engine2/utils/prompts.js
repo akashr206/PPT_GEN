@@ -18,13 +18,13 @@ CONTENT RULES
 2. Maintain logical flow from introduction to conclusion.
 3. Vary content density across slides naturally.
 4. Avoid repeating the same wording, structure, or phrasing across slides.
+5. Always return an even number of items unless a specific count is requested by the user or a parity requirement is defined in the metadata.
 
 THEME & LAYOUT SELECTION RULES (CRITICAL)
 1. Match the Vibe: Select themes and layouts that perfectly match the emotional tone and subject matter. Do NOT default to the first item in the metadata lists.
 2. Title Slide Variety: Carefully read the descriptions of the title layouts. Choose the one that best fits the specific topic (e.g., choose a creative layout for a design topic, or a structured layout for a corporate report).
 3. Layout Diversity: Do not repeat the same layout category and type combination on consecutive slides.
 4. Natural Fit: Only use layouts that naturally accommodate the content you are writing.
-
 
 
 OUTPUT REQUIREMENTS

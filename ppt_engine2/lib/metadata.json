@@ -105,36 +105,141 @@
                 }
             ]
         },
-        "bullets": {
-            "name": "Bullet Points",
-            "description": "Standard lists or grids containing multiple sequential headers and descriptions.",
+        "agenda": {
+            "name": "Agenda & Table of Contents",
+            "description": "Layouts designed for outlining the sections or topics of a presentation.",
             "fields": ["title", "subtitle", "items"],
             "itemFields": ["header", "description"],
             "types": [
                 {
-                    "id": "standard",
-                    "name": "Standard List",
-                    "description": "A classic vertical list of items, splitting into a 2-column layout when there are more than 4 items. Best for general text outlines, comprehensive summaries, and lists of detailed takeaways that require structured hierarchy without visual clutter."
+                    "id": "split",
+                    "name": "Split Agenda",
+                    "description": "A split layout featuring a prominent left-side title block and a vertical list of numbered topics on the right. Best for structuring presentation roadmaps."
                 },
                 {
-                    "id": "big",
-                    "name": "Big Bullets",
-                    "description": "Bold text bullets with larger typography for emphasizing key points. Best for high-impact key takeaways, core values, or brief statements where each item needs to stand out individually and grab immediate attention."
+                    "id": "cards",
+                    "name": "Agenda Grid Cards",
+                    "description": "A grid of structured cards representing presentation chapters. Best for detailed agendas with brief outlines of each topic."
                 },
                 {
-                    "id": "grid",
-                    "name": "Bullets Grid",
-                    "description": "A structured grid of bullet items with headers and descriptions. Best for comparisons, product feature breakdowns, or scanning multiple parallel points at a glance without reading sequentially."
-                },
-                {
-                    "id": "numbered",
-                    "name": "Numbered List",
-                    "description": "A vertical list of items with giant index numbers and a primary accent bar. Best for step-by-step guides, procedural instructions, rankings, and linear sequences where the order of items is critical."
+                    "id": "list",
+                    "name": "Agenda Timeline List",
+                    "description": "An elegant vertical timeline list with a connecting line and large chapter badges. Best for chronological outlines."
                 }
             ],
             "constraints": {
                 "maxItems": 8,
                 "recommendedItems": "3 to 6"
+            }
+        },
+        "icons": {
+            "name": "Icon Layouts",
+            "description": "Visual layouts featuring prominent icons to represent concepts.",
+            "fields": ["title", "subtitle", "items"],
+            "itemFields": ["header", "description", "iconKeywords"],
+            "types": [
+                {
+                    "id": "grid",
+                    "name": "Icons Grid",
+                    "description": "A structured grid of items prominently featuring a large icon for each. Best for visualizing abstract features, key service pillars, or high-level business capabilities using thematic visual metaphors."
+                }
+            ],
+            "constraints": {
+                "maxItems": 8,
+                "recommendedItems": "3 to 6",
+                "other": "iconKeywords field is an array of strings for icon search or generation (3 - 4) keywords"
+            }
+        },
+        "images": {
+            "name": "Image Layouts",
+            "description": "Visual layouts incorporating prominent images as central elements.",
+            "fields": ["title", "subtitle", "image", "items"],
+            "itemFields": ["header", "description", "imageDescription"],
+            "types": [
+                {
+                    "id": "split",
+                    "name": "Image Split",
+                    "description": "A customizable 50/50 split section layout with toggleable left/right image alignment and multiple listing styles (Cards, Plain, Accent, Bullet, Numbered). Best for product spotlight slides, company story introductions, or matching an illustrative image with a list of points."
+                },
+                {
+                    "id": "grid",
+                    "name": "Image Grid",
+                    "description": "A grid of cards where each item features its own image. Best for team bio slides, product gallery showcasing, case study grids, or visual portfolios where every item requires its own visual representation."
+                }
+            ],
+            "constraints": {
+                "maxItems": 6,
+                "recommendedItems": "2 to 4",
+                "other": "imageDescription field is a string for image search or generation"
+            }
+        },
+        "stats": {
+            "name": "Key Metrics & Statistics",
+            "description": "Large text indicators highlighting critical figures or metrics.",
+            "fields": ["title", "subtitle", "items"],
+            "itemFields": ["header", "description"],
+            "types": [
+                {
+                    "id": "grid",
+                    "name": "Stats Grid",
+                    "description": "Grid display of big numbers and their descriptions. Automatically switches layout configurations depending on item count. Best for dashboard summaries, quarterly reports, and showing multiple performance KPIs at once."
+                },
+                {
+                    "id": "callout",
+                    "name": "Large Stat Callout",
+                    "description": "Emphasizes a single massive key metric with a detailed text callout description. Best for highlighting a single monumental breakthrough metric, such as total sales revenue, user milestones, or key survey percentages."
+                }
+            ],
+            "constraints": {
+                "maxItems": 6,
+                "recommendedItems": "2 to 5"
+            }
+        },
+        "table": {
+            "name": "Tables & Comparisons",
+            "description": "Layouts designed for showing structured comparison or data tables with flexible columns and rows.",
+            "fields": ["title", "subtitle", "items"],
+            "itemFields": ["header", "description", "cells"],
+            "types": [
+                {
+                    "id": "striped",
+                    "name": "Striped Rows",
+                    "description": "A table layout with alternating colored row backgrounds, a solid primary accent header row, and flexible columns. The first row in items represents the column headers (e.g., items[0].cells). Subsequent items are table body rows. Each cell is an element in the item's cells array. Best for feature comparison matrices, pricing plans, and data logs."
+                },
+                {
+                    "id": "bordered",
+                    "name": "Bordered Grid",
+                    "description": "A table layout with clean borders around every cell and a card-colored header row. The first row in items represents the column headers (e.g., items[0].cells). Subsequent items are table body rows. Each cell is an element in the item's cells array. Best for structured checklists, specification grids, and tabular metrics."
+                }
+            ],
+            "constraints": {
+                "maxItems": 8,
+                "recommendedItems": "3 to 6",
+                "other": "Each row is represented by an item in the items array. The columns/cells for that row are stored in the item's 'cells' array of strings. The first item in the items array (items[0]) represents the table headers. When generating, ensure all items in the items array contain the same number of elements in their cells array (e.g., cells.length matches column count)."
+            }
+        },
+
+        "timelines": {
+            "name": "Timelines",
+            "description": "Display events, steps, or progression sequences chronologically.",
+            "fields": ["title", "subtitle", "items"],
+            "itemFields": ["header", "description", "iconKeywords"],
+            "types": [
+                {
+                    "id": "horizontal",
+                    "name": "Horizontal Curved Timeline",
+                    "description": "Steps placed horizontally on a curve line, scaling from 2 to 6 items. Best for detailing chronological project roadmaps, historical progression steps, and multi-phase release plans. (odd number of items is preffered)"
+                },
+                {
+                    "id": "chevron",
+                    "name": "Horizontal Chevron Timeline",
+                    "description": "A horizontal timeline using chevron boxes and alternating top/bottom circle icons and description boxes."
+                }
+            ],
+            "constraints": {
+                "maxItems": 10,
+                "recommendedItems": "3 to 6",
+                "other": "iconKeywords field is an array of strings for icon search or generation (3 - 4 keywords) and is only required for the chevron timeline layout."
             }
         },
         "cards": {
@@ -169,110 +274,36 @@
                 "recommendedItems": "2 to 6"
             }
         },
-        "stats": {
-            "name": "Key Metrics & Statistics",
-            "description": "Large text indicators highlighting critical figures or metrics.",
+        "bullets": {
+            "name": "Bullet Points",
+            "description": "Standard lists or grids containing multiple sequential headers and descriptions.",
             "fields": ["title", "subtitle", "items"],
             "itemFields": ["header", "description"],
             "types": [
                 {
-                    "id": "grid",
-                    "name": "Stats Grid",
-                    "description": "Grid display of big numbers and their descriptions. Automatically switches layout configurations depending on item count. Best for dashboard summaries, quarterly reports, and showing multiple performance KPIs at once."
+                    "id": "standard",
+                    "name": "Standard List",
+                    "description": "A classic vertical list of items, splitting into a 2-column layout when there are more than 4 items. Best for general text outlines, comprehensive summaries, and lists of detailed takeaways that require structured hierarchy without visual clutter."
                 },
                 {
-                    "id": "row",
-                    "name": "Stats Row",
-                    "description": "A single row/column layout displaying statistics side-by-side or stacked. Best for comparative growth rates, side-by-side year-over-year metrics, or short sequential statistics."
+                    "id": "big",
+                    "name": "Big Bullets",
+                    "description": "Bold text bullets with larger typography for emphasizing key points. Best for high-impact key takeaways, core values, or brief statements where each item needs to stand out individually and grab immediate attention."
                 },
-                {
-                    "id": "callout",
-                    "name": "Large Stat Callout",
-                    "description": "Emphasizes a single massive key metric with a detailed text callout description. Best for highlighting a single monumental breakthrough metric, such as total sales revenue, user milestones, or key survey percentages."
-                }
-            ],
-            "constraints": {
-                "maxItems": 6,
-                "recommendedItems": "2 to 5"
-            }
-        },
-        "timelines": {
-            "name": "Timelines",
-            "description": "Display events, steps, or progression sequences chronologically.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description"],
-            "types": [
-                {
-                    "id": "horizontal",
-                    "name": "Horizontal Curved Timeline",
-                    "description": "Steps placed horizontally on a curve line, scaling from 2 to 6 items. Best for detailing chronological project roadmaps, historical progression steps, and multi-phase release plans stretching from left to right."
-                },
-                {
-                    "id": "vertical",
-                    "name": "Vertical Timeline",
-                    "description": "A layout displaying chronological steps connected along a vertical timeline line with circle nodes. Best for mobile-friendly presentations, scrolling timelines, meeting agendas, and historical company histories containing vertical flow."
-                },
-                {
-                    "id": "alternating",
-                    "name": "Alternating Timeline",
-                    "description": "Steps arranged in an alternating left-to-right zigzag fashion along a central axis. Best for dynamic storytelling, company histories, and product evolution narratives where you want to split content visually to make it highly engaging."
-                }
-            ],
-            "constraints": {
-                "maxItems": 6,
-                "recommendedItems": "3 to 5",
-                "other": "Odd number of points is preferred for horizontal curved timeline."
-            }
-        },
-        "icons": {
-            "name": "Icon Layouts",
-            "description": "Visual layouts featuring prominent icons to represent concepts.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description", "iconKeywords"],
-            "types": [
                 {
                     "id": "grid",
-                    "name": "Icons Grid",
-                    "description": "A structured grid of items prominently featuring a large icon for each. Best for visualizing abstract features, key service pillars, or high-level business capabilities using thematic visual metaphors."
+                    "name": "Bullets Grid",
+                    "description": "A structured grid of bullet items with headers and descriptions. Best for comparisons, product feature breakdowns, or scanning multiple parallel points at a glance without reading sequentially."
                 },
                 {
-                    "id": "row",
-                    "name": "Icons Row",
-                    "description": "A horizontal row of items with icons centered above the text. Best for displaying team roles, sequential steps, or parallel feature lists where a clean, symmetric row layout with icon indicators is desired."
-                },
-                {
-                    "id": "list",
-                    "name": "Icons List",
-                    "description": "A vertical list of items with icons aligned to the left of the text. Best for feature lists with long descriptions, resource links, or agendas where the icons act as clear bullet-point markers."
+                    "id": "numbered",
+                    "name": "Numbered List",
+                    "description": "A vertical list of items with giant index numbers and a primary accent bar. Best for step-by-step guides, procedural instructions, rankings, and linear sequences where the order of items is critical."
                 }
             ],
             "constraints": {
                 "maxItems": 8,
-                "recommendedItems": "3 to 6",
-                "other": "iconKeywords field is an array each of its elements are single keyword string for icon search or generation (3 - 4) keywords"
-            }
-        },
-        "images": {
-            "name": "Image Layouts",
-            "description": "Visual layouts incorporating prominent images as central elements.",
-            "fields": ["title", "subtitle", "image", "items"],
-            "itemFields": ["header", "description", "imageDescription"],
-            "types": [
-                {
-                    "id": "split",
-                    "name": "Image Split",
-                    "description": "A customizable 50/50 split section layout with toggleable left/right image alignment and multiple listing styles (Cards, Plain, Accent, Bullet, Numbered). Best for product spotlight slides, company story introductions, or matching an illustrative image with a list of points."
-                },
-                {
-                    "id": "grid",
-                    "name": "Image Grid",
-                    "description": "A grid of cards where each item features its own image. Best for team bio slides, product gallery showcasing, case study grids, or visual portfolios where every item requires its own visual representation."
-                }
-            ],
-            "constraints": {
-                "maxItems": 6,
-                "recommendedItems": "2 to 4",
-                "other": "imageDescription field is a string for image search or generation, keep it concise (less than 150 chars)"
+                "recommendedItems": "3 to 6"
             }
         },
         "closing": {

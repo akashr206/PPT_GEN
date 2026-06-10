@@ -10,6 +10,20 @@ export function EditableElement({
     placeholder = "Type here...",
     readOnly = false,
 }) {
+    const contentRef = useRef(null);
+    const prevValue = useRef(value);
+
+    // Update innerText if value changes externally
+    useEffect(() => {
+        if (!readOnly && contentRef.current && value !== prevValue.current) {
+            // Only update if it's not currently focused to avoid messing with cursor position
+            if (document.activeElement !== contentRef.current) {
+                contentRef.current.innerText = value || "";
+            }
+            prevValue.current = value;
+        }
+    }, [value, readOnly]);
+
     if (readOnly) {
         return (
             <Component 
@@ -24,20 +38,6 @@ export function EditableElement({
             </Component>
         );
     }
-
-    const contentRef = useRef(null);
-    const prevValue = useRef(value);
-
-    // Update innerText if value changes externally
-    useEffect(() => {
-        if (contentRef.current && value !== prevValue.current) {
-            // Only update if it's not currently focused to avoid messing with cursor position
-            if (document.activeElement !== contentRef.current) {
-                contentRef.current.innerText = value || "";
-            }
-            prevValue.current = value;
-        }
-    }, [value]);
 
     const handleBlur = (e) => {
         const newValue = e.currentTarget.innerText;

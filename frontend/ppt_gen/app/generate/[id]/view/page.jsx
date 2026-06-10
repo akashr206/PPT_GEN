@@ -3,22 +3,18 @@
 import React, { useState, useEffect, use, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Loader2, Layout, Check, Plus, ChevronLeft, ChevronRight, Undo, Redo } from "lucide-react";
+import { Loader2, Layout, Plus, ChevronLeft, ChevronRight, Undo, Redo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 import Slide from "@/components/templates/Slide";
-import metadata from "@/components/templates/metadata.json";
 import { toast } from "sonner";
 import { extractSlideData } from "@/utils/extractor";
 import api from "@/lib/api";
+
+import ImageSidebar from "./components/ImageSidebar";
+import LayoutSelectorModal from "./components/LayoutSelectorModal";
+import SlideThumbnails from "./components/SlideThumbnails";
 
 const CURSOR_LEFT = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none'><path d='M19 12H5M12 19l-7-7 7-7' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M19 12H5M12 19l-7-7 7-7' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") 16 16, w-resize`;
 const CURSOR_RIGHT = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none'><path d='M5 12h14M12 5l7 7-7 7' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M5 12h14M12 5l7 7-7 7' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") 16 16, e-resize`;
@@ -37,7 +33,6 @@ export default function PPTSlidesViewerPage({ params }) {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [isExtractingPPTX, setIsExtractingPPTX] = useState(false);
-    const [shouldRenderLayouts, setShouldRenderLayouts] = useState(false);
 
     const searchParams = useSearchParams();
     const isGeneratingParam = searchParams?.get("generating") === "true";
@@ -87,9 +82,6 @@ export default function PPTSlidesViewerPage({ params }) {
     // Sidebar image editor states
     const [isImageSidebarOpen, setIsImageSidebarOpen] = useState(false);
     const [imageEditContext, setImageEditContext] = useState(null);
-    const [sidebarSearchQuery, setSidebarSearchQuery] = useState("");
-    const [sidebarSearchResults, setSidebarSearchResults] = useState([]);
-    const [isSidebarSearching, setIsSidebarSearching] = useState(false);
 
     const fetchImage = useCallback(async (key, query) => {
         setImageLoading((prev) => ({ ...prev, [key]: true }));
@@ -178,46 +170,12 @@ export default function PPTSlidesViewerPage({ params }) {
         return resolved;
     }, [fetchedImages, imageLoading]);
 
-    const handleSidebarSearch = useCallback(async (query) => {
-        if (!query || query.trim() === "") {
-            setSidebarSearchResults([]);
-            return;
-        }
-        setIsSidebarSearching(true);
-        try {
-            const res = await api.get(`/api/ppt/images/search`, {
-                params: { q: query }
-            });
-            if (res?.success && res.data) {
-                setSidebarSearchResults(res.data);
-            } else {
-                setSidebarSearchResults([]);
-            }
-        } catch (err) {
-            console.error("Failed to search images for sidebar:", err);
-            setSidebarSearchResults([]);
-            toast.error("Failed to load images from Pexels.");
-        } finally {
-            setIsSidebarSearching(false);
-        }
-    }, []);
-
     const handleEditImage = useCallback((context) => {
         setImageEditContext(context);
-        
-        const isUrl = context.currentQuery && (context.currentQuery.startsWith("http://") || context.currentQuery.startsWith("https://"));
-        const initialQuery = isUrl ? "" : (context.currentQuery || "");
-        setSidebarSearchQuery(initialQuery);
-        
         setIsImageSidebarOpen(true);
-        setSidebarSearchResults([]);
-        
-        if (initialQuery) {
-            handleSidebarSearch(initialQuery);
-        }
-    }, [handleSidebarSearch]);
+    }, []);
 
-    const handleSelectSidebarImage = useCallback((imageUrl) => {
+    const handleSelectSidebarImage = useCallback((imageUrl, queryStr) => {
         if (!imageEditContext || !editableSlides || !editableSlides[activeSlideIndex]) return;
         
         const updatedSlides = [...editableSlides];
@@ -225,14 +183,14 @@ export default function PPTSlidesViewerPage({ params }) {
         
         if (imageEditContext.type === "slide") {
             slide.image = imageUrl;
-            slide.imageDescription = sidebarSearchQuery;
+            slide.imageDescription = queryStr;
         } else if (imageEditContext.type === "item" && imageEditContext.itemIndex !== undefined) {
             const itemIndex = imageEditContext.itemIndex;
             if (slide.items && slide.items[itemIndex]) {
                 slide.items[itemIndex] = {
                     ...slide.items[itemIndex],
                     image: imageUrl,
-                    imageDescription: sidebarSearchQuery
+                    imageDescription: queryStr
                 };
             }
         }
@@ -245,62 +203,9 @@ export default function PPTSlidesViewerPage({ params }) {
         
         updateSlidesState(updatedSlides);
         toast.success("Image updated successfully");
-    }, [imageEditContext, editableSlides, activeSlideIndex, sidebarSearchQuery]);
+    }, [imageEditContext, editableSlides, activeSlideIndex]);
     
-    const slideRefs = useRef([]);
     const presentationRef = useRef(null);
-    const previewScrollRef = useRef(null);
-
-    useEffect(() => {
-        const el = previewScrollRef.current;
-        if (!el) return;
-
-        let animationFrameId = null;
-        let targetScrollLeft = el.scrollLeft;
-
-        const interpolateScroll = () => {
-            const current = el.scrollLeft;
-            const diff = targetScrollLeft - current;
-            
-            if (Math.abs(diff) < 0.5) {
-                el.scrollLeft = targetScrollLeft;
-                animationFrameId = null;
-            } else {
-                el.scrollLeft = current + diff * 0.15;
-                animationFrameId = requestAnimationFrame(interpolateScroll);
-            }
-        };
-
-        const handleWheel = (e) => {
-            const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-            if (delta !== 0) {
-                e.preventDefault();
-                const maxScrollLeft = el.scrollWidth - el.clientWidth;
-                targetScrollLeft = Math.max(0, Math.min(targetScrollLeft + delta, maxScrollLeft));
-                
-                if (animationFrameId === null) {
-                    animationFrameId = requestAnimationFrame(interpolateScroll);
-                }
-            }
-        };
-
-        const handleScroll = () => {
-            if (animationFrameId === null) {
-                targetScrollLeft = el.scrollLeft;
-            }
-        };
-
-        el.addEventListener("wheel", handleWheel, { passive: false });
-        el.addEventListener("scroll", handleScroll);
-
-        return () => {
-            el.removeEventListener("wheel", handleWheel);
-            el.removeEventListener("scroll", handleScroll);
-            if (animationFrameId !== null) {
-                cancelAnimationFrame(animationFrameId);
-            }
-        };
-    }, [isLoading]);
 
 
     useEffect(() => {
@@ -334,16 +239,7 @@ export default function PPTSlidesViewerPage({ params }) {
         };
     }, [isStreamGenerating]);
 
-    useEffect(() => {
-        if (isLayoutModalOpen) {
-            const timer = setTimeout(() => {
-                setShouldRenderLayouts(true);
-            }, 300);
-            return () => clearTimeout(timer);
-        } else {
-            setShouldRenderLayouts((prev) => (prev ? false : prev));
-        }
-    }, [isLayoutModalOpen]);
+
 
     const handlePresent = useCallback(async () => {
         if (presentationRef.current) {
@@ -781,9 +677,12 @@ export default function PPTSlidesViewerPage({ params }) {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
         
         const updatedSlides = [...editableSlides];
-        updatedSlides[activeSlideIndex].layout = {
-            category: category,
-            type: type
+        updatedSlides[activeSlideIndex] = {
+            ...updatedSlides[activeSlideIndex],
+            layout: {
+                category: category,
+                type: type
+            }
         };
         
         updateSlidesState(updatedSlides);
@@ -841,7 +740,6 @@ export default function PPTSlidesViewerPage({ params }) {
         };
         
         updateSlidesState(updatedSlides);
-        toast.success("Item added");
     };
 
     const handleAddItemAtIndex = (itemIndex, direction) => {
@@ -866,7 +764,6 @@ export default function PPTSlidesViewerPage({ params }) {
         };
         
         updateSlidesState(updatedSlides);
-        toast.success(`Point added ${direction}`);
     };
 
     const handleDeleteItem = (itemIndex) => {
@@ -884,7 +781,6 @@ export default function PPTSlidesViewerPage({ params }) {
         };
         
         updateSlidesState(updatedSlides);
-        toast.success("Item deleted");
     };
 
     // Synchronize information with the header/navbar
@@ -1195,233 +1091,40 @@ export default function PPTSlidesViewerPage({ params }) {
                 </div>
 
                 {/* Previews */}
-                <div 
-                    ref={previewScrollRef}
-                    className="mt-4 md:mt-6 w-full max-w-[1000px] shrink-0 overflow-x-auto flex gap-4 py-2 px-1 scrollbar-thin scrollbar-thumb-muted justify-start"
-                >
-                    {editableSlides.map((slide, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => !isBusy && setActiveSlideIndex(idx)}
-                            disabled={isBusy}
-                            className={`relative flex w-[120px] aspect-video rounded-lg overflow-hidden border-2 text-left shrink-0 transition-all ${
-                                activeSlideIndex === idx
-                                    ? "border-primary ring-2 ring-primary/20 shadow-md"
-                                    : "border-border hover:border-muted-foreground/30 opacity-70 hover:opacity-100"
-                            } ${isBusy ? "cursor-not-allowed opacity-50" : ""}`}
-                        >
-                            <div
-                                ref={(el) => {
-                                    slideRefs.current[idx] = el;
-                                }}
-                                className="w-full h-full pointer-events-none select-none"
-                            >
-                                <Slide
-                                    slide_content={{
-                                        ...resolveSlideContent(slide, idx),
-                                        theme: pptData?.theme || "sunset",
-                                    }}
-                                />
-                            </div>
-                            <div className="absolute bottom-1 right-1.5 bg-black/60 backdrop-blur-xs text-[9px] font-bold text-white px-1.5 py-0.5 rounded-md">
-                                {idx + 1}
-                            </div>
-                        </button>
-                    ))}
-                </div>
+                <SlideThumbnails
+                    editableSlides={editableSlides}
+                    activeSlideIndex={activeSlideIndex}
+                    setActiveSlideIndex={setActiveSlideIndex}
+                    isBusy={isBusy}
+                    theme={pptData?.theme || "sunset"}
+                    resolveSlideContent={resolveSlideContent}
+                />
             </div>
         </div>
 
             {/* Right Panel: Sidebar Image Editor */}
-            {isImageSidebarOpen && !isBusy && (
-                <div className="w-[360px] md:w-[400px] border-l border-border bg-card flex flex-col shrink-0 animate-in slide-in-from-right duration-200">
-                    {/* Sidebar Header */}
-                    <div className="p-4 border-b border-border flex items-center justify-between shrink-0 bg-secondary/25">
-                        <div className="flex flex-col">
-                            <h3 className="font-bold text-sm">Edit Slide Image</h3>
-                            <span className="text-[10px] text-muted-foreground">Select an image from Pexels</span>
-                        </div>
-                        <button
-                            onClick={() => {
-                                setIsImageSidebarOpen(false);
-                                setImageEditContext(null);
-                            }}
-                            className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-secondary border border-border/50 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-                        >
-                            Close
-                        </button>
-                    </div>
-
-                    {/* Search Bar & Credits */}
-                    <div className="p-4 border-b border-border shrink-0 flex flex-col gap-2">
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                handleSidebarSearch(sidebarSearchQuery);
-                            }}
-                            className="flex gap-2"
-                        >
-                            <input
-                                type="text"
-                                value={sidebarSearchQuery}
-                                onChange={(e) => setSidebarSearchQuery(e.target.value)}
-                                placeholder="Search Pexels..."
-                                className="flex-grow p-2 border border-border rounded-md text-xs bg-background"
-                            />
-                            <button
-                                type="submit"
-                                disabled={isSidebarSearching}
-                                className="px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold cursor-pointer disabled:opacity-50 hover:bg-primary/95 transition-colors"
-                            >
-                                {isSidebarSearching ? "..." : "Search"}
-                            </button>
-                        </form>
-                        
-                        <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-                            <span>Photos provided by</span>
-                            <a
-                                href="https://www.pexels.com/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-500 hover:underline inline-flex items-center gap-0.5 font-semibold"
-                            >
-                                Pexels
-                            </a>
-                        </div>
-                    </div>
-
-                    {/* Grid of Search Results */}
-                    <div className="flex-grow overflow-y-auto p-4">
-                        {isSidebarSearching ? (
-                            <div className="grid grid-cols-2 gap-3">
-                                {Array.from({ length: 6 }).map((_, i) => (
-                                    <div key={i} className="aspect-[16/9] rounded-lg skeleton-sweep border border-border/50" />
-                                ))}
-                            </div>
-                        ) : sidebarSearchResults.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-3">
-                                {sidebarSearchResults.map((img, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handleSelectSidebarImage(img.imageURL)}
-                                        className="relative aspect-[16/9] rounded-lg overflow-hidden border border-border hover:border-blue-500 shadow-sm cursor-pointer group bg-muted transition-colors"
-                                    >
-                                        <img
-                                            src={img.previewURL}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                            alt="Search result"
-                                        />
-                                    </button>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                                <span className="text-xs text-muted-foreground">No images found. Try a different query.</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
+            <ImageSidebar
+                isOpen={isImageSidebarOpen}
+                isBusy={isBusy}
+                imageEditContext={imageEditContext}
+                onSelectImage={handleSelectSidebarImage}
+                onClose={() => {
+                    setIsImageSidebarOpen(false);
+                    setImageEditContext(null);
+                }}
+            />
 
             {/* Layout Selector Modal */}
-            <Dialog open={isLayoutModalOpen && !isBusy} onOpenChange={isBusy ? undefined : setIsLayoutModalOpen}>
-                <DialogContent className="max-w-4xl sm:max-w-4xl max-h-[90vh] flex flex-col bg-popover border-border text-popover-foreground rounded-xl p-6 shadow-2xl z-50">
-                    <DialogHeader className="shrink-0 mb-4">
-                        <DialogTitle className="text-lg font-bold">Select Slide Layout</DialogTitle>
-                        <DialogDescription className="text-xs text-muted-foreground">
-                            Choose a layout type to display your current slide content.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {/* Scrollable grid area */}
-                    <div className="flex-1 overflow-y-auto pr-1">
-                        {shouldRenderLayouts ? (
-                            Object.entries(metadata.layoutCategories)
-                                .filter(([catKey]) => {
-                                    const activeSlide = editableSlides[activeSlideIndex];
-                                    const activeCat = activeSlide?.layout?.category?.toLowerCase() || "";
-                                    const isTitleOrClosing = 
-                                        activeCat === "title" || 
-                                        activeCat === "titles" || 
-                                        activeCat === "closing" || 
-                                        activeCat === "closings";
-                                    return isTitleOrClosing 
-                                        ? (catKey === "title" || catKey === "closing") 
-                                        : (catKey !== "title" && catKey !== "closing");
-                                })
-                                .map(([catKey, category]) => (
-                                <div key={catKey} className="mb-6">
-                                    <h3 className="text-[11px] font-bold tracking-wider text-primary uppercase mb-3 border-b border-border/40 pb-1.5">
-                                        {category.name}
-                                    </h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
-                                        {category.types.map((type) => {
-                                            const activeSlide = editableSlides[activeSlideIndex];
-                                            const activeCat = activeSlide?.layout?.category || "";
-                                            const normalizeCat = (c) => c.toLowerCase().replace(/s$/, "");
-                                            const isSelected = 
-                                                normalizeCat(activeCat) === normalizeCat(catKey) &&
-                                                activeSlide?.layout?.type === type.id;
-    
-                                            // Fallback items in case the active slide has no items (e.g. Title slides)
-                                            const previewItems = activeSlide?.items?.length ? activeSlide.items : [
-                                                { header: "Key Highlight 1", description: "This is a detailed description of the first key highlight item." },
-                                                { header: "Key Highlight 2", description: "This is a detailed description of the second key highlight item." },
-                                                { header: "Key Highlight 3", description: "This is a detailed description of the third key highlight item." }
-                                            ];
-    
-                                            return (
-                                                <button
-                                                    key={type.id}
-                                                    onClick={() => {
-                                                        handleLayoutChange(catKey, type.id);
-                                                        setIsLayoutModalOpen(false);
-                                                    }}
-                                                    className={`flex flex-col text-left p-2.5 rounded-xl border transition-all text-xs cursor-pointer gap-2 bg-card ${
-                                                        isSelected
-                                                            ? "border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)] ring-1 ring-blue-500/20 opacity-100"
-                                                            : "border-border hover:border-muted-foreground/20 opacity-75 hover:opacity-100"
-                                                    }`}
-                                                >
-                                                    <div className="w-full aspect-[16/9] rounded-lg overflow-hidden border theme-border shadow-xs bg-background/50 relative pointer-events-none">
-                                                        <Slide
-                                                            slide_content={{
-                                                                ...resolveSlideContent(activeSlide, activeSlideIndex),
-                                                                items: previewItems,
-                                                                layout: { category: catKey, type: type.id },
-                                                                theme: pptData?.theme || "sunset",
-                                                            }}
-                                                        />
-                                                        {isSelected && (
-                                                            <div className="absolute top-1.5 right-1.5 z-10 bg-blue-500 text-white rounded-full w-4 h-4 shadow-sm flex items-center justify-center animate-in fade-in zoom-in-75 duration-200">
-                                                                <Check size={10} strokeWidth={3} className="text-white" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-    
-                                                    <div className="flex flex-col gap-0.5 px-0.5 mt-0.5">
-                                                        <span className="font-semibold text-foreground text-[11px] leading-tight">
-                                                            {type.name}
-                                                        </span>
-                                                        <span className="text-[9px] text-muted-foreground leading-normal line-clamp-2">
-                                                            {type.description}
-                                                        </span>
-                                                    </div>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="w-full flex-1 flex flex-col items-center justify-center min-h-[300px] gap-3 py-12">
-                                <Loader2 className="animate-spin text-primary w-6 h-6" />
-                                <span className="text-xs text-muted-foreground font-medium">Loading layout options</span>
-                            </div>
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <LayoutSelectorModal
+                isOpen={isLayoutModalOpen}
+                isBusy={isBusy}
+                onClose={() => setIsLayoutModalOpen(false)}
+                activeSlide={editableSlides[activeSlideIndex]}
+                activeSlideIndex={activeSlideIndex}
+                theme={pptData?.theme || "sunset"}
+                resolveSlideContent={resolveSlideContent}
+                onLayoutChange={handleLayoutChange}
+            />
             
             {isGeneratingPDF && (
                 <div

@@ -34,7 +34,7 @@ const StatsCallout = ({ content, hero, onUpdateItem, onDeleteItem, onAddItem }) 
     let heroDescSize = "text-[2cqw]";
     let heroPadClass = "p-[3cqw]";
     let cardWidthClass = "w-[42cqw]";
-    let containerClass = "flex gap-[4cqw] max-w-[95cqw] mx-auto my-[2cqw] items-stretch justify-between";
+    let containerClass = "flex gap-[4cqw] h-full max-w-[95cqw] mx-auto my-[2cqw] items-stretch justify-between";
 
     if (m === 0) {
         heroNumSize = maxChars > 220 ? "text-[7.5cqw]" : (maxChars > 120 ? "text-[8.5cqw]" : "text-[10cqw]");

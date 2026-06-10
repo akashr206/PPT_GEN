@@ -9,7 +9,6 @@ import CardsNumbered from "./cards/CardsNumbered";
 import CardsFilled from "./cards/CardsFilled";
 
 import StatsGrid from "./stats/StatsGrid";
-import StatsRow from "./stats/StatsRow";
 import StatsCallout from "./stats/StatsCallout";
 
 import TimelineHorizontal from "./timelines/TimelineHorizontal";
@@ -21,8 +20,15 @@ import TitleImage from "./title/TitleImage";
 
 import IconsGrid from "./icons/IconsGrid";
 
+import AgendaSplit from "./agenda/AgendaSplit";
+import AgendaCards from "./agenda/AgendaCards";
+import AgendaList from "./agenda/AgendaList";
+
 import ImageSplit from "./images/ImageSplit";
 import ImageGrid from "./images/ImageGrid";
+
+import TableStriped from "./table/TableStriped";
+import TableBordered from "./table/TableBordered";
 
 import ClosingThankYou from "./closing/ClosingThankYou";
 import ClosingQA from "./closing/ClosingQA";
@@ -44,7 +50,6 @@ export const layout_map = {
     },
     "stats": {
         "grid": StatsGrid,
-        "row": StatsRow,
         "callout": StatsCallout,
     },
     "timelines": {
@@ -64,9 +69,18 @@ export const layout_map = {
         "row": IconsGrid,
         "list": IconsGrid,
     },
+    "agenda": {
+        "split": AgendaSplit,
+        "cards": AgendaCards,
+        "list": AgendaList,
+    },
     "images": {
         "split": ImageSplit,
         "grid": ImageGrid,
+    },
+    "table": {
+        "striped": TableStriped,
+        "bordered": TableBordered,
     },
     "closing": {
         "thankyou": ClosingThankYou,
@@ -82,5 +96,9 @@ layout_map.stat = layout_map.stats;
 layout_map.timeline = layout_map.timelines;
 layout_map.icon = layout_map.icons;
 layout_map.image = layout_map.images;
+layout_map.table = layout_map.table;
+layout_map.tables = layout_map.table;
 layout_map.titles = layout_map.title;
 layout_map.closings = layout_map.closing;
+layout_map.agenda = layout_map.agenda;
+layout_map.agendas = layout_map.agenda;

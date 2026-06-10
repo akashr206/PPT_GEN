@@ -1,6 +1,6 @@
 import pptxgen from 'pptxgenjs';
 import path from 'path';
-import { rgbToHex, parseBoxShadow, getSafeFontFamily, resolveImageToBase64 } from './utils.js';
+import { rgbToHex, parseColor, parseBoxShadow, getSafeFontFamily, resolveImageToBase64 } from './utils.js';
 
 // Standard fallback dimensions
 const VIEWPORT_WIDTH = 1280;
@@ -157,8 +157,17 @@ function scaleCoordinates(el, slideWidthPx = VIEWPORT_WIDTH, slideHeightPx = VIE
  * Draws background container shape (rectangle or circle/ellipse).
  */
 function drawBackgroundShape(slide, el, coords, designWidth = VIEWPORT_WIDTH, designHeight = VIEWPORT_HEIGHT) {
-  const fillColor = rgbToHex(el.backgroundColor);
-  const borderColor = rgbToHex(el.borderColor);
+  const elOpacity = (el.opacity !== undefined && el.opacity !== null) ? parseFloat(el.opacity) : 1.0;
+  const finalOpacity = isNaN(elOpacity) ? 1.0 : elOpacity;
+
+  const bgParsed = parseColor(el.backgroundColor);
+  const fillColor = bgParsed ? bgParsed.hex : null;
+  const bgAlpha = bgParsed ? bgParsed.alpha : 1.0;
+
+  const borderParsed = parseColor(el.borderColor);
+  const borderColor = borderParsed ? borderParsed.hex : null;
+  const borderAlpha = borderParsed ? borderParsed.alpha : 1.0;
+
   const BORDER_SCALE_FACTOR = 0.2;
   const borderWidthPx = (parseFloat(el.borderWidth) || 0) * BORDER_SCALE_FACTOR;
   const borderStyle = el.borderStyle;
@@ -189,7 +198,13 @@ function drawBackgroundShape(slide, el, coords, designWidth = VIEWPORT_WIDTH, de
       shapeY = coords.y + (borderWidthIn / 2);
       
       const borderWidthPt = borderWidthPx * ptScale; // px to pt
-      shapeOpts.line = { color: borderColor, width: borderWidthPt };
+      const borderOpacity = finalOpacity * borderAlpha;
+      const borderTrans = Math.round((1 - borderOpacity) * 100);
+      shapeOpts.line = { 
+        color: borderColor, 
+        width: borderWidthPt,
+        transparency: Math.max(0, Math.min(100, borderTrans))
+      };
     }
 
     shapeOpts.x = shapeX;
@@ -197,7 +212,14 @@ function drawBackgroundShape(slide, el, coords, designWidth = VIEWPORT_WIDTH, de
     shapeOpts.w = shapeW;
     shapeOpts.h = shapeH;
 
-    if (fillColor) shapeOpts.fill = { color: fillColor };
+    if (fillColor) {
+      const fillOpacity = finalOpacity * bgAlpha;
+      const fillTrans = Math.round((1 - fillOpacity) * 100);
+      shapeOpts.fill = { 
+        color: fillColor, 
+        transparency: Math.max(0, Math.min(100, fillTrans))
+      };
+    }
 
     if (el.shapeType === 'roundRect') {
       const borderRadiusPx = parseFloat(el.borderRadius) || 0;
@@ -222,6 +244,10 @@ function drawBackgroundShape(slide, el, coords, designWidth = VIEWPORT_WIDTH, de
  * Draws image and background image layers. Resolves local & remote URLs.
  */
 async function drawImageLayer(slide, el, coords, baseDir, designWidth = VIEWPORT_WIDTH) {
+  const elOpacity = (el.opacity !== undefined && el.opacity !== null) ? parseFloat(el.opacity) : 1.0;
+  const finalOpacity = isNaN(elOpacity) ? 1.0 : elOpacity;
+  const imageTrans = Math.round((1 - finalOpacity) * 100);
+
   let imgX = coords.x;
   let imgY = coords.y;
   let imgW = coords.w;
@@ -229,7 +255,8 @@ async function drawImageLayer(slide, el, coords, baseDir, designWidth = VIEWPORT
 
   const BORDER_SCALE_FACTOR = 0.5;
   const borderWidthPx = (parseFloat(el.borderWidth) || 0) * BORDER_SCALE_FACTOR;
-  const borderColor = rgbToHex(el.borderColor);
+  const borderParsed = parseColor(el.borderColor);
+  const borderColor = borderParsed ? borderParsed.hex : null;
   const borderStyle = el.borderStyle;
   const hasBorder = borderColor && borderWidthPx > 0 && borderStyle !== 'none' && borderStyle !== 'hidden';
 
@@ -243,14 +270,19 @@ async function drawImageLayer(slide, el, coords, baseDir, designWidth = VIEWPORT
     imgH = Math.max(0.01, imgH - 2 * borderWidthIn);
   }
 
+  const baseImgOpts = {
+    x: imgX,
+    y: imgY,
+    w: imgW,
+    h: imgH,
+    ...(el.rotate ? { rotate: el.rotate } : {}),
+    transparency: Math.max(0, Math.min(100, imageTrans))
+  };
+
   if (el.isSvg && el.rasterizedBase64) {
     slide.addImage({
       data: el.rasterizedBase64,
-      x: imgX,
-      y: imgY,
-      w: imgW,
-      h: imgH,
-      ...(el.rotate ? { rotate: el.rotate } : {})
+      ...baseImgOpts
     });
     return true;
   }
@@ -261,11 +293,7 @@ async function drawImageLayer(slide, el, coords, baseDir, designWidth = VIEWPORT
     if (base64Img) {
       slide.addImage({
         data: base64Img,
-        x: imgX,
-        y: imgY,
-        w: imgW,
-        h: imgH,
-        ...(el.rotate ? { rotate: el.rotate } : {})
+        ...baseImgOpts
       });
       return true;
     }
@@ -277,11 +305,7 @@ async function drawImageLayer(slide, el, coords, baseDir, designWidth = VIEWPORT
     if (base64Img) {
       slide.addImage({
         data: base64Img,
-        x: imgX,
-        y: imgY,
-        w: imgW,
-        h: imgH,
-        ...(el.rotate ? { rotate: el.rotate } : {})
+        ...baseImgOpts
       });
       return true;
     }
@@ -305,7 +329,14 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
 
   if (fontSizePt < 6) return false; // skip text below 6pt
 
-  const textColor = rgbToHex(el.color) || '000000';
+  const elOpacity = (el.opacity !== undefined && el.opacity !== null) ? parseFloat(el.opacity) : 1.0;
+  const finalElOpacity = isNaN(elOpacity) ? 1.0 : elOpacity;
+
+  const textParsedColor = parseColor(el.color);
+  const textColor = textParsedColor ? textParsedColor.hex : '000000';
+  const textAlpha = textParsedColor ? textParsedColor.alpha : 1.0;
+  const textTrans = Math.round((1 - (finalElOpacity * textAlpha)) * 100);
+
   const fontFamily = getSafeFontFamily(el.fontFamily);
   const isBold = parseFloat(el.fontWeight) >= 600 || ['bold', 'bolder'].includes(el.fontWeight);
   const isItalic = el.fontStyle === 'italic';
@@ -324,7 +355,8 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
 
   const BORDER_SCALE_FACTOR = 0.5;
   const borderWidthPx = (parseFloat(el.borderWidth) || 0) * BORDER_SCALE_FACTOR;
-  const borderColor = rgbToHex(el.borderColor);
+  const borderParsed = parseColor(el.borderColor);
+  const borderColor = borderParsed ? borderParsed.hex : null;
   const borderStyle = el.borderStyle;
   const hasBorder = borderColor && borderWidthPx > 0 && borderStyle !== 'none' && borderStyle !== 'hidden';
 
@@ -363,10 +395,28 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
     if (run.style.fontStyle) {
       runOpts.italic = run.style.fontStyle === 'italic';
     }
+
+    // Calculate final run opacity
+    const runStyleOpacity = (run.style.opacity !== undefined && run.style.opacity !== null) ? parseFloat(run.style.opacity) : 1.0;
+    const finalRunOpacity = isNaN(runStyleOpacity) ? finalElOpacity : runStyleOpacity;
+    
+    let runAlpha = 1.0;
     if (run.style.color) {
-      runOpts.color = rgbToHex(run.style.color) || '000000';
+      const colorParsed = parseColor(run.style.color);
+      if (colorParsed) {
+        runOpts.color = colorParsed.hex;
+        runAlpha = colorParsed.alpha;
+      } else {
+        runOpts.color = '000000';
+      }
+    } else {
+      runOpts.color = textColor;
+      runAlpha = textAlpha;
     }
     
+    const finalRunTrans = Math.round((1 - (finalRunOpacity * runAlpha)) * 100);
+    runOpts.transparency = Math.max(0, Math.min(100, finalRunTrans));
+
     // CSS text-transform handling on run text
     let runText = run.text;
     if (run.style.textTransform === 'uppercase') {
@@ -400,7 +450,8 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
     valign: el.valign || 'top',
     margin: [0, 0, 0, 0],
     wrap: true,
-    autoFit: true
+    autoFit: true,
+    transparency: Math.max(0, Math.min(100, textTrans))
   };
 
   // Apply CSS line-height

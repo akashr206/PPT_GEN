@@ -67,6 +67,7 @@ export async function rasterizeSvgToPng(svgElement) {
         ];
 
         for (const key of styleKeys) {
+          if (key === 'opacity' && i === 0) continue; // Skip root SVG opacity to let PowerPoint handle it
           const val = computed[key];
           if (val) {
             if (val === 'currentColor') {
@@ -146,7 +147,7 @@ function isTextBoxElement(el) {
  * @param {HTMLElement} element 
  * @returns {Array<object>} List of styled text runs
  */
-function getTextRuns(element) {
+function getTextRuns(element, slideWrapper) {
   const rawRuns = [];
 
   function traverse(node, currentStyle) {
@@ -160,7 +161,8 @@ function getTextRuns(element) {
       }
 
       if (text) {
-        rawRuns.push({ text, style: currentStyle });
+        const runOpacity = getCumulativeOpacity(node.parentElement, slideWrapper || element);
+        rawRuns.push({ text, style: { ...currentStyle, opacity: runOpacity } });
       }
     } else if (node.nodeType === 1) { // Element node
       const tagName = node.tagName.toLowerCase();
@@ -352,7 +354,7 @@ export async function extractSlideData(slideWrapper, slideIndex = 0) {
     const isTextBoxRoot = !isDescendant && isTextBoxElement(el);
     let runs = null;
     if (isTextBoxRoot) {
-      runs = getTextRuns(el);
+      runs = getTextRuns(el, slideWrapper);
     }
 
     // Skip descendants of text boxes unless they have background properties
@@ -420,6 +422,25 @@ export async function extractSlideData(slideWrapper, slideIndex = 0) {
 
     const rasterizedBase64 = isSvg ? el.getAttribute('data-rasterized-base64') : null;
 
+    let finalSrc = src;
+    let finalBgImage = bgImage;
+    let finalRasterizedBase64 = rasterizedBase64;
+
+    const borderRadius = style.borderRadius;
+    const hasBorderRadius = borderRadius && borderRadius !== '0px' && borderRadius !== '0';
+
+    if (hasBorderRadius) {
+      if (tagName === 'img' && src) {
+        finalSrc = await applyBorderRadiusToImage(src, width, height, borderRadius);
+      } else if (bgImage) {
+        finalBgImage = await applyBorderRadiusToImage(bgImage, width, height, borderRadius);
+      } else if (isSvg && rasterizedBase64) {
+        finalRasterizedBase64 = await applyBorderRadiusToImage(rasterizedBase64, width, height, borderRadius);
+      }
+    }
+
+    const cumulativeOpacity = getCumulativeOpacity(el, slideWrapper);
+
     extractedElements.push({
       pptxId,
       domOrder: extractedElements.length,
@@ -446,13 +467,13 @@ export async function extractSlideData(slideWrapper, slideIndex = 0) {
       lineHeight: style.lineHeight,
       letterSpacing: style.letterSpacing,
       textTransform: style.textTransform,
-      opacity: style.opacity,
+      opacity: cumulativeOpacity,
       boxShadow: style.boxShadow,
       runs,
       text: isTextBoxRoot ? runs.map(r => r.text).join('') : '',
-      src,
-      bgImage,
-      rasterizedBase64,
+      src: finalSrc,
+      bgImage: finalBgImage,
+      rasterizedBase64: finalRasterizedBase64,
       rotate
     });
   }
@@ -473,4 +494,93 @@ export async function extractSlideData(slideWrapper, slideIndex = 0) {
     designWidth,
     designHeight
   };
+}
+
+/**
+ * Computes the visual opacity of an element by traversing up the parent hierarchy.
+ */
+function getCumulativeOpacity(el, slideWrapper) {
+  let opacity = 1.0;
+  let current = el;
+  while (current && current !== slideWrapper) {
+    const style = window.getComputedStyle(current);
+    if (style) {
+      const op = parseFloat(style.opacity);
+      if (!isNaN(op)) {
+        opacity *= op;
+      }
+    }
+    current = current.parentElement;
+  }
+  return opacity;
+}
+
+/**
+ * Applies border radius clipping to an image and returns a base64 PNG data URL.
+ */
+async function applyBorderRadiusToImage(src, width, height, borderRadiusStyle) {
+  return new Promise((resolve) => {
+    if (!borderRadiusStyle || borderRadiusStyle === '0px' || borderRadiusStyle === '0') {
+      return resolve(src);
+    }
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const scale = 3; // 3x scale for crisp images
+        const canvas = document.createElement('canvas');
+        const canvasW = width * scale;
+        const canvasH = height * scale;
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // Parse border radius
+        let radius = 0;
+        const cleanRadius = borderRadiusStyle.trim().toLowerCase();
+        if (cleanRadius.endsWith('%')) {
+          const pct = parseFloat(cleanRadius) / 100;
+          radius = Math.min(canvasW, canvasH) * pct;
+        } else {
+          const pxVal = parseFloat(cleanRadius) || 0;
+          radius = pxVal * scale;
+        }
+
+        // Limit radius to half of shorter side
+        radius = Math.min(radius, Math.min(canvasW, canvasH) / 2);
+
+        // Draw rounded rectangle clip path
+        ctx.beginPath();
+        ctx.moveTo(radius, 0);
+        ctx.lineTo(canvasW - radius, 0);
+        ctx.quadraticCurveTo(canvasW, 0, canvasW, radius);
+        ctx.lineTo(canvasW, canvasH - radius);
+        ctx.quadraticCurveTo(canvasW, canvasH, canvasW - radius, canvasH);
+        ctx.lineTo(radius, canvasH);
+        ctx.quadraticCurveTo(0, canvasH, 0, canvasH - radius);
+        ctx.lineTo(0, radius);
+        ctx.quadraticCurveTo(0, 0, radius, 0);
+        ctx.closePath();
+        ctx.clip();
+
+        // Draw the image scaled to the canvas
+        ctx.drawImage(img, 0, 0, canvasW, canvasH);
+
+        const pngBase64 = canvas.toDataURL('image/png');
+        resolve(pngBase64);
+      } catch (err) {
+        console.error('[Extractor] Error rounding image with canvas:', err);
+        resolve(src);
+      }
+    };
+    img.onerror = (e) => {
+      console.error('[Extractor] Failed to load image for rounding:', src, e);
+      resolve(src);
+    };
+    img.src = src;
+  });
 }

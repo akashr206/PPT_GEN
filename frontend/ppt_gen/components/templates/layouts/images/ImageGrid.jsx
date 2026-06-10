@@ -6,33 +6,76 @@ const ImageGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, onEditImage
     const n = content.length;
     
     let gridCols = "grid-cols-3";
-    let gapClass = "gap-[3cqw]";
+    let gapClass = "gap-[2.5cqw]";
     let imgHeight = "h-[15cqw]";
-    let headerSize = "text-[1.8cqw]";
-    let descSize = "text-[1.3cqw]";
+    let headerSize = "text-[1.6cqw]";
+    let descSize = "text-[1.2cqw]";
+    let padClass = "p-[1.4cqw]";
+    let marginClass = "mb-[0.6cqw]";
+    let lineClamp = "line-clamp-4";
+    let containerClass = `grid ${gridCols} ${gapClass} max-w-[95cqw] mx-auto my-[1.5cqw] items-start`;
 
-    if (n >= 5) {
-        gridCols = "grid-cols-3";
-        gapClass = "gap-[2cqw]";
-        imgHeight = "h-[12cqw]";
-        headerSize = "text-[1.4cqw]";
-        descSize = "text-[1.1cqw]";
-    } else if (n === 4) {
-        gridCols = "grid-cols-2";
-        gapClass = "gap-[3cqw]";
-        imgHeight = "h-[10cqw]";
-        headerSize = "text-[2cqw]";
+    if (n === 1) {
+        gridCols = "grid-cols-1";
+        imgHeight = "h-[22cqw]";
+        headerSize = "text-[2.0cqw]";
         descSize = "text-[1.4cqw]";
+        padClass = "p-[1.8cqw]";
+        marginClass = "mb-[0.6cqw]";
+        lineClamp = "line-clamp-4";
+        containerClass = "grid grid-cols-1 max-w-[45cqw] mx-auto my-[1.5cqw] items-start";
     } else if (n === 2) {
         gridCols = "grid-cols-2";
-        gapClass = "gap-[4cqw]";
-        imgHeight = "h-[22cqw]";
-        headerSize = "text-[2cqw]";
-        descSize = "text-[1.5cqw]";
+        imgHeight = "h-[18cqw]";
+        headerSize = "text-[1.8cqw]";
+        descSize = "text-[1.3cqw]";
+        padClass = "p-[1.5cqw]";
+        marginClass = "mb-[0.5cqw]";
+        lineClamp = "line-clamp-4";
+        containerClass = "grid grid-cols-2 gap-[3cqw] max-w-[80cqw] mx-auto my-[1.5cqw] items-start";
+    } else if (n === 3) {
+        gridCols = "grid-cols-3";
+        imgHeight = "h-[14cqw]";
+        headerSize = "text-[1.5cqw]";
+        descSize = "text-[1.1cqw]";
+        padClass = "p-[1.2cqw]";
+        marginClass = "mb-[0.4cqw]";
+        lineClamp = "line-clamp-4";
+        containerClass = `grid ${gridCols} ${gapClass} max-w-[95cqw] mx-auto my-[1.5cqw] items-start`;
+    } else if (n === 4) {
+        gridCols = "grid-cols-2";
+        gapClass = "gap-[1.5cqw] gap-y-[2cqw]";
+        imgHeight = "h-[9.5cqw]";
+        headerSize = "text-[1.4cqw]";
+        descSize = "text-[1.0cqw]";
+        padClass = "p-[1.0cqw]";
+        marginClass = "mb-[0.3cqw]";
+        lineClamp = "line-clamp-2";
+        containerClass = `grid ${gridCols} ${gapClass} max-w-[75cqw] mx-auto my-[1.0cqw] items-start`;
+    } else if (n === 5) {
+        gridCols = "grid-cols-3";
+        gapClass = "gap-[1.5cqw] gap-y-[2cqw]";
+        imgHeight = "h-[8.5cqw]";
+        headerSize = "text-[1.2cqw]";
+        descSize = "text-[0.9cqw]";
+        padClass = "p-[0.9cqw]";
+        marginClass = "mb-[0.2cqw]";
+        lineClamp = "line-clamp-2";
+        containerClass = `grid ${gridCols} ${gapClass} max-w-[90cqw] mx-auto my-[1.0cqw] items-start`;
+    } else if (n >= 6) {
+        gridCols = "grid-cols-3";
+        gapClass = "gap-[1.5cqw] gap-y-[2cqw]";
+        imgHeight = "h-[8.5cqw]";
+        headerSize = "text-[1.2cqw]";
+        descSize = "text-[0.9cqw]";
+        padClass = "p-[0.9cqw]";
+        marginClass = "mb-[0.2cqw]";
+        lineClamp = "line-clamp-2";
+        containerClass = `grid ${gridCols} ${gapClass} max-w-[95cqw] mx-auto my-[1.0cqw] items-start`;
     }
 
     return (
-        <div className={`grid ${gridCols} ${gapClass} max-w-[95cqw] mx-auto my-[2cqw] items-start`}>
+        <div className={containerClass + " h-full"}>
             {content.map((ele, i) => {
                 const imgUrl = ele.image || `https://picsum.photos/seed/${i + 10}/800/600`;
                 
@@ -61,10 +104,10 @@ const ImageGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, onEditImage
                             )}
                         </div>
                         
-                        <div className="p-[2cqw] flex flex-col">
+                        <div className={`${padClass} flex flex-col`}>
                             <EditableElement
                                 as="h3"
-                                className={`font-bold theme-heading ${headerSize} mb-[0.8cqw] leading-tight`}
+                                className={`font-bold theme-heading ${headerSize} ${marginClass} leading-tight`}
                                 value={ele.header}
                                 onChange={(val) => onUpdateItem?.(i, "header", val)}
                                 readOnly={!onUpdateItem}
@@ -73,7 +116,7 @@ const ImageGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, onEditImage
                             
                             <EditableElement
                                 as="p"
-                                className={`${descSize} theme-text-muted text-balance`}
+                                className={`${descSize} theme-text-muted text-balance ${lineClamp}`}
                                 value={ele.description}
                                 onChange={(val) => onUpdateItem?.(i, "description", val)}
                                 readOnly={!onUpdateItem}
