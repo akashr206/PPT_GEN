@@ -117,11 +117,6 @@
                     "description": "A split layout featuring a prominent left-side title block and a vertical list of numbered topics on the right. Best for structuring presentation roadmaps."
                 },
                 {
-                    "id": "cards",
-                    "name": "Agenda Grid Cards",
-                    "description": "A grid of structured cards representing presentation chapters. Best for detailed agendas with brief outlines of each topic."
-                },
-                {
                     "id": "list",
                     "name": "Agenda Timeline List",
                     "description": "An elegant vertical timeline list with a connecting line and large chapter badges. Best for chronological outlines."

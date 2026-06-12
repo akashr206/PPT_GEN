@@ -10,10 +10,17 @@
     transition: outline 0.2s ease, outline-offset 0.2s ease;
 }
 
-.group\/item:hover {
+.group\/item:hover,
+.group\/item:focus-within {
     outline: 1.5px dashed color-mix(in srgb, var(--theme-primary) 50%, transparent);
     outline-offset: 4px;
     border-radius: 0.5cqw;
+}
+
+/* Show the actions menu when the item has focus-within (e.g. text is clicked/active) */
+.group\/item:focus-within > div.absolute {
+    opacity: 1 !important;
+    pointer-events: auto !important;
 }
 
 .slide:has(:focus) .editable-el:hover:not(:focus) {

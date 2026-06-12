@@ -14,7 +14,7 @@ const TitleImage = ({
     const imgUrl = image || "https://picsum.photos/seed/title/1200/800";
 
     return (
-        <div className="flex flex-row items-stretch justify-between h-full min-h-[30cqw] gap-[3cqw] w-full">
+        <div className="flex flex-row items-stretch justify-between h-[48.25cqw] gap-[3cqw] w-full">
             {/* Left Column: Image with outline */}
             <div 
                 onClick={() => onEditImage?.({

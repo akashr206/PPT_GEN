@@ -38,9 +38,9 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         ref={triggerRef}
                         type="button"
                         variant="outline"
-                        className="h-6 w-6 theme-menu-button theme-text-primary"
+                        className="h-max w-max theme-menu-button theme-text-primary"
                     >
-                        <MoreHorizontal size={13} />
+                        <MoreHorizontal className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent

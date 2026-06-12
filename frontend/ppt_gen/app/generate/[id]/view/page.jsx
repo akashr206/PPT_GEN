@@ -1183,7 +1183,7 @@ export default function PPTSlidesViewerPage({ params }) {
                             <Redo size={14} className="text-primary" />
                         </button>
                     </div>
-                    <div className="flex gap-2 max-md:hidden">
+                    <div className="flex gap-2 max-md:hidden text-xs">
                         {editableSlides &&
                             editableSlides[activeSlideIndex] &&
                             !["title", "titles"].includes(
@@ -1194,7 +1194,7 @@ export default function PPTSlidesViewerPage({ params }) {
                                 <Button
                                     variant="outline"
                                     onClick={handleAddItem}
-                                    className="cursor-pointer rounded-sm"
+                                    className="cursor-pointer text-xs rounded-sm"
                                 >
                                     <Plus size={14} />
                                     <span>Add Point</span>
@@ -1203,7 +1203,7 @@ export default function PPTSlidesViewerPage({ params }) {
                         <Button
                             variant="outline"
                             onClick={() => setIsLayoutModalOpen(true)}
-                            className="cursor-pointer rounded-sm"
+                            className="cursor-pointer rounded-sm text-xs"
                         >
                             <Layout size={14} />
                             <span>Change Layout</span>
@@ -1216,7 +1216,7 @@ export default function PPTSlidesViewerPage({ params }) {
                                 setImageEditContext(null);
                                 setIsLibraryOpen(true);
                             }}
-                            className="cursor-pointer rounded-sm"
+                            className="cursor-pointer rounded-sm text-xs"
                         >
                             <FolderOpen size={14} />
                             <span>Open Library</span>

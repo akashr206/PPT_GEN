@@ -21,7 +21,6 @@ import TitleImage from "./title/TitleImage";
 import IconsGrid from "./icons/IconsGrid";
 
 import AgendaSplit from "./agenda/AgendaSplit";
-import AgendaCards from "./agenda/AgendaCards";
 import AgendaList from "./agenda/AgendaList";
 
 import ImageSplit from "./images/ImageSplit";
@@ -71,7 +70,6 @@ export const layout_map = {
     },
     "agenda": {
         "split": AgendaSplit,
-        "cards": AgendaCards,
         "list": AgendaList,
     },
     "images": {
