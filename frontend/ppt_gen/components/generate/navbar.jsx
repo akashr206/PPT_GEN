@@ -95,7 +95,8 @@ export function Navbar() {
     };
 
     return (
-        <div className="w-full bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-50 px-6">
+        <>
+            <div className="w-full bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-50 px-6">
             <div className="w-full h-14 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Link
@@ -271,17 +272,18 @@ export function Navbar() {
                     )}
                 </div>
             </div>
+        </div>
 
             {/* Mobile Drawer Overlay */}
             {isMobileMenuOpen && (
                 <>
                     {/* Backdrop */}
                     <div
-                        className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 md:hidden"
+                        className="fixed inset-0 bg-black/40 backdrop-blur-xs z-[9999] md:hidden"
                         onClick={() => setIsMobileMenuOpen(false)}
                     />
                     {/* Drawer */}
-                    <div className="fixed top-0 right-0 h-full w-[300px] bg-background border-l border-border z-50 p-5 flex flex-col gap-5 md:hidden shadow-2xl animate-in slide-in-from-right duration-200">
+                    <div className="fixed top-0 right-0 h-full w-[300px] bg-background border-l border-border z-[9999] p-5 flex flex-col gap-5 md:hidden shadow-2xl animate-in slide-in-from-right duration-200">
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-semibold text-foreground">
                                 Menu
@@ -532,6 +534,6 @@ export function Navbar() {
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
+        </>
     );
 }

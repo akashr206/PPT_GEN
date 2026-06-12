@@ -41,15 +41,17 @@ export function PromptBox({
           autoFocus={autoFocus}
         />
         
-        <div className="flex flex-wrap items-center justify-between p-3 md:px-5 md:py-3 bg-zinc-50/80 dark:bg-zinc-950/50 border-t border-zinc-100 dark:border-zinc-800/80 backdrop-blur-md">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3 md:px-5 md:py-3 bg-zinc-50/80 dark:bg-zinc-950/50 border-t border-zinc-100 dark:border-zinc-800/80 backdrop-blur-md gap-3 sm:gap-2">
+          <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-2">
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-zinc-600 dark:text-zinc-300">
-                  <AlignLeft size={14} className="text-blue-500 dark:text-blue-400" />
-                  {layoutStyle}
-                  <ChevronDown size={14} className="opacity-50 ml-0.5" />
+                <Button variant="outline" size="sm" className="h-8 w-full justify-between sm:w-auto sm:justify-start gap-1.5 text-[11px] sm:text-xs text-zinc-600 dark:text-zinc-300 px-2 sm:px-3">
+                  <span className="flex items-center gap-1.5 min-w-0 truncate">
+                    <AlignLeft size={13} className="text-blue-500 dark:text-blue-400 shrink-0" />
+                    <span className="truncate">{layoutStyle}</span>
+                  </span>
+                  <ChevronDown size={13} className="opacity-50 shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -62,10 +64,12 @@ export function PromptBox({
             {/* Tone Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-zinc-600 dark:text-zinc-300">
-                  <Type size={14} className="text-violet-500 dark:text-violet-400" />
-                  {tone}
-                  <ChevronDown size={14} className="opacity-50 ml-0.5" />
+                <Button variant="outline" size="sm" className="h-8 w-full justify-between sm:w-auto sm:justify-start gap-1.5 text-[11px] sm:text-xs text-zinc-600 dark:text-zinc-300 px-2 sm:px-3">
+                  <span className="flex items-center gap-1.5 min-w-0 truncate">
+                    <Type size={13} className="text-violet-500 dark:text-violet-400 shrink-0" />
+                    <span className="truncate">{tone}</span>
+                  </span>
+                  <ChevronDown size={13} className="opacity-50 shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -77,10 +81,12 @@ export function PromptBox({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs text-zinc-600 dark:text-zinc-300">
-                  <FileStack size={14} className="text-indigo-500 dark:text-indigo-400" />
-                  {slides} Slides
-                  <ChevronDown size={14} className="opacity-50 ml-0.5" />
+                <Button variant="outline" size="sm" className="h-8 w-full justify-between sm:w-auto sm:justify-start gap-1.5 text-[11px] sm:text-xs text-zinc-600 dark:text-zinc-300 px-2 sm:px-3">
+                  <span className="flex items-center gap-1.5 min-w-0 truncate">
+                    <FileStack size={13} className="text-indigo-500 dark:text-indigo-400 shrink-0" />
+                    <span className="truncate">{slides} Slides</span>
+                  </span>
+                  <ChevronDown size={13} className="opacity-50 shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -95,10 +101,17 @@ export function PromptBox({
           <Button 
             type="submit"
             disabled={!prompt.trim() || isGenerating}
-            size="icon"
-            className="w-10 h-10 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all mt-3 sm:mt-0"
+            size="default"
+            className="w-full sm:w-10 h-10 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer sm:p-0"
           >
-            {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <ArrowUp size={18} className="ml-0.5" />}
+            {isGenerating ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <>
+                <ArrowUp size={18} className="shrink-0" />
+                <span className="sm:hidden text-xs font-semibold">Generate Presentation</span>
+              </>
+            )}
           </Button>
         </div>
       </form>

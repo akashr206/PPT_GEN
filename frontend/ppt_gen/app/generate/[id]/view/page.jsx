@@ -1183,7 +1183,7 @@ export default function PPTSlidesViewerPage({ params }) {
                             <Redo size={14} className="text-primary" />
                         </button>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 max-md:hidden">
                         {editableSlides &&
                             editableSlides[activeSlideIndex] &&
                             !["title", "titles"].includes(
@@ -1222,7 +1222,7 @@ export default function PPTSlidesViewerPage({ params }) {
                             <span>Open Library</span>
                         </Button>
                     </div>
-                    <DropdownMenu className="">
+                    <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="outline"
@@ -1239,7 +1239,7 @@ export default function PPTSlidesViewerPage({ params }) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="start"
-                            className="min-w-[160px] bg-popover border-border text-popover-foreground rounded-xl p-1.5 shadow-2xl z-50"
+                            className="min-w-[180px] bg-popover border-border text-popover-foreground rounded-md p-1.5 shadow-2xl z-50"
                         >
                             {editableSlides &&
                                 editableSlides[activeSlideIndex] &&
@@ -1330,7 +1330,7 @@ export default function PPTSlidesViewerPage({ params }) {
                                 )}
 
                                 <div
-                                    className={`w-full relative overflow-hidden ${isFullscreen ? "max-h-screen max-w-[calc(100vh*16/9)] bg-background" : "shadow-xl rounded-xl overflow-hidden ring-1 ring-border/20"}`}
+                                    className={`w-full relative overflow-hidden ${isFullscreen ? "max-h-screen max-w-[calc(100vh*16/9)] bg-background" : "shadow-xl rounded-lg max-md:rounded-md overflow-hidden ring-1 ring-border/20"}`}
                                 >
                                     {editableSlides &&
                                     editableSlides[activeSlideIndex] ? (
