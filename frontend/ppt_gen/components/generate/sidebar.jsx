@@ -25,7 +25,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useHistory } from "@/contexts/history-context";
 
 export function Sidebar() {
@@ -45,8 +49,14 @@ export function Sidebar() {
             >
                 {!isCollapsed && (
                     <div className="flex items-center gap-2.5 font-semibold text-lg transition-all duration-300 whitespace-nowrap overflow-hidden">
-                        <img src="/logo.png" alt="iota AI Logo" className="w-8 h-8 object-contain flex-shrink-0 dark:invert" />
-                        <span className="tracking-tight text-sidebar-foreground">iota AI</span>
+                        <img
+                            src="/logo.png"
+                            alt="iota AI Logo"
+                            className="w-8 h-8 object-contain flex-shrink-0 dark:invert"
+                        />
+                        <span className="tracking-tight text-sidebar-foreground">
+                            iota AI
+                        </span>
                     </div>
                 )}
                 <Tooltip>
@@ -60,7 +70,11 @@ export function Sidebar() {
                             <Menu size={18} />
                         </Button>
                     </TooltipTrigger>
-                    {isCollapsed && <TooltipContent side="right">Expand Menu</TooltipContent>}
+                    {isCollapsed && (
+                        <TooltipContent side="right">
+                            Expand Menu
+                        </TooltipContent>
+                    )}
                 </Tooltip>
             </div>
 
@@ -69,10 +83,14 @@ export function Sidebar() {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button size="icon" asChild>
-                                <Link href="/generate"><Plus size={18} /></Link>
+                                <Link href="/generate">
+                                    <Plus size={18} />
+                                </Link>
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="right">New Presentation</TooltipContent>
+                        <TooltipContent side="right">
+                            New Presentation
+                        </TooltipContent>
                     </Tooltip>
                 ) : (
                     <Button className="w-full justify-start" asChild>
@@ -98,30 +116,50 @@ export function Sidebar() {
                             <Skeleton className="h-5 w-5/6 bg-muted/20 rounded-md" />
                         </div>
                     )}
-                    {!isCollapsed && !isLoadingHistory && history.map((item) => (
-                        <Button
-                            key={item.id}
-                            variant="ghost"
-                            asChild
-                            className="w-full justify-start gap-3 px-3 font-normal text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors group"
-                        >
-                            <Link href={`/generate/${item.id}/view`}>
-                                <span className="truncate">{item.title || "Untitled"}</span>
-                            </Link>
-                        </Button>
-                    ))}
-                    {!isCollapsed && !isLoadingHistory && history.length === 0 && status === "authenticated" && (
-                        <div className="px-3 py-6 flex flex-col items-center text-center">
-                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
-                                <Sparkles size={16} className="text-muted-foreground" />
-                            </div>
-                            <p className="text-sm font-medium text-foreground mb-1">No presentations</p>
-                            <p className="text-xs text-muted-foreground mb-4">Create your first presentation to see it here.</p>
-                            <Button variant="default" size="sm" className="w-full text-xs" asChild>
-                                <Link href="/generate">Create PPT</Link>
+                    {!isCollapsed &&
+                        !isLoadingHistory &&
+                        history.map((item) => (
+                            <Button
+                                key={item.id}
+                                variant="ghost"
+                                asChild
+                                className="w-full justify-start gap-3 px-3 font-normal text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors group"
+                            >
+                                <Link href={`/generate/${item.id}/view`}>
+                                    <span className="truncate">
+                                        {item.title || "Untitled"}
+                                    </span>
+                                </Link>
                             </Button>
-                        </div>
-                    )}
+                        ))}
+                    {!isCollapsed &&
+                        !isLoadingHistory &&
+                        history.length === 0 &&
+                        status === "authenticated" && (
+                            <div className="px-3 py-6 flex flex-col items-center text-center">
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
+                                    <Sparkles
+                                        size={16}
+                                        className="text-muted-foreground"
+                                    />
+                                </div>
+                                <p className="text-sm font-medium text-foreground mb-1">
+                                    No presentations
+                                </p>
+                                <p className="text-xs text-muted-foreground mb-4">
+                                    Create your first presentation to see it
+                                    here.
+                                </p>
+                                <Button
+                                    variant="default"
+                                    size="sm"
+                                    className="w-full text-xs"
+                                    asChild
+                                >
+                                    <Link href="/generate">Create PPT</Link>
+                                </Button>
+                            </div>
+                        )}
                 </nav>
             </ScrollArea>
 
@@ -129,14 +167,27 @@ export function Sidebar() {
                 {session?.user ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <div className="flex w-full hover:bg-accent/80 cursor-pointer rounded-lg gap-2 p-2 items-center">
+                            <div className="flex w-full hover:bg-accent/80 cursor-pointer rounded-md gap-2 p-2 items-center">
                                 <Avatar className="w-7 h-7 cursor-pointer border border-border transition-all">
-                                    <AvatarImage src={session.user.image} alt={session.user.name || "User"} />
+                                    <AvatarImage
+                                        src={session.user.image}
+                                        alt={session.user.name || "User"}
+                                    />
                                     <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                                        {(session.user.name || session.user.email || "U").charAt(0).toUpperCase()}
+                                        {(
+                                            session.user.name ||
+                                            session.user.email ||
+                                            "U"
+                                        )
+                                            .charAt(0)
+                                            .toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
-                                {!isCollapsed && <p className="text-foreground">{session.user.name}</p>}
+                                {!isCollapsed && (
+                                    <p className="text-foreground">
+                                        {session.user.name}
+                                    </p>
+                                )}
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
@@ -156,7 +207,7 @@ export function Sidebar() {
                             <DropdownMenuSeparator className="bg-border" />
                             <DropdownMenuItem
                                 onClick={() => signOut()}
-                                className="px-2.5 py-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-lg cursor-pointer flex items-center gap-2"
+                                className="px-2.5 py-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-md cursor-pointer flex items-center gap-2"
                             >
                                 <LogOut size={16} />
                                 <span>Sign out</span>
@@ -164,7 +215,7 @@ export function Sidebar() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : (
-                    <div className="flex w-full rounded-lg gap-2 p-2 items-center">
+                    <div className="flex w-full rounded-md gap-2 p-2 items-center">
                         <Skeleton className="w-7 h-7 rounded-full" />
                         {!isCollapsed && <Skeleton className="h-4 w-20" />}
                     </div>

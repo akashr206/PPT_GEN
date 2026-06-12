@@ -10,7 +10,7 @@ const WEIGHTS = [
     { value: "regular", label: "Regular" },
     { value: "bold", label: "Bold" },
     { value: "fill", label: "Fill" },
-    { value: "duotone", label: "Duotone" }
+    { value: "duotone", label: "Duotone" },
 ];
 
 const getRecommendedIcons = (text) => {
@@ -52,7 +52,14 @@ const getRecommendedIcons = (text) => {
     return recs.slice(0, 6);
 };
 
-export function IconPicker({ open, onOpenChange, onSelectIcon, defaultWeight = "regular", contextText, recommendedIcons }) {
+export function IconPicker({
+    open,
+    onOpenChange,
+    onSelectIcon,
+    defaultWeight = "regular",
+    contextText,
+    recommendedIcons,
+}) {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedWeight, setSelectedWeight] = useState(defaultWeight);
 
@@ -76,20 +83,24 @@ export function IconPicker({ open, onOpenChange, onSelectIcon, defaultWeight = "
             ) {
                 return false;
             }
-            
+
             const item = icons[name];
             if (!item) return false;
-            
+
             // Strictly ensure the item is a valid React component (function or forwardRef object)
             if (typeof item === "function") return true;
             if (typeof item === "object" && item.$$typeof) return true;
-            
+
             return false;
         });
     }, []);
 
     const recommendedIconNames = useMemo(() => {
-        if (recommendedIcons && Array.isArray(recommendedIcons) && recommendedIcons.length > 0) {
+        if (
+            recommendedIcons &&
+            Array.isArray(recommendedIcons) &&
+            recommendedIcons.length > 0
+        ) {
             return recommendedIcons;
         }
         return getRecommendedIcons(contextText);
@@ -123,20 +134,42 @@ export function IconPicker({ open, onOpenChange, onSelectIcon, defaultWeight = "
                     <DialogTitle>Choose an Icon</DialogTitle>
                 </DialogHeader>
 
-                <div className="px-4 pb-2">
+                <div className="px-4 pb-2 flex gap-2">
                     <input
                         type="text"
                         placeholder="Search icons..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full p-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                        className="flex-1 p-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                     />
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                            onOpenChange(false);
+                            const event = new CustomEvent(
+                                "trigger-open-library",
+                                {
+                                    detail: {
+                                        tab: "icons",
+                                        onSelectIcon: onSelectIcon,
+                                    },
+                                },
+                            );
+                            window.dispatchEvent(event);
+                        }}
+                        className="text-xs shrink-0 cursor-pointer font-semibold"
+                    >
+                        Custom Icon...
+                    </Button>
                 </div>
 
-
                 <div className="px-4 pb-2 flex items-center justify-between border-b border-border/50">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Style</span>
-                    <div className="flex bg-muted/40 p-0.5 rounded-lg border border-border/40 gap-px">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Style
+                    </span>
+                    <div className="flex bg-muted/40 p-0.5 rounded-md border border-border/40 gap-px">
                         {WEIGHTS.map((w) => (
                             <button
                                 key={w.value}
@@ -162,16 +195,26 @@ export function IconPicker({ open, onOpenChange, onSelectIcon, defaultWeight = "
                         <div className="grid grid-cols-6 gap-3">
                             {recommendedIconNames.map((iconName) => {
                                 const IconComponent = icons[iconName];
-                                if (!IconComponent || (typeof IconComponent !== "function" && !(typeof IconComponent === "object" && IconComponent.$$typeof))) return null;
+                                if (
+                                    !IconComponent ||
+                                    (typeof IconComponent !== "function" &&
+                                        !(
+                                            typeof IconComponent === "object" &&
+                                            IconComponent.$$typeof
+                                        ))
+                                )
+                                    return null;
                                 return (
                                     <button
                                         key={`rec-${iconName}`}
                                         type="button"
                                         onClick={() => {
-                                            onSelectIcon(`${iconName}:${selectedWeight}`);
+                                            onSelectIcon(
+                                                `${iconName}:${selectedWeight}`,
+                                            );
                                             onOpenChange(false);
                                         }}
-                                        className="aspect-square flex items-center justify-center rounded-lg hover:bg-accent hover:text-accent-foreground border border-border/50 transition-colors group bg-background shadow-sm"
+                                        className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-border/50 transition-colors group bg-background shadow-sm"
                                         title={iconName}
                                     >
                                         <IconComponent
@@ -195,17 +238,28 @@ export function IconPicker({ open, onOpenChange, onSelectIcon, defaultWeight = "
                             <div className="grid grid-cols-6 gap-2 w-full content-start flex-1">
                                 {paginatedIcons.map((iconName) => {
                                     const IconComponent = icons[iconName];
-                                    if (!IconComponent || (typeof IconComponent !== "function" && !(typeof IconComponent === "object" && IconComponent.$$typeof))) return null;
+                                    if (
+                                        !IconComponent ||
+                                        (typeof IconComponent !== "function" &&
+                                            !(
+                                                typeof IconComponent ===
+                                                    "object" &&
+                                                IconComponent.$$typeof
+                                            ))
+                                    )
+                                        return null;
 
                                     return (
                                         <button
                                             key={iconName}
                                             type="button"
                                             onClick={() => {
-                                                onSelectIcon(`${iconName}:${selectedWeight}`);
+                                                onSelectIcon(
+                                                    `${iconName}:${selectedWeight}`,
+                                                );
                                                 onOpenChange(false);
                                             }}
-                                            className="aspect-square flex items-center justify-center rounded-lg hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group"
+                                            className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group"
                                             title={iconName}
                                         >
                                             <IconComponent

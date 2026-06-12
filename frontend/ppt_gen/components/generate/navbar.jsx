@@ -12,6 +12,8 @@ import {
     Presentation,
     Palette,
     Play,
+    Menu,
+    X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/generate/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -44,8 +46,13 @@ export function Navbar() {
     const isDetailPage =
         pathname.startsWith("/generate/") &&
         (pathSegments.length === 3 || pathSegments.length === 4);
-    const [pptInfo, setPptInfo] = useState({ title: "", appState: "", isBusy: false });
+    const [pptInfo, setPptInfo] = useState({
+        title: "",
+        appState: "",
+        isBusy: false,
+    });
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         if (!isDetailPage) return;
@@ -115,7 +122,7 @@ export function Navbar() {
 
                 <div className="flex items-center gap-3">
                     {isDetailPage && pptInfo.appState === "viewing_slides" && (
-                        <>
+                        <div className="hidden md:flex items-center gap-3">
                             {/* Theme Selector Button */}
                             <Button
                                 variant="outline"
@@ -153,14 +160,14 @@ export function Navbar() {
                                 >
                                     <DropdownMenuItem
                                         onClick={handleDownloadPDF}
-                                        className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-lg"
+                                        className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
                                     >
                                         <FileText size={14} />
                                         <span>Download as PDF</span>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                         onClick={handleDownloadPPT}
-                                        className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-lg"
+                                        className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
                                     >
                                         <Presentation size={14} />
                                         <span>Download as PPTX</span>
@@ -185,22 +192,34 @@ export function Navbar() {
                             </Button>
 
                             <div className="h-4 w-[1px] bg-black/10 dark:bg-white/10" />
-                        </>
+                        </div>
                     )}
 
-                    <Link
-                        href="/dashboard"
-                        title="Dashboard"
-                        className={`inline-flex items-center justify-center rounded-md w-9 h-9 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 ${
-                            pathname === "/dashboard"
-                                ? "bg-zinc-100 dark:bg-zinc-800 text-foreground font-semibold"
-                                : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        }`}
-                    >
-                        <LayoutDashboard className="h-[1.2rem] w-[1.2rem]" />
-                    </Link>
+                    <div className="hidden md:flex items-center gap-3">
+                        <Link
+                            href="/dashboard"
+                            title="Dashboard"
+                            className={`inline-flex items-center justify-center rounded-md w-9 h-9 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-600 ${
+                                pathname === "/dashboard"
+                                    ? "bg-zinc-100 dark:bg-zinc-800 text-foreground font-semibold"
+                                    : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            }`}
+                        >
+                            <LayoutDashboard className="h-[1.2rem] w-[1.2rem]" />
+                        </Link>
 
-                    <ThemeToggle />
+                        <ThemeToggle />
+                    </div>
+
+                    {/* Hamburger Button for Mobile */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="flex md:hidden text-foreground hover:bg-accent w-9 h-9 items-center justify-center"
+                    >
+                        <Menu size={18} />
+                    </Button>
 
                     {session?.user ? (
                         <DropdownMenu>
@@ -238,7 +257,7 @@ export function Navbar() {
                                 <DropdownMenuSeparator className="bg-border" />
                                 <DropdownMenuItem
                                     onClick={() => signOut()}
-                                    className="px-2.5 py-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-lg cursor-pointer flex items-center gap-2"
+                                    className="px-2.5 py-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-md cursor-pointer flex items-center gap-2"
                                 >
                                     <LogOut size={16} />
                                     <span>Sign out</span>
@@ -253,8 +272,203 @@ export function Navbar() {
                 </div>
             </div>
 
+            {/* Mobile Drawer Overlay */}
+            {isMobileMenuOpen && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 md:hidden"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    {/* Drawer */}
+                    <div className="fixed top-0 right-0 h-full w-[300px] bg-background border-l border-border z-50 p-5 flex flex-col gap-5 md:hidden shadow-2xl animate-in slide-in-from-right duration-200">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-foreground">
+                                Menu
+                            </span>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            >
+                                <X size={18} />
+                            </Button>
+                        </div>
+
+                        <div className="flex flex-col gap-4 overflow-y-auto flex-1">
+                            {isDetailPage &&
+                                pptInfo.appState === "viewing_slides" && (
+                                    <div className="flex flex-col gap-3">
+                                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1">
+                                            Presentation Actions
+                                        </span>
+
+                                        {/* Theme Selector */}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setIsThemeModalOpen(true);
+                                                setIsMobileMenuOpen(false);
+                                            }}
+                                            disabled={pptInfo.isBusy}
+                                            className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground h-9 gap-2 px-3 rounded-md text-xs font-medium cursor-pointer"
+                                        >
+                                            <Palette
+                                                size={14}
+                                                className="text-primary"
+                                            />
+                                            <span>Theme: </span>
+                                            <span className="capitalize font-semibold">
+                                                {themesList.find(
+                                                    (t) =>
+                                                        t.id === pptInfo.theme,
+                                                )?.name ||
+                                                    pptInfo.theme ||
+                                                    "Theme"}
+                                            </span>
+                                        </Button>
+
+                                        {/* Export PDF */}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                handleDownloadPDF();
+                                                setIsMobileMenuOpen(false);
+                                            }}
+                                            disabled={pptInfo.isBusy}
+                                            className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground h-9 gap-2 px-3 rounded-md text-xs font-medium cursor-pointer"
+                                        >
+                                            <FileText
+                                                size={14}
+                                                className="text-primary"
+                                            />
+                                            <span>Download as PDF</span>
+                                        </Button>
+
+                                        {/* Export PPT */}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                handleDownloadPPT();
+                                                setIsMobileMenuOpen(false);
+                                            }}
+                                            disabled={pptInfo.isBusy}
+                                            className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground h-9 gap-2 px-3 rounded-md text-xs font-medium cursor-pointer"
+                                        >
+                                            <Presentation
+                                                size={14}
+                                                className="text-primary"
+                                            />
+                                            <span>Download as PPTX</span>
+                                        </Button>
+
+                                        {/* Present */}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                handlePresentClick();
+                                                setIsMobileMenuOpen(false);
+                                            }}
+                                            disabled={pptInfo.isBusy}
+                                            className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground h-9 gap-2 px-3 rounded-md text-xs font-medium cursor-pointer"
+                                        >
+                                            <Play
+                                                size={14}
+                                                className="fill-current text-primary"
+                                            />
+                                            <span>Present</span>
+                                        </Button>
+                                    </div>
+                                )}
+
+                            <div className="h-[1px] bg-border my-1" />
+
+                            <div className="flex flex-col gap-3">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1">
+                                    Navigation & Settings
+                                </span>
+
+                                {/* Dashboard */}
+                                <Link
+                                    href="/dashboard"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
+                                        pathname === "/dashboard"
+                                            ? "bg-accent text-accent-foreground font-semibold"
+                                            : "text-zinc-700 dark:text-zinc-300 hover:bg-accent hover:text-accent-foreground"
+                                    }`}
+                                >
+                                    <LayoutDashboard className="h-4 w-4 text-primary" />
+                                    <span>Dashboard</span>
+                                </Link>
+
+                                {/* Theme Toggle */}
+                                <div className="flex items-center justify-between px-3 py-1 bg-muted/40 rounded-md">
+                                    <span className="text-xs text-muted-foreground">
+                                        Dark Mode
+                                    </span>
+                                    <ThemeToggle />
+                                </div>
+                            </div>
+
+                            {session?.user && (
+                                <div className="mt-auto border-t border-border pt-4 flex flex-col gap-3">
+                                    <div className="flex items-center gap-2.5 px-1">
+                                        <Avatar className="w-8 h-8">
+                                            <AvatarImage
+                                                src={session.user.image}
+                                                alt={
+                                                    session.user.name || "User"
+                                                }
+                                            />
+                                            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+                                                {(
+                                                    session.user.name ||
+                                                    session.user.email ||
+                                                    "U"
+                                                )
+                                                    .charAt(0)
+                                                    .toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="text-xs font-semibold truncate text-foreground">
+                                                {session.user.name}
+                                            </span>
+                                            <span className="text-[10px] text-muted-foreground truncate">
+                                                {session.user.email}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => {
+                                            signOut();
+                                            setIsMobileMenuOpen(false);
+                                        }}
+                                        className="w-full justify-center gap-1.5 h-9 text-xs font-medium"
+                                    >
+                                        <LogOut size={14} />
+                                        <span>Sign out</span>
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
+
             {/* Theme Selector Modal */}
-            <Dialog open={isThemeModalOpen && !pptInfo.isBusy} onOpenChange={pptInfo.isBusy ? undefined : setIsThemeModalOpen}>
+            <Dialog
+                open={isThemeModalOpen && !pptInfo.isBusy}
+                onOpenChange={pptInfo.isBusy ? undefined : setIsThemeModalOpen}
+            >
                 <DialogContent className="max-w-4xl sm:max-w-4xl bg-popover border-border text-popover-foreground rounded-xl p-6 shadow-2xl z-50">
                     <DialogHeader>
                         <DialogTitle className="text-lg font-bold">
@@ -290,7 +504,7 @@ export function Navbar() {
                                     {/* Miniature slide layout preview */}
                                     <div
                                         data-theme={t.id}
-                                        className="theme-container w-full aspect-[16/10] rounded-lg border theme-border p-2.5 flex flex-col justify-between overflow-hidden shadow-xs relative"
+                                        className="theme-container w-full aspect-[16/10] rounded-md border theme-border p-2.5 flex flex-col justify-between overflow-hidden shadow-xs relative"
                                     >
                                         {/* Title & Subtitle */}
                                         <div className="space-y-0.5">

@@ -24,16 +24,61 @@ export function EditableIcon({
     const [pickerOpen, setPickerOpen] = useState(false);
 
     const parseIconName = (nameString) => {
-        if (!nameString) return { pureName: "Star", currentWeight: "regular" };
+        if (!nameString) return { pureName: "Star", currentWeight: "regular", isCustomSvg: false, isCustomImg: false };
+        
+        if (nameString.startsWith("custom_svg:")) {
+            let svgContent = "";
+            try {
+                const base64 = nameString.substring("custom_svg:".length);
+                svgContent = atob(base64);
+                // Sanitize scripts
+                svgContent = svgContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+                svgContent = svgContent.replace(/on\w+\s*=\s*"(?:\\"|[^"])*"/g, "");
+                svgContent = svgContent.replace(/on\w+\s*=\s*'(?:\\'|[^'])*'/g, "");
+            } catch (e) {
+                console.error("Failed to decode custom SVG:", e);
+            }
+            return {
+                pureName: "",
+                currentWeight: "regular",
+                isCustomSvg: true,
+                isCustomImg: false,
+                svgContent
+            };
+        }
+        
+        if (nameString.startsWith("custom_img:")) {
+            const imgUrl = nameString.substring("custom_img:".length);
+            return {
+                pureName: "",
+                currentWeight: "regular",
+                isCustomSvg: false,
+                isCustomImg: true,
+                imgUrl
+            };
+        }
+        
+        if (nameString.startsWith("http://") || nameString.startsWith("https://") || nameString.startsWith("/")) {
+            return {
+                pureName: "",
+                currentWeight: "regular",
+                isCustomSvg: false,
+                isCustomImg: true,
+                imgUrl: nameString
+            };
+        }
+        
         const parts = nameString.split(":");
         return {
             pureName: parts[0] || "Star",
             currentWeight: parts[1] || "regular",
+            isCustomSvg: false,
+            isCustomImg: false
         };
     };
 
-    const { pureName, currentWeight } = parseIconName(iconName);
-    const IconComponent = icons[pureName] || icons["Star"];
+    const { pureName, currentWeight, isCustomSvg, isCustomImg, svgContent, imgUrl } = parseIconName(iconName);
+    const IconComponent = (!isCustomSvg && !isCustomImg) ? (icons[pureName] || icons["Star"]) : null;
 
     return (
         <div className={`relative inline-flex group/icon ${className}`}>
@@ -72,11 +117,24 @@ export function EditableIcon({
             <div
                 className={`flex items-center justify-center relative transition-all rounded-[0.4cqw] ${iconClassName} ${!readOnly ? "group-hover/icon:outline group-hover/icon:outline-[0.15cqw] group-hover/icon:outline-blue-500/80 group-hover/icon:outline-offset-[0.2cqw] group-data-[menu-open=true]/item:!outline-none" : ""}`}
             >
-                <IconComponent
-                    weight={currentWeight}
-                    className="theme-text-primary my-[1cqw]"
-                    style={{ width: "100%", height: "100%" }}
-                />
+                {isCustomSvg ? (
+                    <div 
+                        className="theme-text-primary my-[1cqw] w-full h-full flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-current [&_svg]:text-current"
+                        dangerouslySetInnerHTML={{ __html: svgContent }}
+                    />
+                ) : isCustomImg ? (
+                    <img
+                        src={imgUrl}
+                        className="w-full h-full object-contain my-[1cqw] block"
+                        alt="Custom Icon"
+                    />
+                ) : (
+                    <IconComponent
+                        weight={currentWeight}
+                        className="theme-text-primary my-[1cqw]"
+                        style={{ width: "100%", height: "100%" }}
+                    />
+                )}
             </div>
 
             {!readOnly && (

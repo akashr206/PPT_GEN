@@ -91,13 +91,13 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="px-6 md:px-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
+        <div className="md:px-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
 
           {!isLoading && history.length > 0 && (
             <Link href="/generate" className="h-full">
               <motion.div
                 whileHover={{ y: -4 }}
-                className="h-full border-2 border-dashed border-border hover:border-muted-foreground/30 bg-card/30 hover:bg-card/60 transition-all rounded-lg flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none group"
+                className="h-full border-2 border-dashed border-border hover:border-muted-foreground/30 bg-card/30 hover:bg-card/60 transition-all rounded-md flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none group"
               >
                 <div className="w-12 h-12 rounded-full border border-border group-hover:border-muted-foreground/20 bg-muted/20 group-hover:bg-muted/40 transition-colors flex items-center justify-center mb-3">
                   <Plus size={20} className="text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -131,7 +131,7 @@ export default function DashboardPage() {
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.2 }}
               onClick={() => router.push(`/generate/${item.id}/view`)}
-              className="border border-border bg-card hover:bg-card/80 transition-all rounded-lg flex flex-col cursor-pointer select-none overflow-hidden shadow-sm group hover:shadow-md relative"
+              className="border border-border bg-card hover:bg-card/80 transition-all rounded-md flex flex-col cursor-pointer select-none overflow-hidden shadow-sm group hover:shadow-md relative"
             >
               <div className="aspect-video relative bg-muted/30 border-b border-border/50 overflow-hidden flex items-center justify-center shrink-0">
                 <Slide
@@ -169,13 +169,13 @@ export default function DashboardPage() {
                         onClick={(e) => {
                           e.stopPropagation();
                           const toastId = toast.loading("Converting presentation to PPTX...");
-                          
+
                           const fetchAndDownload = async () => {
                             try {
                               // Fetch full presentation to get all slides
                               const res = await api.get(`/api/ppt/${item.id}`);
                               const presentation = (res && res.data && res.data[0]) || res[0] || res;
-                              
+
                               if (!presentation || !presentation.slides) {
                                 throw new Error("Presentation slides not found");
                               }
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                               toast.dismiss(toastId);
                             }
                           };
-                          
+
                           fetchAndDownload();
                         }}
                         className="cursor-pointer gap-2 py-2"

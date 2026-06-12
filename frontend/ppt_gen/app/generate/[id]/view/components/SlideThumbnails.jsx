@@ -23,7 +23,7 @@ export default function SlideThumbnails({
         const interpolateScroll = () => {
             const current = el.scrollLeft;
             const diff = targetScrollLeft - current;
-            
+
             if (Math.abs(diff) < 0.5) {
                 el.scrollLeft = targetScrollLeft;
                 animationFrameId = null;
@@ -34,12 +34,16 @@ export default function SlideThumbnails({
         };
 
         const handleWheel = (e) => {
-            const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+            const delta =
+                Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
             if (delta !== 0) {
                 e.preventDefault();
                 const maxScrollLeft = el.scrollWidth - el.clientWidth;
-                targetScrollLeft = Math.max(0, Math.min(targetScrollLeft + delta, maxScrollLeft));
-                
+                targetScrollLeft = Math.max(
+                    0,
+                    Math.min(targetScrollLeft + delta, maxScrollLeft),
+                );
+
                 if (animationFrameId === null) {
                     animationFrameId = requestAnimationFrame(interpolateScroll);
                 }
@@ -65,16 +69,16 @@ export default function SlideThumbnails({
     }, []);
 
     return (
-        <div 
+        <div
             ref={previewScrollRef}
-            className="mt-4 md:mt-6 w-full max-w-[1000px] shrink-0 overflow-x-auto flex gap-4 py-2 px-1 scrollbar-thin scrollbar-thumb-muted justify-start"
+            className="mt-3 w-full max-w-[1000px] shrink-0 overflow-x-auto flex gap-4 py-2 px-1 scrollbar-thin scrollbar-thumb-muted justify-start"
         >
             {editableSlides.map((slide, idx) => (
                 <button
                     key={idx}
                     onClick={() => !isBusy && setActiveSlideIndex(idx)}
                     disabled={isBusy}
-                    className={`relative flex w-[120px] aspect-video rounded-lg overflow-hidden border-2 text-left shrink-0 transition-all ${
+                    className={`relative flex w-[120px] aspect-video rounded-md overflow-hidden border-2 text-left shrink-0 transition-all ${
                         activeSlideIndex === idx
                             ? "border-primary ring-2 ring-primary/20 shadow-md"
                             : "border-border hover:border-muted-foreground/30 opacity-70 hover:opacity-100"

@@ -23,7 +23,7 @@ export default function ImageSidebar({
         setIsSearching(true);
         try {
             const res = await api.get(`/api/ppt/images/search`, {
-                params: { q: query }
+                params: { q: query },
             });
             if (res?.success && res.data) {
                 setSearchResults(res.data);
@@ -41,8 +41,13 @@ export default function ImageSidebar({
 
     useEffect(() => {
         if (isOpen && imageEditContext) {
-            const isUrl = imageEditContext.currentQuery && (imageEditContext.currentQuery.startsWith("http://") || imageEditContext.currentQuery.startsWith("https://"));
-            const initialQuery = isUrl ? "" : (imageEditContext.currentQuery || "");
+            const isUrl =
+                imageEditContext.currentQuery &&
+                (imageEditContext.currentQuery.startsWith("http://") ||
+                    imageEditContext.currentQuery.startsWith("https://"));
+            const initialQuery = isUrl
+                ? ""
+                : imageEditContext.currentQuery || "";
             setSearchQuery(initialQuery);
             setSearchResults([]);
             if (initialQuery) {
@@ -59,7 +64,9 @@ export default function ImageSidebar({
             <div className="p-4 border-b border-border flex items-center justify-between shrink-0 bg-secondary/25">
                 <div className="flex flex-col">
                     <h3 className="font-bold text-sm">Edit Slide Image</h3>
-                    <span className="text-[10px] text-muted-foreground">Select an image from Pexels</span>
+                    <span className="text-[10px] text-muted-foreground">
+                        Select an image from Pexels
+                    </span>
                 </div>
                 <button
                     onClick={onClose}
@@ -93,7 +100,7 @@ export default function ImageSidebar({
                         {isSearching ? "..." : "Search"}
                     </button>
                 </form>
-                
+
                 <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
                     <span>Photos provided by</span>
                     <a
@@ -112,7 +119,10 @@ export default function ImageSidebar({
                 {isSearching ? (
                     <div className="grid grid-cols-2 gap-3">
                         {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="aspect-[16/9] rounded-lg skeleton-sweep border border-border/50" />
+                            <div
+                                key={i}
+                                className="aspect-[16/9] rounded-md skeleton-sweep border border-border/50"
+                            />
                         ))}
                     </div>
                 ) : searchResults.length > 0 ? (
@@ -120,8 +130,10 @@ export default function ImageSidebar({
                         {searchResults.map((img, i) => (
                             <button
                                 key={i}
-                                onClick={() => onSelectImage(img.imageURL, searchQuery)}
-                                className="relative aspect-[16/9] rounded-lg overflow-hidden border border-border hover:border-blue-500 shadow-sm cursor-pointer group bg-muted transition-colors"
+                                onClick={() =>
+                                    onSelectImage(img.imageURL, searchQuery)
+                                }
+                                className="relative aspect-[16/9] rounded-md overflow-hidden border border-border hover:border-blue-500 shadow-sm cursor-pointer group bg-muted transition-colors"
                             >
                                 <img
                                     src={img.previewURL}
@@ -133,7 +145,9 @@ export default function ImageSidebar({
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <span className="text-xs text-muted-foreground">No images found. Try a different query.</span>
+                        <span className="text-xs text-muted-foreground">
+                            No images found. Try a different query.
+                        </span>
                     </div>
                 )}
             </div>

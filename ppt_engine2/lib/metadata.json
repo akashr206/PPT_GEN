@@ -218,7 +218,6 @@
                 "other": "Each row is represented by an item in the items array. The columns/cells for that row are stored in the item's 'cells' array of strings. The first item in the items array (items[0]) represents the table headers. When generating, ensure all items in the items array contain the same number of elements in their cells array (e.g., cells.length matches column count)."
             }
         },
-
         "timelines": {
             "name": "Timelines",
             "description": "Display events, steps, or progression sequences chronologically.",

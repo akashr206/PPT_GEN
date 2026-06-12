@@ -36,8 +36,7 @@ export default function GenerateLayout({ children }) {
           className="absolute bottom-1/4 -right-[10%] w-[50%] h-[50%] bg-gradient-to-l from-violet-600/25 to-blue-600/25 blur-[140px] rounded-full pointer-events-none z-0 mix-blend-screen transform rotate-12 dark:opacity-70 opacity-40"
         />
 
-        {/* Added top padding of 72px (pt-18) to offset floating navbar */}
-        <div className="flex-1 min-h-0 flex relative z-10 pt-18">
+        <div className="flex-1 min-h-0 flex relative z-10 pt-14">
           {children}
         </div>
       </main>

@@ -51,7 +51,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         <TooltipTrigger asChild>
                             <DropdownMenuItem
                                 onClick={onAddBefore}
-                                className="cursor-pointer text-xs flex items-center justify-center p-2 rounded-lg hover:bg-accent"
+                                className="cursor-pointer text-xs flex items-center justify-center p-2 rounded-md hover:bg-accent"
                             >
                                 <ArrowLeftToLine
                                     size={14}
@@ -71,7 +71,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         <TooltipTrigger asChild>
                             <DropdownMenuItem
                                 onClick={onAddAfter}
-                                className="cursor-pointer text-xs flex items-center justify-center p-2 rounded-lg hover:bg-accent"
+                                className="cursor-pointer text-xs flex items-center justify-center p-2 rounded-md hover:bg-accent"
                             >
                                 <ArrowRightToLine
                                     size={14}
@@ -91,7 +91,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         <TooltipTrigger asChild>
                             <DropdownMenuItem
                                 onClick={onDelete}
-                                className="cursor-pointer text-xs flex items-center justify-center p-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-lg"
+                                className="cursor-pointer text-xs flex items-center justify-center p-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-md"
                             >
                                 <Trash2 size={14} />
                             </DropdownMenuItem>

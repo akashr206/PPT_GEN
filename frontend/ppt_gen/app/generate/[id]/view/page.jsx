@@ -3,16 +3,33 @@
 import React, { useState, useEffect, use, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Loader2, Layout, Plus, ChevronLeft, ChevronRight, Undo, Redo } from "lucide-react";
+import {
+    Loader2,
+    Layout,
+    Plus,
+    ChevronLeft,
+    ChevronRight,
+    Undo,
+    Redo,
+    FolderOpen,
+    SlidersHorizontal,
+    Diamond,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import Slide from "@/components/templates/Slide";
 import { toast } from "sonner";
 import { extractSlideData } from "@/utils/extractor";
 import api from "@/lib/api";
 
-import ImageSidebar from "./components/ImageSidebar";
+import LibrarySidebar from "./components/LibrarySidebar";
 import LayoutSelectorModal from "./components/LayoutSelectorModal";
 import SlideThumbnails from "./components/SlideThumbnails";
 
@@ -40,13 +57,20 @@ export default function PPTSlidesViewerPage({ params }) {
     // Detect if page was reloaded to prevent triggering new stream / generation on reload
     const [isReloaded] = useState(() => {
         if (typeof window === "undefined") return false;
-        const navigationEntries = window.performance?.getEntriesByType?.("navigation");
-        return navigationEntries && navigationEntries.length > 0 && navigationEntries[0].type === "reload";
+        const navigationEntries =
+            window.performance?.getEntriesByType?.("navigation");
+        return (
+            navigationEntries &&
+            navigationEntries.length > 0 &&
+            navigationEntries[0].type === "reload"
+        );
     });
 
-    const [isStreamGenerating, setIsStreamGenerating] = useState(isGeneratingParam && !isReloaded);
+    const [isStreamGenerating, setIsStreamGenerating] = useState(
+        isGeneratingParam && !isReloaded,
+    );
     const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX;
-    
+
     // Undo / Redo history state
     const [past, setPast] = useState([]);
     const [future, setFuture] = useState([]);
@@ -79,29 +103,81 @@ export default function PPTSlidesViewerPage({ params }) {
     const [imageLoading, setImageLoading] = useState({});
     const fetchQueueRef = useRef(new Set());
 
-    // Sidebar image editor states
-    const [isImageSidebarOpen, setIsImageSidebarOpen] = useState(false);
+    // Unified Library Sidebar states
+    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+    const [libraryActiveTab, setLibraryActiveTab] = useState("images");
     const [imageEditContext, setImageEditContext] = useState(null);
+    const [libraryIconCallback, setLibraryIconCallback] = useState(null);
 
     const fetchImage = useCallback(async (key, query) => {
         setImageLoading((prev) => ({ ...prev, [key]: true }));
+        let finalImageUrl = null;
         try {
             const res = await api.get(`/api/ppt/images/search`, {
-                params: { description: query }
+                params: { description: query },
             });
             if (res?.success && res.data && res.data.length > 0) {
-                const imageUrl = res.data[0].imageURL;
-                setFetchedImages((prev) => ({ ...prev, [key]: imageUrl }));
+                finalImageUrl = res.data[0].imageURL;
+                setFetchedImages((prev) => ({ ...prev, [key]: finalImageUrl }));
             } else {
                 throw new Error("No images found in search results");
             }
         } catch (err) {
             console.error(`Failed to fetch image for key ${key}:`, err);
             // Fallback placeholder
-            const fallback = `https://picsum.photos/seed/${encodeURIComponent(query)}/800/600`;
-            setFetchedImages((prev) => ({ ...prev, [key]: fallback }));
+            finalImageUrl = `https://picsum.photos/seed/${encodeURIComponent(query)}/800/600`;
+            setFetchedImages((prev) => ({ ...prev, [key]: finalImageUrl }));
         } finally {
             setImageLoading((prev) => ({ ...prev, [key]: false }));
+
+            if (finalImageUrl) {
+                const keyParts = key.split("_");
+                const sIndex = parseInt(keyParts[1], 10);
+
+                const updateSlideImage = (slidesList) => {
+                    if (!slidesList || !slidesList[sIndex]) return slidesList;
+                    const updated = [...slidesList];
+                    if (keyParts.length === 2) {
+                        // Slide level image split / overlay
+                        updated[sIndex] = {
+                            ...updated[sIndex],
+                            image: finalImageUrl,
+                            imageDescription: query,
+                        };
+                    } else if (
+                        keyParts.length === 4 &&
+                        keyParts[2] === "item"
+                    ) {
+                        // Item level image grid
+                        const iIndex = parseInt(keyParts[3], 10);
+                        if (
+                            updated[sIndex].items &&
+                            updated[sIndex].items[iIndex]
+                        ) {
+                            const updatedItems = [...updated[sIndex].items];
+                            updatedItems[iIndex] = {
+                                ...updatedItems[iIndex],
+                                image: finalImageUrl,
+                                imageDescription: query,
+                            };
+                            updated[sIndex] = {
+                                ...updated[sIndex],
+                                items: updatedItems,
+                            };
+                        }
+                    }
+                    return updated;
+                };
+
+                setEditableSlides((prev) => updateSlideImage(prev));
+                setPptData((prev) => {
+                    if (!prev || !prev.slides) return prev;
+                    return {
+                        ...prev,
+                        slides: updateSlideImage(prev.slides),
+                    };
+                });
+            }
         }
     }, []);
 
@@ -109,15 +185,22 @@ export default function PPTSlidesViewerPage({ params }) {
         if (!editableSlides || editableSlides.length === 0) return;
 
         editableSlides.forEach((slide, sIndex) => {
-            const isImageCategory = slide.layout?.category === "images" || slide.layout?.category === "image";
+            const isImageCategory =
+                slide.layout?.category === "images" ||
+                slide.layout?.category === "image";
             if (!isImageCategory) return;
 
             const lType = slide.layout?.type;
 
             if (lType === "split" || lType === "overlay") {
                 const sKey = `slide_${sIndex}`;
-                const hasUrl = slide.image && (slide.image.startsWith("http://") || slide.image.startsWith("https://"));
-                const query = slide.imageDescription || (!hasUrl ? slide.image : null);
+                const hasUrl =
+                    slide.image &&
+                    (slide.image.startsWith("http://") ||
+                        slide.image.startsWith("https://"));
+                const query = hasUrl
+                    ? null
+                    : slide.imageDescription || slide.image;
 
                 if (query && !fetchQueueRef.current.has(sKey)) {
                     fetchQueueRef.current.add(sKey);
@@ -127,8 +210,13 @@ export default function PPTSlidesViewerPage({ params }) {
                 if (slide.items) {
                     slide.items.forEach((item, iIndex) => {
                         const itemKey = `slide_${sIndex}_item_${iIndex}`;
-                        const hasUrl = item.image && (item.image.startsWith("http://") || item.image.startsWith("https://"));
-                        const query = item.imageDescription || (!hasUrl ? item.image : null);
+                        const hasUrl =
+                            item.image &&
+                            (item.image.startsWith("http://") ||
+                                item.image.startsWith("https://"));
+                        const query = hasUrl
+                            ? null
+                            : item.imageDescription || item.image;
 
                         if (query && !fetchQueueRef.current.has(itemKey)) {
                             fetchQueueRef.current.add(itemKey);
@@ -140,80 +228,125 @@ export default function PPTSlidesViewerPage({ params }) {
         });
     }, [editableSlides, fetchImage]);
 
-    const resolveSlideContent = useCallback((slide, index) => {
-        if (!slide) return null;
-        
-        const resolved = { ...slide };
-        const sKey = `slide_${index}`;
-        
-        if (fetchedImages[sKey]) {
-            resolved.image = fetchedImages[sKey];
-        }
-        if (imageLoading[sKey]) {
-            resolved.imageLoading = true;
-        }
+    const resolveSlideContent = useCallback(
+        (slide, index) => {
+            if (!slide) return null;
 
-        if (resolved.items) {
-            resolved.items = resolved.items.map((item, itemIdx) => {
-                const itemKey = `slide_${index}_item_${itemIdx}`;
-                const newItem = { ...item };
-                if (fetchedImages[itemKey]) {
-                    newItem.image = fetchedImages[itemKey];
-                }
-                if (imageLoading[itemKey]) {
-                    newItem.imageLoading = true;
-                }
-                return newItem;
-            });
-        }
-        
-        return resolved;
-    }, [fetchedImages, imageLoading]);
+            const resolved = { ...slide };
+            const sKey = `slide_${index}`;
+
+            if (fetchedImages[sKey]) {
+                resolved.image = fetchedImages[sKey];
+            }
+            if (imageLoading[sKey]) {
+                resolved.imageLoading = true;
+            }
+
+            if (resolved.items) {
+                resolved.items = resolved.items.map((item, itemIdx) => {
+                    const itemKey = `slide_${index}_item_${itemIdx}`;
+                    const newItem = { ...item };
+                    if (fetchedImages[itemKey]) {
+                        newItem.image = fetchedImages[itemKey];
+                    }
+                    if (imageLoading[itemKey]) {
+                        newItem.imageLoading = true;
+                    }
+                    return newItem;
+                });
+            }
+
+            return resolved;
+        },
+        [fetchedImages, imageLoading],
+    );
 
     const handleEditImage = useCallback((context) => {
         setImageEditContext(context);
-        setIsImageSidebarOpen(true);
+        setLibraryActiveTab("images");
+        setIsLibraryOpen(true);
     }, []);
 
-    const handleSelectSidebarImage = useCallback((imageUrl, queryStr) => {
-        if (!imageEditContext || !editableSlides || !editableSlides[activeSlideIndex]) return;
-        
-        const updatedSlides = [...editableSlides];
-        const slide = updatedSlides[activeSlideIndex];
-        
-        if (imageEditContext.type === "slide") {
-            slide.image = imageUrl;
-            slide.imageDescription = queryStr;
-        } else if (imageEditContext.type === "item" && imageEditContext.itemIndex !== undefined) {
-            const itemIndex = imageEditContext.itemIndex;
-            if (slide.items && slide.items[itemIndex]) {
-                slide.items[itemIndex] = {
-                    ...slide.items[itemIndex],
-                    image: imageUrl,
-                    imageDescription: queryStr
-                };
+    const handleSelectSidebarIcon = useCallback(
+        (iconName) => {
+            if (libraryIconCallback) {
+                libraryIconCallback(iconName);
             }
-        }
-        
-        const cacheKey = imageEditContext.type === "slide" 
-            ? `slide_${activeSlideIndex}` 
-            : `slide_${activeSlideIndex}_item_${imageEditContext.itemIndex}`;
-        
-        setFetchedImages((prev) => ({ ...prev, [cacheKey]: imageUrl }));
-        
-        updateSlidesState(updatedSlides);
-        toast.success("Image updated successfully");
-    }, [imageEditContext, editableSlides, activeSlideIndex]);
-    
-    const presentationRef = useRef(null);
+        },
+        [libraryIconCallback],
+    );
 
+    useEffect(() => {
+        const handleOpenLibraryEvent = (e) => {
+            const { tab, onSelectIcon } = e.detail;
+            setLibraryActiveTab(tab || "images");
+            if (onSelectIcon) {
+                setLibraryIconCallback(() => onSelectIcon);
+            }
+            setIsLibraryOpen(true);
+        };
+        window.addEventListener("trigger-open-library", handleOpenLibraryEvent);
+        return () =>
+            window.removeEventListener(
+                "trigger-open-library",
+                handleOpenLibraryEvent,
+            );
+    }, []);
+
+    const handleSelectSidebarImage = useCallback(
+        (imageUrl, queryStr) => {
+            if (
+                !imageEditContext ||
+                !editableSlides ||
+                !editableSlides[activeSlideIndex]
+            )
+                return;
+
+            const updatedSlides = [...editableSlides];
+            const slide = updatedSlides[activeSlideIndex];
+
+            if (imageEditContext.type === "slide") {
+                slide.image = imageUrl;
+                slide.imageDescription = queryStr;
+            } else if (
+                imageEditContext.type === "item" &&
+                imageEditContext.itemIndex !== undefined
+            ) {
+                const itemIndex = imageEditContext.itemIndex;
+                if (slide.items && slide.items[itemIndex]) {
+                    slide.items[itemIndex] = {
+                        ...slide.items[itemIndex],
+                        image: imageUrl,
+                        imageDescription: queryStr,
+                    };
+                }
+            }
+
+            const cacheKey =
+                imageEditContext.type === "slide"
+                    ? `slide_${activeSlideIndex}`
+                    : `slide_${activeSlideIndex}_item_${imageEditContext.itemIndex}`;
+
+            setFetchedImages((prev) => ({ ...prev, [cacheKey]: imageUrl }));
+
+            updateSlidesState(updatedSlides);
+            toast.success("Image updated successfully");
+        },
+        [imageEditContext, editableSlides, activeSlideIndex],
+    );
+
+    const presentationRef = useRef(null);
 
     useEffect(() => {
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };
         document.addEventListener("fullscreenchange", handleFullscreenChange);
-        return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+        return () =>
+            document.removeEventListener(
+                "fullscreenchange",
+                handleFullscreenChange,
+            );
     }, []);
 
     // Redirect reloads back to /generate (only if we were in generating mode)
@@ -229,7 +362,8 @@ export default function PPTSlidesViewerPage({ params }) {
 
         const handleBeforeUnload = (e) => {
             e.preventDefault();
-            e.returnValue = "Reloading will abort the generation. Are you sure you want to leave?";
+            e.returnValue =
+                "Reloading will abort the generation. Are you sure you want to leave?";
             return e.returnValue;
         };
 
@@ -238,8 +372,6 @@ export default function PPTSlidesViewerPage({ params }) {
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
     }, [isStreamGenerating]);
-
-
 
     const handlePresent = useCallback(async () => {
         if (presentationRef.current) {
@@ -251,18 +383,23 @@ export default function PPTSlidesViewerPage({ params }) {
                 }
             } catch (err) {
                 console.error("Error attempting to enable fullscreen:", err);
-                toast.error("Fullscreen presentation not supported or blocked.");
+                toast.error(
+                    "Fullscreen presentation not supported or blocked.",
+                );
             }
         }
     }, []);
 
     const updateSlidesState = (newSlides) => {
-        setPast((prev) => [...prev, JSON.parse(JSON.stringify(editableSlidesRef.current))]);
+        setPast((prev) => [
+            ...prev,
+            JSON.parse(JSON.stringify(editableSlidesRef.current)),
+        ]);
         setFuture([]);
         setEditableSlides(newSlides);
         setPptData((prev) => ({
             ...prev,
-            slides: newSlides
+            slides: newSlides,
         }));
     };
 
@@ -276,14 +413,27 @@ export default function PPTSlidesViewerPage({ params }) {
         const currentSlides = editableSlidesRef.current;
         let diffIndex = -1;
         if (currentSlides && previous) {
-            for (let i = 0; i < Math.min(currentSlides.length, previous.length); i++) {
-                if (JSON.stringify(currentSlides[i]) !== JSON.stringify(previous[i])) {
+            for (
+                let i = 0;
+                i < Math.min(currentSlides.length, previous.length);
+                i++
+            ) {
+                if (
+                    JSON.stringify(currentSlides[i]) !==
+                    JSON.stringify(previous[i])
+                ) {
                     diffIndex = i;
                     break;
                 }
             }
             if (diffIndex === -1) {
-                diffIndex = Math.min(previous.length - 1, Math.max(0, Math.min(currentSlides.length, previous.length)));
+                diffIndex = Math.min(
+                    previous.length - 1,
+                    Math.max(
+                        0,
+                        Math.min(currentSlides.length, previous.length),
+                    ),
+                );
             }
         } else {
             diffIndex = 0;
@@ -296,12 +446,15 @@ export default function PPTSlidesViewerPage({ params }) {
             const newPast = latestPast.slice(0, latestPast.length - 1);
 
             setPast(newPast);
-            setFuture((prev) => [JSON.parse(JSON.stringify(editableSlidesRef.current)), ...prev]);
+            setFuture((prev) => [
+                JSON.parse(JSON.stringify(editableSlidesRef.current)),
+                ...prev,
+            ]);
 
             setEditableSlides(latestPrevious);
             setPptData((prev) => ({
                 ...prev,
-                slides: latestPrevious
+                slides: latestPrevious,
             }));
         };
 
@@ -326,14 +479,23 @@ export default function PPTSlidesViewerPage({ params }) {
         const currentSlides = editableSlidesRef.current;
         let diffIndex = -1;
         if (currentSlides && next) {
-            for (let i = 0; i < Math.min(currentSlides.length, next.length); i++) {
-                if (JSON.stringify(currentSlides[i]) !== JSON.stringify(next[i])) {
+            for (
+                let i = 0;
+                i < Math.min(currentSlides.length, next.length);
+                i++
+            ) {
+                if (
+                    JSON.stringify(currentSlides[i]) !== JSON.stringify(next[i])
+                ) {
                     diffIndex = i;
                     break;
                 }
             }
             if (diffIndex === -1) {
-                diffIndex = Math.min(next.length - 1, Math.max(0, Math.min(currentSlides.length, next.length)));
+                diffIndex = Math.min(
+                    next.length - 1,
+                    Math.max(0, Math.min(currentSlides.length, next.length)),
+                );
             }
         } else {
             diffIndex = 0;
@@ -346,12 +508,15 @@ export default function PPTSlidesViewerPage({ params }) {
             const newFuture = latestFuture.slice(1);
 
             setFuture(newFuture);
-            setPast((prev) => [...prev, JSON.parse(JSON.stringify(editableSlidesRef.current))]);
+            setPast((prev) => [
+                ...prev,
+                JSON.parse(JSON.stringify(editableSlidesRef.current)),
+            ]);
 
             setEditableSlides(latestNext);
             setPptData((prev) => ({
                 ...prev,
-                slides: latestNext
+                slides: latestNext,
             }));
         };
 
@@ -379,8 +544,11 @@ export default function PPTSlidesViewerPage({ params }) {
                 return;
             }
             // Check for Undo / Redo shortcuts
-            const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey;
-            const isRedo = (e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && e.key === "z"));
+            const isUndo =
+                (e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey;
+            const isRedo =
+                (e.ctrlKey || e.metaKey) &&
+                (e.key === "y" || (e.shiftKey && e.key === "z"));
 
             if (isUndo) {
                 e.preventDefault();
@@ -404,7 +572,7 @@ export default function PPTSlidesViewerPage({ params }) {
 
             if (e.key === "ArrowRight") {
                 setActiveSlideIndex((prev) =>
-                    Math.min(prev + 1, editableSlides.length - 1)
+                    Math.min(prev + 1, editableSlides.length - 1),
                 );
             } else if (e.key === "ArrowLeft") {
                 setActiveSlideIndex((prev) => Math.max(prev - 1, 0));
@@ -466,7 +634,7 @@ export default function PPTSlidesViewerPage({ params }) {
             active = false;
         };
     }, [pptId, authStatus, router, isStreamGenerating]);
- 
+
     // Effect to handle Server-Sent Events (SSE) streaming during generation via fetch
     useEffect(() => {
         if (!pptId || !isStreamGenerating || !session?.accessToken) return;
@@ -476,29 +644,33 @@ export default function PPTSlidesViewerPage({ params }) {
 
         const startStream = async () => {
             const token = session.accessToken;
-            
+
             // Extract generation parameters from URL
             const promptParam = searchParams?.get("prompt") || "";
             const toneParam = searchParams?.get("tone") || "";
             const slidesCountParam = searchParams?.get("slidesCount") || "";
             const layoutStyleParam = searchParams?.get("layoutStyle") || "";
 
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-            const streamUrl = `${backendUrl.replace(/\/$/, "")}/api/ppt/stream/${pptId}?` +
+            const backendUrl =
+                process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+            const streamUrl =
+                `${backendUrl.replace(/\/$/, "")}/api/ppt/stream/${pptId}?` +
                 `prompt=${encodeURIComponent(promptParam)}` +
                 `&tone=${encodeURIComponent(toneParam)}` +
                 `&slidesCount=${encodeURIComponent(slidesCountParam)}` +
                 `&layoutStyle=${encodeURIComponent(layoutStyleParam)}`;
 
-            console.log(`[Stream] Establishing fetch stream connection to: ${streamUrl}`);
-            
+            console.log(
+                `[Stream] Establishing fetch stream connection to: ${streamUrl}`,
+            );
+
             try {
                 const response = await fetch(streamUrl, {
                     method: "GET",
                     headers: {
-                        "Authorization": `Bearer ${token}`
+                        Authorization: `Bearer ${token}`,
                     },
-                    signal: abortController.signal
+                    signal: abortController.signal,
                 });
 
                 if (!response.ok) {
@@ -534,14 +706,19 @@ export default function PPTSlidesViewerPage({ params }) {
                                     setEditableSlides(data.slides);
                                     setPptData((prev) => ({
                                         ...prev,
-                                        slides: data.slides
+                                        slides: data.slides,
                                     }));
                                     if (data.slides.length > 0) {
-                                        setActiveSlideIndex(data.slides.length - 1);
+                                        setActiveSlideIndex(
+                                            data.slides.length - 1,
+                                        );
                                     }
                                 }
                             } catch (e) {
-                                console.error("[Stream] Error parsing SSE chunk:", e);
+                                console.error(
+                                    "[Stream] Error parsing SSE chunk:",
+                                    e,
+                                );
                             }
                         }
                     }
@@ -572,7 +749,10 @@ export default function PPTSlidesViewerPage({ params }) {
                         initialDataRef.current = JSON.stringify(presentation);
                     }
                 } catch (err) {
-                    console.error("[Stream] Failed refetching presentation on complete:", err);
+                    console.error(
+                        "[Stream] Failed refetching presentation on complete:",
+                        err,
+                    );
                 }
             };
             refetch();
@@ -615,12 +795,17 @@ export default function PPTSlidesViewerPage({ params }) {
             try {
                 await api.patch(`/api/ppt/${pptId}`, {
                     theme: pptData.theme,
-                    slides: pptData.slides
+                    slides: pptData.slides,
                 });
                 initialDataRef.current = currentDataStr;
             } catch (err) {
-                console.error("Failed to auto-save presentation to backend:", err);
-                toast.error(err.message || "Failed to save presentation changes");
+                console.error(
+                    "Failed to auto-save presentation to backend:",
+                    err,
+                );
+                toast.error(
+                    err.message || "Failed to save presentation changes",
+                );
             }
         }, 1000);
 
@@ -628,11 +813,13 @@ export default function PPTSlidesViewerPage({ params }) {
     }, [pptData, isLoading, pptId, isStreamGenerating]);
 
     const handleDownloadAsPPT = async (e) => {
-        const toastId = toast.loading("Preparing slides for PowerPoint export...");
-        
+        const toastId = toast.loading(
+            "Preparing slides for PowerPoint export...",
+        );
+
         // 1. Mount the full-size slides off-screen
         setIsExtractingPPTX(true);
-        
+
         // 2. Give the browser time to render the hidden slides at full size (1280x720)
         await new Promise((resolve) => setTimeout(resolve, 800));
 
@@ -642,22 +829,33 @@ export default function PPTSlidesViewerPage({ params }) {
             for (let i = 0; i < editableSlides.length; i++) {
                 const element = document.getElementById(`pptx-slide-${i}`);
                 if (!element) {
-                    throw new Error(`Failed to find off-screen slide container for slide ${i + 1}`);
+                    throw new Error(
+                        `Failed to find off-screen slide container for slide ${i + 1}`,
+                    );
                 }
-                const slideData = await extractSlideData(element.firstChild || element);
+                const slideData = await extractSlideData(
+                    element.firstChild || element,
+                );
                 allSlidesData.push(slideData);
             }
 
             // 4. Send the request to backend
-            const blob = await api.post("/api/ppt/convert", {
-                slides: allSlidesData
-            }, {
-                responseType: "blob"
-            });
+            const blob = await api.post(
+                "/api/ppt/convert",
+                {
+                    slides: allSlidesData,
+                },
+                {
+                    responseType: "blob",
+                },
+            );
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = downloadUrl;
-            link.setAttribute("download", `${pptData?.title || "presentation"}.pptx`);
+            link.setAttribute(
+                "download",
+                `${pptData?.title || "presentation"}.pptx`,
+            );
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
@@ -675,111 +873,117 @@ export default function PPTSlidesViewerPage({ params }) {
 
     const handleLayoutChange = (category, type) => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
-        
+
         const updatedSlides = [...editableSlides];
         updatedSlides[activeSlideIndex] = {
             ...updatedSlides[activeSlideIndex],
             layout: {
                 category: category,
-                type: type
-            }
+                type: type,
+            },
         };
-        
+
         updateSlidesState(updatedSlides);
         toast.success(`Layout changed to ${category} (${type})`);
     };
 
     const handleUpdateSlide = (field, value) => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
-        
+
         const updatedSlides = [...editableSlides];
         updatedSlides[activeSlideIndex] = {
             ...updatedSlides[activeSlideIndex],
-            [field]: value
+            [field]: value,
         };
-        
+
         updateSlidesState(updatedSlides);
     };
 
     const handleUpdateItem = (itemIndex, field, value) => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
-        
+
         const updatedSlides = [...editableSlides];
         const slide = updatedSlides[activeSlideIndex];
         if (!slide.items) slide.items = [];
-        
+
         const updatedItems = [...slide.items];
         updatedItems[itemIndex] = {
             ...updatedItems[itemIndex],
-            [field]: value
+            [field]: value,
         };
-        
+
         updatedSlides[activeSlideIndex] = {
             ...slide,
-            items: updatedItems
+            items: updatedItems,
         };
-        
+
         updateSlidesState(updatedSlides);
     };
 
     const handleAddItem = () => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
-        
+
         const updatedSlides = [...editableSlides];
         const slide = updatedSlides[activeSlideIndex];
         const currentItems = slide.items || [];
-        
+
         if (currentItems.length >= 10) {
             toast.error("Maximum of 10 points allowed per slide");
             return;
         }
-        
+
         updatedSlides[activeSlideIndex] = {
             ...slide,
-            items: [...currentItems, { header: "New Item", description: "Item description" }]
+            items: [
+                ...currentItems,
+                { header: "New Item", description: "Item description" },
+            ],
         };
-        
+
         updateSlidesState(updatedSlides);
     };
 
     const handleAddItemAtIndex = (itemIndex, direction) => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
-        
+
         const updatedSlides = [...editableSlides];
         const slide = updatedSlides[activeSlideIndex];
         const currentItems = [...(slide.items || [])];
-        
+
         if (currentItems.length >= 10) {
             toast.error("Maximum of 10 points allowed per slide");
             return;
         }
-        
-        const newItem = { header: "New Point", description: "Point description" };
+
+        const newItem = {
+            header: "New Point",
+            description: "Point description",
+        };
         const insertIndex = direction === "before" ? itemIndex : itemIndex + 1;
         currentItems.splice(insertIndex, 0, newItem);
-        
+
         updatedSlides[activeSlideIndex] = {
             ...slide,
-            items: currentItems
+            items: currentItems,
         };
-        
+
         updateSlidesState(updatedSlides);
     };
 
     const handleDeleteItem = (itemIndex) => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
-        
+
         const updatedSlides = [...editableSlides];
         const slide = updatedSlides[activeSlideIndex];
         if (!slide.items) return;
-        
+
         const updatedItems = slide.items.filter((_, idx) => idx !== itemIndex);
-        
+
         updatedSlides[activeSlideIndex] = {
             ...slide,
-            items: updatedItems
+            items: updatedItems,
         };
-        
+
         updateSlidesState(updatedSlides);
     };
 
@@ -792,8 +996,8 @@ export default function PPTSlidesViewerPage({ params }) {
                         title: pptData.title || "Untitled Presentation",
                         appState: "viewing_slides",
                         theme: pptData.theme || "sunset",
-                        isBusy: isBusy
-                    }
+                        isBusy: isBusy,
+                    },
                 });
                 window.dispatchEvent(event);
             }, 0);
@@ -810,8 +1014,8 @@ export default function PPTSlidesViewerPage({ params }) {
                             title: pptData.title || "Untitled Presentation",
                             appState: "viewing_slides",
                             theme: pptData.theme || "sunset",
-                            isBusy: isBusy
-                        }
+                            isBusy: isBusy,
+                        },
                     });
                     window.dispatchEvent(event);
                 }, 0);
@@ -863,7 +1067,9 @@ export default function PPTSlidesViewerPage({ params }) {
         let active = true;
 
         const generate = async () => {
-            const toastId = toast.loading("Preparing slides for high-res PDF export...");
+            const toastId = toast.loading(
+                "Preparing slides for high-res PDF export...",
+            );
 
             // Give browser time to render the hidden slides
             await new Promise((resolve) => setTimeout(resolve, 800));
@@ -877,12 +1083,12 @@ export default function PPTSlidesViewerPage({ params }) {
                 const pdf = new jsPDF({
                     orientation: "landscape",
                     unit: "px",
-                    format: [1280, 720]
+                    format: [1280, 720],
                 });
 
                 for (let i = 0; i < editableSlides.length; i++) {
                     if (!active) return;
-                    
+
                     const element = document.getElementById(`pdf-slide-${i}`);
                     if (!element) {
                         console.error(`Element pdf-slide-${i} not found`);
@@ -890,13 +1096,13 @@ export default function PPTSlidesViewerPage({ params }) {
                     }
 
                     const canvas = await html2canvas(element, {
-                        scale: 2, 
+                        scale: 2,
                         useCORS: true,
                         logging: false,
                         width: 1280,
                         height: 720,
                         windowWidth: 1280,
-                        windowHeight: 720
+                        windowHeight: 720,
                     });
 
                     if (!active) return;
@@ -953,166 +1159,338 @@ export default function PPTSlidesViewerPage({ params }) {
     }
 
     return (
-        <div className="w-full flex-grow flex flex-row min-h-0 select-none overflow-hidden relative">
-            {/* Left Panel: Main slide editor preview */}
-            <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-8 min-h-0 overflow-y-auto">
-                <div className="flex-1 flex flex-col items-center justify-between md:justify-center w-full h-full p-2 sm:p-4 pb-4 md:pb-4 relative min-h-0">
-                
-                <div className="w-full flex-1 md:flex-none flex flex-col items-center justify-center min-h-0 gap-3">
-                    
-                    <div className="w-full max-w-[1000px] flex justify-end gap-2 px-1">
-                        {isStreamGenerating && (
-                            <div className="mr-auto flex items-center gap-2 text-xs text-amber-500 font-medium px-3 py-1 rounded-lg">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                                </span>
-                                <span>AI is generating. Please do not reload or close this tab.</span>
-                            </div>
-                        )}
+        <div className="w-full flex-grow flex flex-col min-h-0 select-none overflow-hidden relative">
+            {/* Top Toolbar Panel */}
+            <div className="w-full h-12 relative bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 flex items-center justify-between px-6 z-20 shrink-0 select-none">
+                <div className="flex items-center justify-between mx-auto w-full max-w-5xl gap-2">
+                    <div className="flex gap-2">
+                        {/* Undo Button */}
                         <button
                             onClick={handleUndo}
                             disabled={past.length === 0 || isBusy}
-                            className="h-8 w-8 rounded-lg bg-secondary/50 hover:bg-secondary disabled:opacity-50 text-secondary-foreground flex items-center justify-center transition-colors cursor-pointer border border-border/50 shadow-sm disabled:cursor-not-allowed"
+                            className="h-8 w-8 rounded-md bg-secondary/50 hover:bg-secondary disabled:opacity-50 text-secondary-foreground flex items-center justify-center transition-colors cursor-pointer border border-border/50 shadow-sm disabled:cursor-not-allowed"
                             title="Undo (Ctrl+Z)"
                         >
                             <Undo size={14} className="text-primary" />
                         </button>
+                        {/* Redo Button */}
                         <button
                             onClick={handleRedo}
                             disabled={future.length === 0 || isBusy}
-                            className="h-8 w-8 rounded-lg bg-secondary/50 hover:bg-secondary disabled:opacity-50 text-secondary-foreground flex items-center justify-center transition-colors cursor-pointer border border-border/50 shadow-sm disabled:cursor-not-allowed"
+                            className="h-8 w-8 rounded-md bg-secondary/50 hover:bg-secondary disabled:opacity-50 text-secondary-foreground flex items-center justify-center transition-colors cursor-pointer border border-border/50 shadow-sm disabled:cursor-not-allowed"
                             title="Redo (Ctrl+Y)"
                         >
                             <Redo size={14} className="text-primary" />
                         </button>
-
-                        {editableSlides && editableSlides[activeSlideIndex] && 
-                            !["title", "titles"].includes(editableSlides[activeSlideIndex].layout?.category?.toLowerCase()) && (
-                            <button
-                                onClick={handleAddItem}
-                                disabled={isBusy}
-                                className="h-8 px-3 rounded-md bg-secondary/50 hover:bg-secondary text-secondary-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs font-medium border border-border/50 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Add New Point"
-                            >
-                                <Plus size={14} className="text-primary" />
-                                <span>Add Point</span>
-                            </button>
-                        )}
-                        <button
-                            onClick={() => setIsLayoutModalOpen(true)}
-                            disabled={isBusy}
-                            className="h-8 px-3 rounded-md bg-secondary/50 hover:bg-secondary text-secondary-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs font-medium border border-border/50 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Change Slide Layout"
-                        >
-                            <Layout size={14} className="text-primary" />
-                            <span>Layout</span>
-                        </button>
                     </div>
-
-                    <div 
-                        ref={presentationRef}
-                        className={`w-full max-w-[1000px] relative group flex items-center justify-center ${isFullscreen ? '!max-w-none bg-black w-screen h-screen' : ''}`}
-                    >
-                        {!isFullscreen && (
-                            <button
-                                onClick={() => setActiveSlideIndex((prev) => Math.max(prev - 1, 0))}
-                                disabled={activeSlideIndex === 0 || isBusy}
-                                className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:!opacity-0 shadow-sm backdrop-blur-sm cursor-pointer -left-4 md:-left-12"
-                                title="Previous Slide (Left Arrow)"
-                            >
-                                <ChevronLeft size={20} className="mr-0.5" />
-                            </button>
-                        )}
-                        
-                        <div className={`w-full relative overflow-hidden ${isFullscreen ? 'max-h-screen max-w-[calc(100vh*16/9)] bg-background' : 'shadow-xl rounded-xl overflow-hidden ring-1 ring-border/20'}`}>
-                            {editableSlides && editableSlides[activeSlideIndex] ? (
-                                <Slide
-                                    slide_content={{
-                                        ...resolveSlideContent(editableSlides[activeSlideIndex], activeSlideIndex),
-                                        theme: pptData?.theme || "sunset",
-                                    }}
-                                    onUpdateSlide={isBusy ? undefined : handleUpdateSlide}
-                                    onUpdateItem={isBusy ? undefined : handleUpdateItem}
-                                    onDeleteItem={isBusy ? undefined : handleDeleteItem}
-                                    onAddItem={isBusy ? undefined : handleAddItemAtIndex}
-                                    onEditImage={isBusy ? undefined : handleEditImage}
-                                />
-                            ) : isStreamGenerating ? (
-                                <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-white gap-4 p-8 text-center rounded-xl border border-neutral-800">
-                                    <Loader2 className="animate-spin text-primary w-8 h-8" />
-                                    <div className="flex flex-col gap-1">
-                                        <p className="text-sm font-semibold text-neutral-200">Generating presentation...</p>
-                                        <p className="text-xs text-neutral-500 max-w-sm">AI is creating and styling slides. This will take a few moments.</p>
-                                        <p className="text-xs text-amber-500 font-medium mt-2">Please do not reload or close this tab while generation is in progress.</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-neutral-500 rounded-xl border border-neutral-800">
-                                    <p className="text-sm">No slides available</p>
-                                </div>
+                    <div className="flex gap-2">
+                        {editableSlides &&
+                            editableSlides[activeSlideIndex] &&
+                            !["title", "titles"].includes(
+                                editableSlides[
+                                    activeSlideIndex
+                                ].layout?.category?.toLowerCase(),
+                            ) && (
+                                <Button
+                                    variant="outline"
+                                    onClick={handleAddItem}
+                                    className="cursor-pointer rounded-sm"
+                                >
+                                    <Plus size={14} />
+                                    <span>Add Point</span>
+                                </Button>
                             )}
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsLayoutModalOpen(true)}
+                            className="cursor-pointer rounded-sm"
+                        >
+                            <Layout size={14} />
+                            <span>Change Layout</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setLibraryActiveTab("images");
+                                setLibraryIconCallback(null);
+                                setImageEditContext(null);
+                                setIsLibraryOpen(true);
+                            }}
+                            className="cursor-pointer rounded-sm"
+                        >
+                            <FolderOpen size={14} />
+                            <span>Open Library</span>
+                        </Button>
+                    </div>
+                    <DropdownMenu className="">
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={isBusy}
+                                className="h-8 px-3 rounded-md bg-secondary/50 hover:bg-secondary text-secondary-foreground flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-xs font-medium border border-border/50 shadow-sm md:hidden"
+                            >
+                                <SlidersHorizontal
+                                    size={13}
+                                    className="text-primary"
+                                />
+                                <span>Slide Tools</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            align="start"
+                            className="min-w-[160px] bg-popover border-border text-popover-foreground rounded-xl p-1.5 shadow-2xl z-50"
+                        >
+                            {editableSlides &&
+                                editableSlides[activeSlideIndex] &&
+                                !["title", "titles"].includes(
+                                    editableSlides[
+                                        activeSlideIndex
+                                    ].layout?.category?.toLowerCase(),
+                                ) && (
+                                    <DropdownMenuItem
+                                        onClick={handleAddItem}
+                                        className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
+                                    >
+                                        <Plus size={14} />
+                                        <span>Add Point</span>
+                                    </DropdownMenuItem>
+                                )}
+                            <DropdownMenuItem
+                                onClick={() => setIsLayoutModalOpen(true)}
+                                className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
+                            >
+                                <Layout size={14} />
+                                <span>Change Layout</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setLibraryActiveTab("images");
+                                    setLibraryIconCallback(null);
+                                    setImageEditContext(null);
+                                    setIsLibraryOpen(true);
+                                }}
+                                className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
+                            >
+                                <FolderOpen size={14} />
+                                <span>Open Library</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                {isStreamGenerating && (
+                    <div className="absolute h-full w-full flex justify-center items-center bg-background/80">
+                        <div className="flex gap-2 text-[11px] text-amber-500 font-medium">
+                            <span>
+                                AI is generating slides. Do not close or reload
+                            </span>
+                            <Diamond className="animate-spin w-4 h-4 shrink-0 p-px"></Diamond>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Main content body below top panel */}
+            <div className="w-full flex-1 flex flex-row min-h-0 relative overflow-hidden">
+                {/* Left Panel: Main slide editor preview */}
+                <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-8 min-h-0 overflow-y-auto">
+                    <div className="flex-1 flex flex-col items-center justify-between md:justify-center w-full h-full p-2 sm:p-4 pb-4 md:pb-4 relative min-h-0">
+                        <div className="w-full flex-1 md:flex-none flex flex-col items-center justify-center min-h-0 gap-3">
+                            <div
+                                ref={presentationRef}
+                                className={`w-full relative group flex items-center justify-center ${isFullscreen ? "!max-w-none bg-black w-screen h-screen" : ""}`}
+                                style={
+                                    isFullscreen
+                                        ? undefined
+                                        : {
+                                              maxWidth:
+                                                  "min(1000px, 100%, calc(1.778 * (100vh - 240px)))",
+                                          }
+                                }
+                            >
+                                {!isFullscreen && (
+                                    <button
+                                        onClick={() =>
+                                            setActiveSlideIndex((prev) =>
+                                                Math.max(prev - 1, 0),
+                                            )
+                                        }
+                                        disabled={
+                                            activeSlideIndex === 0 || isBusy
+                                        }
+                                        className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:!opacity-0 shadow-sm backdrop-blur-sm cursor-pointer -left-4 md:-left-12"
+                                        title="Previous Slide (Left Arrow)"
+                                    >
+                                        <ChevronLeft
+                                            size={20}
+                                            className="mr-0.5"
+                                        />
+                                    </button>
+                                )}
+
+                                <div
+                                    className={`w-full relative overflow-hidden ${isFullscreen ? "max-h-screen max-w-[calc(100vh*16/9)] bg-background" : "shadow-xl rounded-xl overflow-hidden ring-1 ring-border/20"}`}
+                                >
+                                    {editableSlides &&
+                                    editableSlides[activeSlideIndex] ? (
+                                        <Slide
+                                            slide_content={{
+                                                ...resolveSlideContent(
+                                                    editableSlides[
+                                                        activeSlideIndex
+                                                    ],
+                                                    activeSlideIndex,
+                                                ),
+                                                theme:
+                                                    pptData?.theme || "sunset",
+                                            }}
+                                            onUpdateSlide={
+                                                isBusy
+                                                    ? undefined
+                                                    : handleUpdateSlide
+                                            }
+                                            onUpdateItem={
+                                                isBusy
+                                                    ? undefined
+                                                    : handleUpdateItem
+                                            }
+                                            onDeleteItem={
+                                                isBusy
+                                                    ? undefined
+                                                    : handleDeleteItem
+                                            }
+                                            onAddItem={
+                                                isBusy
+                                                    ? undefined
+                                                    : handleAddItemAtIndex
+                                            }
+                                            onEditImage={
+                                                isBusy
+                                                    ? undefined
+                                                    : handleEditImage
+                                            }
+                                        />
+                                    ) : isStreamGenerating ? (
+                                        <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-white gap-4 p-8 text-center rounded-xl border border-neutral-800">
+                                            <Loader2 className="animate-spin text-primary w-8 h-8" />
+                                            <div className="flex flex-col gap-1">
+                                                <p className="text-sm font-semibold text-neutral-200">
+                                                    Generating presentation
+                                                </p>
+                                                <p className="text-xs text-neutral-500 max-w-sm">
+                                                    Our AI is thinking and
+                                                    preparing your slides. This
+                                                    will take a few moments.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-neutral-500 rounded-xl border border-neutral-800">
+                                            <p className="text-sm">
+                                                No slides available
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {isFullscreen && (
+                                    <>
+                                        {/* Left half click area */}
+                                        <div
+                                            onClick={() =>
+                                                setActiveSlideIndex((prev) =>
+                                                    Math.max(prev - 1, 0),
+                                                )
+                                            }
+                                            className="absolute left-0 top-0 w-1/2 h-full z-30"
+                                            style={{
+                                                cursor:
+                                                    activeSlideIndex === 0
+                                                        ? "default"
+                                                        : CURSOR_LEFT,
+                                            }}
+                                            title="Previous Slide"
+                                        />
+                                        {/* Right half click area */}
+                                        <div
+                                            onClick={() =>
+                                                setActiveSlideIndex((prev) =>
+                                                    Math.min(
+                                                        prev + 1,
+                                                        editableSlides.length -
+                                                            1,
+                                                    ),
+                                                )
+                                            }
+                                            className="absolute right-0 top-0 w-1/2 h-full z-30"
+                                            style={{
+                                                cursor:
+                                                    activeSlideIndex ===
+                                                    editableSlides.length - 1
+                                                        ? "default"
+                                                        : CURSOR_RIGHT,
+                                            }}
+                                            title="Next Slide"
+                                        />
+                                    </>
+                                )}
+
+                                {!isFullscreen && (
+                                    <button
+                                        onClick={() =>
+                                            setActiveSlideIndex((prev) =>
+                                                Math.min(
+                                                    prev + 1,
+                                                    editableSlides.length - 1,
+                                                ),
+                                            )
+                                        }
+                                        disabled={
+                                            activeSlideIndex ===
+                                                editableSlides.length - 1 ||
+                                            isBusy
+                                        }
+                                        className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:!opacity-0 shadow-sm backdrop-blur-sm cursor-pointer -right-4 md:-right-12"
+                                        title="Next Slide (Right Arrow)"
+                                    >
+                                        <ChevronRight
+                                            size={20}
+                                            className="ml-0.5"
+                                        />
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
-                        {isFullscreen && (
-                            <>
-                                {/* Left half click area */}
-                                <div
-                                    onClick={() => setActiveSlideIndex((prev) => Math.max(prev - 1, 0))}
-                                    className="absolute left-0 top-0 w-1/2 h-full z-30"
-                                    style={{
-                                        cursor: activeSlideIndex === 0 ? "default" : CURSOR_LEFT
-                                    }}
-                                    title="Previous Slide"
-                                />
-                                {/* Right half click area */}
-                                <div
-                                    onClick={() => setActiveSlideIndex((prev) => Math.min(prev + 1, editableSlides.length - 1))}
-                                    className="absolute right-0 top-0 w-1/2 h-full z-30"
-                                    style={{
-                                        cursor: activeSlideIndex === editableSlides.length - 1 ? "default" : CURSOR_RIGHT
-                                    }}
-                                    title="Next Slide"
-                                />
-                            </>
-                        )}
-
-                        {!isFullscreen && (
-                            <button
-                                onClick={() => setActiveSlideIndex((prev) => Math.min(prev + 1, editableSlides.length - 1))}
-                                disabled={activeSlideIndex === editableSlides.length - 1 || isBusy}
-                                className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:!opacity-0 shadow-sm backdrop-blur-sm cursor-pointer -right-4 md:-right-12"
-                                title="Next Slide (Right Arrow)"
-                            >
-                                <ChevronRight size={20} className="ml-0.5" />
-                            </button>
-                        )}
+                        {/* Previews */}
+                        <SlideThumbnails
+                            editableSlides={editableSlides}
+                            activeSlideIndex={activeSlideIndex}
+                            setActiveSlideIndex={setActiveSlideIndex}
+                            isBusy={isBusy}
+                            theme={pptData?.theme || "sunset"}
+                            resolveSlideContent={resolveSlideContent}
+                        />
                     </div>
                 </div>
 
-                {/* Previews */}
-                <SlideThumbnails
-                    editableSlides={editableSlides}
-                    activeSlideIndex={activeSlideIndex}
-                    setActiveSlideIndex={setActiveSlideIndex}
+                {/* Right Panel: Unified User Library */}
+                <LibrarySidebar
+                    isOpen={isLibraryOpen}
                     isBusy={isBusy}
-                    theme={pptData?.theme || "sunset"}
-                    resolveSlideContent={resolveSlideContent}
+                    imageEditContext={imageEditContext}
+                    onSelectImage={handleSelectSidebarImage}
+                    iconEditCallback={libraryIconCallback}
+                    onSelectIcon={handleSelectSidebarIcon}
+                    defaultTab={libraryActiveTab}
+                    onClose={() => {
+                        setIsLibraryOpen(false);
+                        setImageEditContext(null);
+                        setLibraryIconCallback(null);
+                    }}
                 />
             </div>
-        </div>
-
-            {/* Right Panel: Sidebar Image Editor */}
-            <ImageSidebar
-                isOpen={isImageSidebarOpen}
-                isBusy={isBusy}
-                imageEditContext={imageEditContext}
-                onSelectImage={handleSelectSidebarImage}
-                onClose={() => {
-                    setIsImageSidebarOpen(false);
-                    setImageEditContext(null);
-                }}
-            />
 
             {/* Layout Selector Modal */}
             <LayoutSelectorModal
@@ -1125,7 +1503,7 @@ export default function PPTSlidesViewerPage({ params }) {
                 resolveSlideContent={resolveSlideContent}
                 onLayoutChange={handleLayoutChange}
             />
-            
+
             {isGeneratingPDF && (
                 <div
                     style={{
@@ -1134,7 +1512,7 @@ export default function PPTSlidesViewerPage({ params }) {
                         top: "-9999px",
                         width: "1280px",
                         zIndex: -9999,
-                        pointerEvents: "none"
+                        pointerEvents: "none",
                     }}
                 >
                     {editableSlides.map((slide, idx) => (
@@ -1144,7 +1522,7 @@ export default function PPTSlidesViewerPage({ params }) {
                             style={{
                                 width: "1280px",
                                 height: "720px",
-                                overflow: "hidden"
+                                overflow: "hidden",
                             }}
                         >
                             <Slide
@@ -1166,7 +1544,7 @@ export default function PPTSlidesViewerPage({ params }) {
                         top: "-9999px",
                         width: "1280px",
                         zIndex: -9999,
-                        pointerEvents: "none"
+                        pointerEvents: "none",
                     }}
                 >
                     {editableSlides.map((slide, idx) => (
@@ -1176,7 +1554,7 @@ export default function PPTSlidesViewerPage({ params }) {
                             style={{
                                 width: "1280px",
                                 height: "720px",
-                                overflow: "hidden"
+                                overflow: "hidden",
                             }}
                         >
                             <Slide

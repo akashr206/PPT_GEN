@@ -152,7 +152,7 @@ export default function LandingPage() {
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuItem
                   onClick={() => signOut()}
-                  className="px-2.5 py-2 text-red-400 focus:bg-red-500/10 focus:text-red-400 rounded-lg cursor-pointer flex items-center gap-2"
+                  className="px-2.5 py-2 text-red-400 focus:bg-red-500/10 focus:text-red-400 rounded-md cursor-pointer flex items-center gap-2"
                 >
                   <LogOut size={16} />
                   <span>Sign out</span>
