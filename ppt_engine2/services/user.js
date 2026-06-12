@@ -44,7 +44,9 @@ export const addUser = async ({
                 p_name,
                 image
             }
-        ]);
+        ]).select().single();
+
+    console.log("DATA:", data);
 
     if (error) {
         throw error;

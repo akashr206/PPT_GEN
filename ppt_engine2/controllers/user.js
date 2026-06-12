@@ -20,8 +20,10 @@ export const addUserController = async (req, res) => {
             return sendError(res, "Required fields are missing", null, 400);
         }
         const existingUser = await getUserByEmail({ email });
-        if (existingUser) {
-            return sendSuccess(res, { ...existingUser });
+        if (existingUser.length > 0) {
+            console.log(existingUser);
+
+            return sendSuccess(res, { ...existingUser[0] });
         }
         if (!author_name) author_name = name;
         const user_id = nanoid(10);

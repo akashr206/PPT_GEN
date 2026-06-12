@@ -27,8 +27,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
         );
+        console.log(data);
 
-        user.id = data[0].id;
+        user.id = data.id;
       } catch (err) {
         console.error("Error saving user on signIn:", err);
         return false;
