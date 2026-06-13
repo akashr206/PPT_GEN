@@ -192,7 +192,7 @@
             ],
             "constraints": {
                 "maxItems": 6,
-                "recommendedItems": "2 to 5"
+                "recommendedItems": "2 to 6"
             }
         },
         "table": {

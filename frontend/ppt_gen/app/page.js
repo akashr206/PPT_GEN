@@ -28,64 +28,7 @@ export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
-  const [placeholder, setPlaceholder] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard");
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    if (isFocused) {
-      setPlaceholder("What presentation shall we design? e.g. A 10-slide pitch deck for a sustainable coffee brand...");
-      return;
-    }
-
-    const placeholders = [
-      "A 10-slide pitch deck for a sustainable coffee brand...",
-      "A comprehensive presentation for a Quarterly Business Review...",
-      "An investor pitch deck for a modern SaaS startup...",
-      "An engaging slides deck for Employee Onboarding...",
-      "A clean, minimal presentation on AI and the future of work..."
-    ];
-
-    let currentIdx = 0;
-    let charIdx = 0;
-    let isDeleting = false;
-    let timeoutId;
-
-    const type = () => {
-      const currentString = placeholders[currentIdx];
-
-      if (isDeleting) {
-        setPlaceholder("What presentation shall we design? e.g. " + currentString.substring(0, charIdx - 1));
-        charIdx--;
-      } else {
-        setPlaceholder("What presentation shall we design? e.g. " + currentString.substring(0, charIdx + 1));
-        charIdx++;
-      }
-
-      let speed = isDeleting ? 25 : 50;
-
-      if (!isDeleting && charIdx === currentString.length) {
-        speed = 2500;
-        isDeleting = true;
-      } else if (isDeleting && charIdx === 0) {
-        isDeleting = false;
-        currentIdx = (currentIdx + 1) % placeholders.length;
-        speed = 400;
-      }
-
-      timeoutId = setTimeout(type, speed);
-    };
-
-    type();
-
-    return () => clearTimeout(timeoutId);
-  }, [isFocused]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -188,9 +131,7 @@ export default function LandingPage() {
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder={placeholder}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              placeholder={"What presentation shall we design?"}
               className="w-full min-h-[160px] p-6 md:p-8 bg-transparent resize-none outline-none text-white placeholder:text-white/40 text-lg md:text-xl leading-relaxed rounded-none"
 
             />

@@ -32,11 +32,13 @@ export const generatePPT = async (req, res) => {
                     `\nStrictly output exactly ${slidesCount} slides. Do not generate more or fewer slides under any circumstance.`;
 
                 const response = await chat(newSysPrompt, fullPrompt);
-                
+
                 const parsedResponse = parseLLMJson(response);
 
                 await insertIconsToContent(parsedResponse);
-
+                
+                parsedResponse.slides_count = parsedResponse.slides.length;
+                
                 await addPPTContent({ ppt_id, ...parsedResponse, tone, status: "SUCCESS" });
 
                 console.log(`PPT ${ppt_id} generated successfully`);
@@ -150,7 +152,7 @@ export const streamPPT = async (req, res) => {
         }
     } catch (error) {
         console.error(`Streaming PPT ${ppt_id} generation failed:`, error);
-        
+
         // Handle AbortError vs other errors
         if (error.name === 'AbortError') {
             console.log(`[Stream] PPT ${ppt_id} stream was aborted.`);
@@ -209,7 +211,7 @@ export const searchIcons = async (req, res) => {
 
         // Split the search query based on spaces, lowercase, and trim them
         const keywords = query.split(/\s+/).filter(Boolean).map(k => k.toLowerCase().trim());
-        
+
         if (keywords.length === 0) {
             return sendSuccess(res, [], "No keywords provided");
         }

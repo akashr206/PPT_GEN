@@ -154,7 +154,7 @@ export default function DashboardPage() {
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          toast.info("Preparing PDF download...");
+                          toast.info("Preparing PDF download");
                           setTimeout(() => {
                             toast.success("PDF downloaded successfully (simulation).");
                           }, 1000);
@@ -168,7 +168,7 @@ export default function DashboardPage() {
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          const toastId = toast.loading("Converting presentation to PPTX...");
+                          const toastId = toast.loading("Converting presentation to PPTX");
 
                           const fetchAndDownload = async () => {
                             try {

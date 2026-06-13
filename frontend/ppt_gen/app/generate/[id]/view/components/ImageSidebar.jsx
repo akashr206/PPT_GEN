@@ -89,7 +89,7 @@ export default function ImageSidebar({
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search Pexels..."
+                        placeholder="Search Pexels"
                         className="flex-grow p-2 border border-border rounded-md text-xs bg-background"
                     />
                     <button

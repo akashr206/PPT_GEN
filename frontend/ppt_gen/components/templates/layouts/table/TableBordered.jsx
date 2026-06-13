@@ -41,23 +41,34 @@ const TableBordered = ({ content, onUpdateSlide }) => {
         return `${remaining / (totalCols - 1)}%`;
     };
 
-    // Dynamic sizing based on row count to prevent vertical overflow and optimize space
-    let paddingClass = "py-[1.6cqw] px-[2.0cqw]";
-    let headerTextSize = "text-[2.0cqw]";
-    let rowTextSize = "text-[1.6cqw]";
-    if (n > 9) {
-        paddingClass = "py-[0.6cqw] px-[1.2cqw]";
-        headerTextSize = "text-[1.3cqw]";
-        rowTextSize = "text-[1.1cqw]";
-    } else if (n > 6) {
-        paddingClass = "py-[1.2cqw] px-[1.6cqw]";
-        headerTextSize = "text-[1.7cqw]";
-        rowTextSize = "text-[1.4cqw]";
-    } else if (n <= 4) {
-        paddingClass = "py-[2.0cqw] px-[2.4cqw]";
-        headerTextSize = "text-[2.2cqw]";
-        rowTextSize = "text-[1.8cqw]";
-    }
+    // Dynamic sizing based on row count and cell content length to prevent vertical overflow
+    const numRows = normalizedContent.length;
+    let maxCellLength = 0;
+    normalizedContent.forEach(item => {
+        item.cells.forEach(cell => {
+            const len = cell ? String(cell).length : 0;
+            if (len > maxCellLength) maxCellLength = len;
+        });
+    });
+
+    const rowFactor = numRows <= 5 ? 1 : 1 + (numRows - 5) * 0.08;
+    const colFactor = numCols <= 3 ? 1 : 1 + (numCols - 3) * 0.12;
+    const textFactor = maxCellLength <= 30 ? 1 : 1 + (maxCellLength - 30) * 0.005;
+    
+    const density = rowFactor * colFactor * textFactor;
+    const scale = Math.max(0.72, Math.min(1.0, 1.1 / density));
+
+    const py = (1.6 * scale).toFixed(2);
+    const px = (2.0 * scale).toFixed(2);
+    const paddingStyle = {
+        paddingTop: `${py}cqw`,
+        paddingBottom: `${py}cqw`,
+        paddingLeft: `${px}cqw`,
+        paddingRight: `${px}cqw`,
+    };
+
+    const headerTextSize = `${(2.0 * scale).toFixed(2)}cqw`;
+    const rowTextSize = `${(1.6 * scale).toFixed(2)}cqw`;
 
     const updateCell = (rowIdx, colIdx, val) => {
         const newItems = [...normalizedContent];
@@ -130,15 +141,19 @@ const TableBordered = ({ content, onUpdateSlide }) => {
                         {Array.from({ length: numCols }).map((_, colIdx) => (
                             <col key={colIdx} style={{ width: getColWidth(colIdx, numCols) }} />
                         ))}
-                        {onUpdateSlide && <col style={{ width: "4cqw" }} />}
                     </colgroup>
                     <thead>
                         <tr style={{ backgroundColor: "var(--theme-card-bg)" }}>
                             {headerRow.cells.map((cell, colIdx) => (
                                 <th 
                                     key={colIdx} 
-                                    className={`${paddingClass} ${headerTextSize} font-bold border-[0.1cqw] relative group/colHeader`}
-                                    style={{ borderColor: "var(--theme-card-border)", color: "var(--theme-primary)" }}
+                                    className="font-bold border-[0.1cqw] relative group/colHeader"
+                                    style={{ 
+                                        ...paddingStyle,
+                                        fontSize: headerTextSize,
+                                        borderColor: "var(--theme-card-border)", 
+                                        color: "var(--theme-primary)" 
+                                    }}
                                 >
                                     <div className="flex items-center justify-between gap-[0.5cqw]">
                                         <EditableElement
@@ -161,7 +176,6 @@ const TableBordered = ({ content, onUpdateSlide }) => {
                                     </div>
                                 </th>
                             ))}
-                            {onUpdateSlide && <th className="w-[4cqw] p-0 border-[0.1cqw]" style={{ borderColor: "var(--theme-card-border)" }} />}
                         </tr>
                     </thead>
                     <tbody>
@@ -170,14 +184,28 @@ const TableBordered = ({ content, onUpdateSlide }) => {
                             return (
                                 <tr 
                                     key={i} 
+                                    className="group/row"
                                     style={{ backgroundColor: "var(--theme-bg)" }}
                                 >
                                     {row.cells.map((cell, colIdx) => (
                                         <td 
                                             key={colIdx} 
-                                            className={`${paddingClass} ${rowTextSize} align-top border-[0.1cqw]`}
-                                            style={{ borderColor: "var(--theme-card-border)" }}
+                                            className={`align-top border-[0.1cqw] ${colIdx === 0 ? "relative" : ""}`}
+                                            style={{ 
+                                                ...paddingStyle,
+                                                fontSize: rowTextSize,
+                                                borderColor: "var(--theme-card-border)" 
+                                            }}
                                         >
+                                            {colIdx === 0 && onUpdateSlide && (
+                                                <div className="absolute top-1/2 -translate-y-1/2 right-[102%] opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 transition-opacity z-20">
+                                                    <ItemActionsMenu
+                                                        onAddBefore={() => addRow(actualIdx, "before")}
+                                                        onAddAfter={() => addRow(actualIdx, "after")}
+                                                        onDelete={() => deleteRow(actualIdx)}
+                                                    />
+                                                </div>
+                                            )}
                                             <EditableElement
                                                 as="span"
                                                 className={`w-full block bg-transparent border-none focus:outline-none ${colIdx === 0 ? "font-semibold" : ""}`}
@@ -188,20 +216,6 @@ const TableBordered = ({ content, onUpdateSlide }) => {
                                             />
                                         </td>
                                     ))}
-                                    {onUpdateSlide && (
-                                        <td 
-                                            className="relative w-[4cqw] p-0 align-middle text-center border-[0.1cqw] group/row" 
-                                            style={{ borderColor: "var(--theme-card-border)" }}
-                                        >
-                                            <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 opacity-0 group-hover/row:opacity-100 transition-opacity z-20">
-                                                <ItemActionsMenu
-                                                    onAddBefore={() => addRow(actualIdx, "before")}
-                                                    onAddAfter={() => addRow(actualIdx, "after")}
-                                                    onDelete={() => deleteRow(actualIdx)}
-                                                />
-                                            </div>
-                                        </td>
-                                    )}
                                 </tr>
                             );
                         })}

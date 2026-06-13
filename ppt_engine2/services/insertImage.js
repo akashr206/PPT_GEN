@@ -34,7 +34,7 @@ export const searchPexelsImages = async (query) => {
         });
 
         if (response.status === 429 && fallbackKey) {
-            console.warn("Pexels rate limited (429). Retrying with fallback key...");
+            console.warn("Pexels rate limited (429). Retrying with fallback key");
             response = await fetch(url, {
                 headers: {
                     'Authorization': fallbackKey

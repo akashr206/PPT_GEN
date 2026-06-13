@@ -6,13 +6,45 @@ const AgendaList = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     const n = content.length;
 
     // Adjust sizes based on density to avoid vertical overflows
-    const headerSize = n >= 6 ? "text-[1.4cqw]" : n >= 5 ? "text-[1.6cqw]" : "text-[1.8cqw]";
-    const descSize = n >= 6 ? "text-[1.0cqw]" : n >= 5 ? "text-[1.1cqw]" : "text-[1.2cqw]";
-    const padClass = n >= 6 ? "p-[0.8cqw] px-[1.2cqw]" : n >= 5 ? "p-[1.0cqw] px-[1.5cqw]" : "p-[1.4cqw] px-[2.0cqw]";
-    const gapClass = n >= 6 ? "gap-[0.5cqw]" : n >= 5 ? "gap-[0.8cqw]" : "gap-[1.2cqw]";
+    let headerSize = "text-[1.8cqw]";
+    let descSize = "text-[1.2cqw]";
+    let padClass = "p-[1.4cqw] px-[2.0cqw]";
+    let gapClass = "gap-[1.2cqw]";
+    let badgeSize = "w-[5.2cqw] h-[5.2cqw]";
+    let badgeTextSize = "text-[1.6cqw]";
+
+    if (n >= 9) {
+        headerSize = "text-[1.05cqw]";
+        descSize = "text-[0.75cqw]";
+        padClass = "p-[0.35cqw] px-[0.95cqw]";
+        gapClass = "gap-[0.25cqw]";
+        badgeSize = "w-[2.8cqw] h-[2.8cqw]";
+        badgeTextSize = "text-[1.0cqw]";
+    } else if (n >= 7) {
+        headerSize = "text-[1.2cqw]";
+        descSize = "text-[0.9cqw]";
+        padClass = "p-[0.5cqw] px-[1.1cqw]";
+        gapClass = "gap-[0.45cqw]";
+        badgeSize = "w-[3.8cqw] h-[3.8cqw]";
+        badgeTextSize = "text-[1.2cqw]";
+    } else if (n >= 6) {
+        headerSize = "text-[1.4cqw]";
+        descSize = "text-[1.0cqw]";
+        padClass = "p-[0.8cqw] px-[1.2cqw]";
+        gapClass = "gap-[0.5cqw]";
+        badgeSize = "w-[4.4cqw] h-[4.4cqw]";
+        badgeTextSize = "text-[1.4cqw]";
+    } else if (n >= 5) {
+        headerSize = "text-[1.6cqw]";
+        descSize = "text-[1.1cqw]";
+        padClass = "p-[1.0cqw] px-[1.5cqw]";
+        gapClass = "gap-[0.8cqw]";
+        badgeSize = "w-[4.8cqw] h-[4.8cqw]";
+        badgeTextSize = "text-[1.5cqw]";
+    }
 
     return (
-        <div className="relative max-w-[90cqw] mx-auto py-[1cqw] flex flex-col justify-center h-full">
+        <div className="relative max-w-[90cqw] mx-auto py-[1cqw] flex flex-col justify-center h-full w-full">
             
 
             {/* List Items */}
@@ -24,14 +56,14 @@ const AgendaList = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                     >
                         {/* Circular Chapter Index Badge */}
                         <div 
-                            className="w-[5.2cqw] h-[5.2cqw] rounded-full flex items-center justify-center shrink-0 border-[0.2cqw]"
+                            className={`${badgeSize} rounded-full flex items-center justify-center shrink-0 border-[0.2cqw]`}
                             style={{ 
                                 backgroundColor: "var(--theme-card-bg)",
                                 borderColor: "var(--theme-primary)",
                                 color: "var(--theme-primary)"
                             }}
                         >
-                            <span className="text-[1.6cqw] font-black leading-none">
+                            <span className={`${badgeTextSize} font-black leading-none`}>
                                 {i + 1}
                             </span>
                         </div>

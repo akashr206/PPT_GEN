@@ -597,7 +597,7 @@ export default function PPTSlidesViewerPage({ params }) {
         // Skip fetching presentation from database on mount if we are actively generating it.
         // The SSE streaming connection will initialize the record, and the complete event will trigger final refetch.
         if (isStreamGenerating) {
-            setPptData({ id: pptId, title: "Generating...", slides: [] });
+            setPptData({ id: pptId, title: "Generating", slides: [] });
             setIsLoading(false);
             return;
         }
@@ -814,7 +814,7 @@ export default function PPTSlidesViewerPage({ params }) {
 
     const handleDownloadAsPPT = async (e) => {
         const toastId = toast.loading(
-            "Preparing slides for PowerPoint export...",
+            "Preparing slides for PowerPoint export",
         );
 
         // 1. Mount the full-size slides off-screen
@@ -1068,7 +1068,7 @@ export default function PPTSlidesViewerPage({ params }) {
 
         const generate = async () => {
             const toastId = toast.loading(
-                "Preparing slides for high-res PDF export...",
+                "Preparing slides for high-res PDF export",
             );
 
             // Give browser time to render the hidden slides

@@ -54,7 +54,7 @@ const Slide = ({
                         </div>
                     )}
                     <div
-                        className={`relative grow p-[4cqw] ${isTitleLayout ? "" : "pt-0"}`}
+                        className={`relative grow p-[4cqw] ${isTitleLayout ? "" : "pt-0 flex items-center justify-center"}`}
                     >
                         <SlideLayout
                             layoutCategory={slide_content.layout?.category}

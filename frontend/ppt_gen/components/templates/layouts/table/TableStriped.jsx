@@ -41,23 +41,34 @@ const TableStriped = ({ content, onUpdateSlide }) => {
         return `${remaining / (totalCols - 1)}%`;
     };
 
-    // Dynamic sizing based on row count to prevent vertical overflow and optimize space
-    let paddingClass = "py-[1.6cqw] px-[2.0cqw]";
-    let headerTextSize = "text-[2.0cqw]";
-    let rowTextSize = "text-[1.6cqw]";
-    if (n > 9) {
-        paddingClass = "py-[0.6cqw] px-[1.2cqw]";
-        headerTextSize = "text-[1.3cqw]";
-        rowTextSize = "text-[1.1cqw]";
-    } else if (n > 6) {
-        paddingClass = "py-[1.2cqw] px-[1.6cqw]";
-        headerTextSize = "text-[1.7cqw]";
-        rowTextSize = "text-[1.4cqw]";
-    } else if (n <= 4) {
-        paddingClass = "py-[2.0cqw] px-[2.4cqw]";
-        headerTextSize = "text-[2.2cqw]";
-        rowTextSize = "text-[1.8cqw]";
-    }
+    // Dynamic sizing based on row count and cell content length to prevent vertical overflow
+    const numRows = normalizedContent.length;
+    let maxCellLength = 0;
+    normalizedContent.forEach(item => {
+        item.cells.forEach(cell => {
+            const len = cell ? String(cell).length : 0;
+            if (len > maxCellLength) maxCellLength = len;
+        });
+    });
+
+    const rowFactor = numRows <= 5 ? 1 : 1 + (numRows - 5) * 0.08;
+    const colFactor = numCols <= 3 ? 1 : 1 + (numCols - 3) * 0.12;
+    const textFactor = maxCellLength <= 30 ? 1 : 1 + (maxCellLength - 30) * 0.005;
+    
+    const density = rowFactor * colFactor * textFactor;
+    const scale = Math.max(0.72, Math.min(1.0, 1.1 / density));
+
+    const py = (1.6 * scale).toFixed(2);
+    const px = (2.0 * scale).toFixed(2);
+    const paddingStyle = {
+        paddingTop: `${py}cqw`,
+        paddingBottom: `${py}cqw`,
+        paddingLeft: `${px}cqw`,
+        paddingRight: `${px}cqw`,
+    };
+
+    const headerTextSize = `${(2.0 * scale).toFixed(2)}cqw`;
+    const rowTextSize = `${(1.6 * scale).toFixed(2)}cqw`;
 
     const updateCell = (rowIdx, colIdx, val) => {
         const newItems = [...normalizedContent];
@@ -124,40 +135,51 @@ const TableStriped = ({ content, onUpdateSlide }) => {
 
     return (
         <div className="relative w-full h-full flex flex-col justify-center py-[1cqw]">
-            <div className="max-w-[90cqw] w-full mx-auto overflow-hidden rounded-[0.5cqw] border-[0.1cqw]" style={{ borderColor: "var(--theme-card-border)" }}>
+            <div className="max-w-[90cqw] w-full mx-auto rounded-[0.5cqw] border-[0.1cqw]" style={{ borderColor: "var(--theme-card-border)" }}>
                 <table className="w-full border-collapse text-left table-fixed">
                     <colgroup>
                         {Array.from({ length: numCols }).map((_, colIdx) => (
                             <col key={colIdx} style={{ width: getColWidth(colIdx, numCols) }} />
                         ))}
-                        {onUpdateSlide && <col style={{ width: "4cqw" }} />}
                     </colgroup>
                     <thead>
                         <tr style={{ backgroundColor: "var(--theme-primary)", color: "var(--theme-bg)" }}>
-                            {headerRow.cells.map((cell, colIdx) => (
-                                <th key={colIdx} className={`${paddingClass} ${headerTextSize} font-bold relative group/colHeader`}>
-                                    <div className="flex items-center justify-between gap-[0.5cqw]">
-                                        <EditableElement
-                                            as="span"
-                                            className="w-full bg-transparent border-none focus:outline-none"
-                                            value={cell}
-                                            onChange={(val) => updateCell(0, colIdx, val)}
-                                            readOnly={!onUpdateSlide}
-                                            placeholder={`Column ${colIdx + 1}`}
-                                        />
-                                        {onUpdateSlide && (
-                                            <div className="opacity-0 group-hover/colHeader:opacity-100 group-focus-within/colHeader:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity">
-                                                <ColumnActionsMenu
-                                                    onAddBefore={() => addColumn(colIdx, "before")}
-                                                    onAddAfter={() => addColumn(colIdx, "after")}
-                                                    onDelete={numCols > 1 ? () => deleteColumn(colIdx) : null}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            ))}
-                            {onUpdateSlide && <th className="w-[4cqw] p-0" />}
+                            {headerRow.cells.map((cell, colIdx) => {
+                                const isFirstCol = colIdx === 0;
+                                const isLastCol = colIdx === numCols - 1;
+                                return (
+                                    <th 
+                                        key={colIdx} 
+                                        className="font-bold relative group/colHeader"
+                                        style={{
+                                            ...paddingStyle,
+                                            fontSize: headerTextSize,
+                                            borderTopLeftRadius: isFirstCol ? "0.4cqw" : "0",
+                                            borderTopRightRadius: isLastCol ? "0.4cqw" : "0"
+                                        }}
+                                    >
+                                        <div className="flex items-center justify-between gap-[0.5cqw]">
+                                            <EditableElement
+                                                as="span"
+                                                className="w-full bg-transparent border-none focus:outline-none"
+                                                value={cell}
+                                                onChange={(val) => updateCell(0, colIdx, val)}
+                                                readOnly={!onUpdateSlide}
+                                                placeholder={`Column ${colIdx + 1}`}
+                                            />
+                                            {onUpdateSlide && (
+                                                <div className="opacity-0 group-hover/colHeader:opacity-100 group-focus-within/colHeader:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity">
+                                                    <ColumnActionsMenu
+                                                        onAddBefore={() => addColumn(colIdx, "before")}
+                                                        onAddAfter={() => addColumn(colIdx, "after")}
+                                                        onDelete={numCols > 1 ? () => deleteColumn(colIdx) : null}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </th>
+                                );
+                            })}
                         </tr>
                     </thead>
                     <tbody>
@@ -165,6 +187,7 @@ const TableStriped = ({ content, onUpdateSlide }) => {
                             const actualIdx = i + 1;
                             const isEven = i % 2 === 0;
                             const rowBg = isEven ? "var(--theme-bg-alt)" : "var(--theme-card-bg)";
+                            const isLastRow = i === dataRows.length - 1;
                             return (
                                 <tr 
                                     key={i} 
@@ -174,29 +197,40 @@ const TableStriped = ({ content, onUpdateSlide }) => {
                                         borderColor: "var(--theme-card-border)" 
                                     }}
                                 >
-                                    {row.cells.map((cell, colIdx) => (
-                                        <td key={colIdx} className={`${paddingClass} ${rowTextSize} align-top`}>
-                                            <EditableElement
-                                                as="span"
-                                                className={`w-full block bg-transparent border-none focus:outline-none ${colIdx === 0 ? "font-semibold" : ""}`}
-                                                value={cell}
-                                                onChange={(val) => updateCell(actualIdx, colIdx, val)}
-                                                readOnly={!onUpdateSlide}
-                                                placeholder="Text..."
-                                            />
-                                        </td>
-                                    ))}
-                                    {onUpdateSlide && (
-                                        <td className="relative w-[4cqw] p-0 align-middle text-center">
-                                            <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 opacity-0 group-hover/row:opacity-100 transition-opacity z-20">
-                                                <ItemActionsMenu
-                                                    onAddBefore={() => addRow(actualIdx, "before")}
-                                                    onAddAfter={() => addRow(actualIdx, "after")}
-                                                    onDelete={() => deleteRow(actualIdx)}
+                                    {row.cells.map((cell, colIdx) => {
+                                        const isFirstCol = colIdx === 0;
+                                        const isLastCol = colIdx === numCols - 1;
+                                        return (
+                                            <td 
+                                                key={colIdx} 
+                                                className={`align-top ${colIdx === 0 ? "relative" : ""}`}
+                                                style={{
+                                                    ...paddingStyle,
+                                                    fontSize: rowTextSize,
+                                                    borderBottomLeftRadius: (isLastRow && isFirstCol) ? "0.4cqw" : "0",
+                                                    borderBottomRightRadius: (isLastRow && isLastCol) ? "0.4cqw" : "0"
+                                                }}
+                                            >
+                                                {colIdx === 0 && onUpdateSlide && (
+                                                    <div className="absolute top-1/2 -translate-y-1/2 right-[102%] opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 transition-opacity z-20">
+                                                        <ItemActionsMenu
+                                                            onAddBefore={() => addRow(actualIdx, "before")}
+                                                            onAddAfter={() => addRow(actualIdx, "after")}
+                                                            onDelete={() => deleteRow(actualIdx)}
+                                                        />
+                                                    </div>
+                                                )}
+                                                <EditableElement
+                                                    as="span"
+                                                    className={`w-full block bg-transparent border-none focus:outline-none ${colIdx === 0 ? "font-semibold" : ""}`}
+                                                    value={cell}
+                                                    onChange={(val) => updateCell(actualIdx, colIdx, val)}
+                                                    readOnly={!onUpdateSlide}
+                                                    placeholder="Text..."
                                                 />
-                                            </div>
-                                        </td>
-                                    )}
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             );
                         })}

@@ -62,7 +62,7 @@ export default function LibrarySidebar({
         try {
             const res = await api.get("/api/library/images");
             if (res?.success && res.data) {
-                setUserImages(res.data);
+                setUserImages(res.data.images);
             }
         } catch (err) {
             console.error("Failed to load user images:", err);
@@ -208,7 +208,7 @@ export default function LibrarySidebar({
         if (!pastedSvg.trim()) return;
 
         setIsUploadingIcon(true);
-        const toastId = toast.loading("Saving custom SVG icon...");
+        const toastId = toast.loading("Saving custom SVG icon");
 
         try {
             const iconName = pastedIconName.trim() || "Pasted Icon";
@@ -249,7 +249,7 @@ export default function LibrarySidebar({
         e.stopPropagation();
         if (!confirm("Are you sure you want to delete this image?")) return;
 
-        const toastId = toast.loading("Deleting image...");
+        const toastId = toast.loading("Deleting image");
         try {
             await api.delete(`/api/library/images/${id}`);
             toast.success("Image deleted", { id: toastId });
@@ -265,7 +265,7 @@ export default function LibrarySidebar({
         if (!confirm("Are you sure you want to delete this custom icon?"))
             return;
 
-        const toastId = toast.loading("Deleting icon...");
+        const toastId = toast.loading("Deleting icon");
         try {
             await api.delete(`/api/library/icons/${id}`);
             toast.success("Icon deleted", { id: toastId });
@@ -540,7 +540,7 @@ export default function LibrarySidebar({
                                             onChange={(e) =>
                                                 setPexelsQuery(e.target.value)
                                             }
-                                            placeholder="Search Pexels..."
+                                            placeholder="Search Pexels"
                                             className="flex-grow p-2 border border-border rounded-md text-xs bg-background"
                                         />
                                         <button
@@ -806,7 +806,7 @@ export default function LibrarySidebar({
                                                     e.target.value,
                                                 )
                                             }
-                                            placeholder="Search Phosphor icons..."
+                                            placeholder="Search Phosphor icons"
                                             className="flex-grow p-2 border border-border rounded-md text-xs bg-background"
                                         />
                                     </div>

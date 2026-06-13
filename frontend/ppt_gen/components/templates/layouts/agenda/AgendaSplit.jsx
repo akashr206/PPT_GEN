@@ -5,13 +5,46 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 const AgendaSplit = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     const n = content.length;
 
-    // Adjust font sizes based on item count to avoid overflows
-    const headerSize = n >= 6 ? "text-[1.3cqw]" : n >= 5 ? "text-[1.5cqw]" : "text-[1.7cqw]";
-    const descSize = n >= 6 ? "text-[1.0cqw]" : n >= 5 ? "text-[1.1cqw]" : "text-[1.2cqw]";
-    const gapClass = n >= 6 ? "gap-[1cqw]" : n >= 5 ? "gap-[1.5cqw]" : "gap-[2cqw]";
+    // Adjust layout density based on item count to avoid overflows
+    let headerSize = "text-[1.7cqw]";
+    let descSize = "text-[1.2cqw]";
+    let gapClass = "gap-[2cqw]";
+    let paddingClass = "py-[0.5cqw]";
+    let indexSize = "text-[2.2cqw]";
+    let dotSize = "w-[0.6cqw] h-[0.6cqw]";
+
+    if (n >= 10) {
+        headerSize = "text-[1.0cqw]";
+        descSize = "text-[0.8cqw]";
+        gapClass = "gap-[0.4cqw]";
+        paddingClass = "py-[0.1cqw]";
+        indexSize = "text-[1.4cqw]";
+        dotSize = "w-[0.4cqw] h-[0.4cqw]";
+    } else if (n >= 8) {
+        headerSize = "text-[1.15cqw]";
+        descSize = "text-[0.9cqw]";
+        gapClass = "gap-[0.6cqw]";
+        paddingClass = "py-[0.25cqw]";
+        indexSize = "text-[1.7cqw]";
+        dotSize = "w-[0.5cqw] h-[0.5cqw]";
+    } else if (n >= 6) {
+        headerSize = "text-[1.3cqw]";
+        descSize = "text-[1.0cqw]";
+        gapClass = "gap-[1cqw]";
+        paddingClass = "py-[0.4cqw]";
+        indexSize = "text-[2.0cqw]";
+        dotSize = "w-[0.6cqw] h-[0.6cqw]";
+    } else if (n >= 5) {
+        headerSize = "text-[1.5cqw]";
+        descSize = "text-[1.1cqw]";
+        gapClass = "gap-[1.5cqw]";
+        paddingClass = "py-[0.45cqw]";
+        indexSize = "text-[2.1cqw]";
+        dotSize = "w-[0.6cqw] h-[0.6cqw]";
+    }
 
     return (
-        <div className="flex items-stretch justify-between h-full min-h-[30cqw] gap-[3.5cqw] max-w-[95cqw] mx-auto py-[1cqw]">
+        <div className="flex w-full items-stretch justify-between h-full min-h-[30cqw] gap-[3.5cqw] max-w-[95cqw] mx-auto py-[1cqw]">
             {/* Left Accent Panel */}
             <div 
                 className="w-[30%] rounded-[1.2cqw] p-[3cqw] flex flex-col justify-between relative overflow-hidden shadow-lg border"
@@ -58,11 +91,11 @@ const AgendaSplit = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                 {content.map((ele, i) => (
                     <div 
                         key={i}
-                        className="flex items-start gap-[2cqw] relative group/item py-[0.5cqw]"
+                        className={`flex items-start gap-[2cqw] relative group/item ${paddingClass}`}
                     >
                         {/* Number Index */}
                         <div 
-                            className="text-[2.2cqw] font-black leading-none shrink-0"
+                            className={`${indexSize} font-black leading-none shrink-0`}
                             style={{ color: "var(--theme-primary)" }}
                         >
                             {String(i + 1).padStart(2, "0")}
@@ -71,7 +104,7 @@ const AgendaSplit = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                         {/* Divider Dot / Line */}
                         <div className="flex flex-col items-center self-stretch py-[0.3cqw] shrink-0">
                             <div 
-                                className="w-[0.6cqw] h-[0.6cqw] rounded-full" 
+                                className={`${dotSize} rounded-full`} 
                                 style={{ backgroundColor: "var(--theme-primary)" }}
                             />
                             {i < n - 1 && (

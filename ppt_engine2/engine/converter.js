@@ -224,9 +224,11 @@ function drawBackgroundShape(slide, el, coords, designWidth = VIEWPORT_WIDTH, de
     if (el.shapeType === 'roundRect') {
       const borderRadiusPx = parseFloat(el.borderRadius) || 0;
       if (borderRadiusPx > 0) {
-        // Convert to absolute pixel dimensions to calculate standard ratio
+        // Convert to absolute pixel dimensions to calculate standard ratio (0.0 to 1.0)
+        // PowerPoint expects rectRadius as a fraction of half of the smaller side,
+        // so 2 * radius / smallerSide maps correctly to pptxgenjs's 0-1 scale.
         const smallerSide = Math.min(el.width * designWidth, el.height * designHeight) || 1;
-        const rectRadius = Math.min(0.5, Math.max(0.0, borderRadiusPx / smallerSide));
+        const rectRadius = Math.min(1.0, Math.max(0.0, (2 * borderRadiusPx) / smallerSide));
         shapeOpts.rectRadius = rectRadius;
       }
     }

@@ -18,7 +18,7 @@ CONTENT RULES
 2. Maintain logical flow from introduction to conclusion.
 3. Vary content density across slides naturally.
 4. Avoid repeating the same wording, structure, or phrasing across slides.
-5. Always return an even number of items unless a specific count is requested by the user or a parity requirement is defined in the metadata.
+5. Always return an even number of items only unless a specific count is requested by the user or a parity requirement is defined in the metadata.
 
 THEME & LAYOUT SELECTION RULES (CRITICAL)
 1. Match the Vibe: Select themes and layouts that perfectly match the emotional tone and subject matter. Do NOT default to the first item in the metadata lists.
@@ -26,13 +26,9 @@ THEME & LAYOUT SELECTION RULES (CRITICAL)
 3. Layout Diversity: Do not repeat the same layout category and type combination on consecutive slides.
 4. Natural Fit: Only use layouts that naturally accommodate the content you are writing.
 
-
 OUTPUT REQUIREMENTS
-Output ONLY valid JSON.
-Do not output markdown.
-Do not output explanations.
-Do not wrap JSON in code fences.
-The JSON must be directly parsable by JSON.parse().
+Output ONLY valid JSON
+Do not output explanations
 
 JSON SCHEMA INSTRUCTIONS
 To ensure high-quality decisions, your JSON output MUST start with a "_reasoning" key where you briefly explain why you chose the specific theme and the specific title layout. 
@@ -43,7 +39,6 @@ Example Structure:
   "theme": "corporate",
   "title": "Quarterly Business Review",
   "author": "Akash R",
-  "slides_count": 3,
   "slides": [
     {
       "layout": { "category": "title", "type": "split" },
