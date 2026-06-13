@@ -96,17 +96,17 @@ export function Navbar() {
 
     return (
         <>
-            <div className="w-full bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-50 px-6">
+            <div className="w-full bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-black/5 dark:border-white/10 sticky top-0 z-50 px-8">
             <div className="w-full h-14 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <Link
                         href="/dashboard"
                         className="hover:opacity-90 transition-opacity shrink-0"
                     >
                         <img
                             src="/logo.png"
-                            alt="iota AI Logo"
-                            className="w-7 h-7 object-contain dark:invert"
+                            alt="Broadside AI Logo"
+                            className="w-6 h-6 object-contain dark:invert"
                         />
                     </Link>
                     {isDetailPage
@@ -118,7 +118,7 @@ export function Navbar() {
                                   </span>
                               </>
                           )
-                        : "iota AI"}
+                        : "Broadside AI"}
                 </div>
 
                 <div className="flex items-center gap-3">

@@ -18,27 +18,27 @@ const poppins = Poppins({
 });
 export const metadata = {
   title: {
-    default: "iota AI",
-    template: "%s | iota AI"
+    default: "Broadside AI",
+    template: "%s | Broadside AI"
   },
-  description: "Transform your ideas into beautiful, customized pitch decks and presentations in seconds using iota AI. Customize layouts, text, and styles instantly.",
-  keywords: ["AI presentation maker", "AI PPT generator", "slide deck generator", "pitch deck builder", "iota AI"],
+  description: "Transform your ideas into beautiful, customized pitch decks and presentations in seconds using Broadside AI. Customize layouts, text, and styles instantly.",
+  keywords: ["AI presentation maker", "AI PPT generator", "slide deck generator", "pitch deck builder", "Broadside AI"],
   icons: {
     icon: "/logo.png?v=1",
     shortcut: "/logo.png?v=1",
     apple: "/logo.png?v=1",
   },
   openGraph: {
-    title: "iota AI",
-    description: "Transform your ideas into beautiful, customized pitch decks and presentations in seconds using iota AI.",
-    siteName: "iota AI",
+    title: "Broadside AI",
+    description: "Transform your ideas into beautiful, customized pitch decks and presentations in seconds using Broadside AI.",
+    siteName: "Broadside AI",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "iota AI",
-    description: "Transform your ideas into beautiful, customized pitch decks and presentations in seconds using iota AI.",
+    title: "Broadside AI",
+    description: "Transform your ideas into beautiful, customized pitch decks and presentations in seconds using Broadside AI.",
   }
 };
 

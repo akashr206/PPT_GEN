@@ -45,7 +45,7 @@ Example Structure:
       "title": "Q2 Business Performance",
       "subtitle": "Key metrics and strategic initiatives overview.",
       "presenter": "Akash R",
-      "company": "IOTA AI",
+      "company": "Broadside AI",
       "date": "June 2026"
     },
     ...

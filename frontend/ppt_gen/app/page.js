@@ -69,8 +69,8 @@ export default function LandingPage() {
       <nav className="relative z-99 flex items-center justify-between p-6 max-w-[1400px] w-full mx-auto">
         <div className="flex items-center gap-3">
           <Link href="/" className="font-semibold text-xl tracking-tight flex items-center gap-2.5">
-            <img src="/logo.png" alt="iota AI Logo" className="h-8 w-auto object-contain dark:invert" />
-            <span>iota AI</span>
+            <img src="/logo.png" alt="Broadside AI Logo" className="h-6 w-6 object-contain invert" />
+            <span>Broadside AI</span>
           </Link>
         </div>
         <div className="flex items-center gap-4">
@@ -162,8 +162,8 @@ export default function LandingPage() {
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent className="max-w-[380px] bg-[#0c0c12]/95 border-white/10 text-white rounded-2xl p-6 shadow-2xl backdrop-blur-md select-none flex flex-col gap-0" showCloseButton={true}>
           <DialogHeader className="flex flex-col items-center text-center pb-4">
-            <img src="/logo.png" alt="iota AI Logo" className="w-16 h-16 object-contain dark:invert" />
-            <DialogTitle className="text-xl font-bold text-white tracking-tight">Sign in to iota AI</DialogTitle>
+            <img src="/logo.png" alt="Broadside AI Logo" className="w-14 h-14 object-contain dark:invert" />
+            <DialogTitle className="text-xl font-bold text-white tracking-tight">Sign in to Broadside AI</DialogTitle>
             <DialogDescription className="text-zinc-400 text-xs mt-1 px-4 leading-normal">
               Sign in to design your presentation and customize slides in real-time.
             </DialogDescription>

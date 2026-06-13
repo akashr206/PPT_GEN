@@ -51,11 +51,11 @@ export function Sidebar() {
                     <div className="flex items-center gap-2.5 font-semibold text-lg transition-all duration-300 whitespace-nowrap overflow-hidden">
                         <img
                             src="/logo.png"
-                            alt="iota AI Logo"
+                            alt="Broadside AI Logo"
                             className="w-8 h-8 object-contain flex-shrink-0 dark:invert"
                         />
                         <span className="tracking-tight text-sidebar-foreground">
-                            iota AI
+                            Broadside AI
                         </span>
                     </div>
                 )}
