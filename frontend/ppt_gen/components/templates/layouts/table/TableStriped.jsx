@@ -10,7 +10,7 @@ const TableStriped = ({ content, onUpdateSlide }) => {
 
     if (n === 0) {
         return (
-            <div className="max-w-[90cqw] mx-auto my-[2cqw] text-center text-[1.6cqw] theme-text-muted">
+            <div className="max-w-[90cqw] mx-auto my-[2em] text-center text-[1.6em] theme-text-muted">
                 No items available.
             </div>
         );
@@ -134,8 +134,8 @@ const TableStriped = ({ content, onUpdateSlide }) => {
     };
 
     return (
-        <div className="relative w-full h-full flex flex-col justify-center py-[1cqw]">
-            <div className="max-w-[90cqw] w-full mx-auto rounded-[0.5cqw] border-[0.1cqw]" style={{ borderColor: "var(--theme-card-border)" }}>
+        <div className="relative w-full h-full flex flex-col justify-center py-[1em]">
+            <div className="max-w-[90cqw] w-full mx-auto rounded-[0.5em] border-[0.1em]" style={{ borderColor: "var(--theme-card-border)" }}>
                 <table className="w-full border-collapse text-left table-fixed">
                     <colgroup>
                         {Array.from({ length: numCols }).map((_, colIdx) => (
@@ -158,7 +158,7 @@ const TableStriped = ({ content, onUpdateSlide }) => {
                                             borderTopRightRadius: isLastCol ? "0.4cqw" : "0"
                                         }}
                                     >
-                                        <div className="flex items-center justify-between gap-[0.5cqw]">
+                                        <div className="flex items-center justify-between gap-[0.5em]">
                                             <EditableElement
                                                 as="span"
                                                 className="w-full bg-transparent border-none focus:outline-none"
@@ -191,7 +191,7 @@ const TableStriped = ({ content, onUpdateSlide }) => {
                             return (
                                 <tr 
                                     key={i} 
-                                    className="group/row border-b-[0.1cqw] last:border-b-0"
+                                    className="group/row border-b-[0.1em] last:border-b-0"
                                     style={{ 
                                         backgroundColor: rowBg,
                                         borderColor: "var(--theme-card-border)" 

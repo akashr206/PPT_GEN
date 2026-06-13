@@ -6,6 +6,17 @@
     overflow: hidden;
 }
 
+.slide-content {
+    --scale-factor: 1;
+    font-size: calc(var(--scale-factor, 1) * 1cqw);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
 .group\/item {
     transition: outline 0.2s ease, outline-offset 0.2s ease;
 }

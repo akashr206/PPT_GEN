@@ -5,9 +5,8 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 const CardsSimple = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     const n = content.length;
     
-    // Choose grid columns based on item count
-    const gridCols = n === 3 ? "grid-cols-3" : (n >= 4 ? "grid-cols-2" : "grid-cols-1");
-    const rows = n === 3 ? 1 : (n >= 4 ? Math.ceil(n / 2) : n);
+    const cols = n >= 5 ? 3 : n === 3 ? 3 : n === 1 ? 1 : 2;
+    const rows = Math.ceil(n / cols);
     
     // Adjust layout density based on text length to prevent vertical overflows
     const maxChars = content.reduce((max, ele) => {
@@ -24,71 +23,83 @@ const CardsSimple = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     
     const effectiveRows = rows + textInflation;
     
-    let gapClass = "gap-[2.5cqw]";
-    let padClass = "p-[2.0cqw]";
-    let headerSize = "text-[2.2cqw]";
-    let descSize = "text-[1.6cqw]";
-    let marginClass = "mb-[0.4cqw]";
-    let radiusClass = "rounded-[1cqw]";
+    let gapVal = 2.5;
+    let padClass = "p-[2.0em]";
+    let headerSize = "text-[2.2em]";
+    let descSize = "text-[1.6em]";
+    let marginClass = "mb-[0.4em]";
+    let radiusClass = "rounded-[1em]";
 
     if (effectiveRows >= 5) {
-        gapClass = "gap-[0.6cqw] gap-x-[3cqw]";
-        padClass = "p-[1.0cqw]";
-        headerSize = "text-[1.5cqw]";
-        descSize = "text-[1.1cqw]";
-        marginClass = "mb-[0.1cqw]";
-        radiusClass = "rounded-[0.5cqw]";
+        gapVal = 0.6;
+        padClass = "p-[1.0em]";
+        headerSize = "text-[1.5em]";
+        descSize = "text-[1.1em]";
+        marginClass = "mb-[0.1em]";
+        radiusClass = "rounded-[0.5em]";
     } else if (effectiveRows >= 4) {
-        gapClass = "gap-[1.0cqw] gap-x-[3cqw]";
-        padClass = "p-[1.4cqw]";
-        headerSize = "text-[1.8cqw]";
-        descSize = "text-[1.3cqw]";
-        marginClass = "mb-[0.2cqw]";
-        radiusClass = "rounded-[0.7cqw]";
+        gapVal = 1.0;
+        padClass = "p-[1.4em]";
+        headerSize = "text-[1.8em]";
+        descSize = "text-[1.3em]";
+        marginClass = "mb-[0.2em]";
+        radiusClass = "rounded-[0.7em]";
     } else if (effectiveRows >= 3) {
-        gapClass = "gap-[1.6cqw] gap-x-[3cqw]";
-        padClass = "p-[1.8cqw]";
-        headerSize = "text-[2.0cqw]";
-        descSize = "text-[1.4cqw]";
-        marginClass = "mb-[0.3cqw]";
-        radiusClass = "rounded-[0.8cqw]";
+        gapVal = 1.6;
+        padClass = "p-[1.8em]";
+        headerSize = "text-[2.0em]";
+        descSize = "text-[1.4em]";
+        marginClass = "mb-[0.3em]";
+        radiusClass = "rounded-[0.8em]";
     }
 
+    const gapClass = `gap-[${gapVal}em]`;
+
+    const getFlexBasis = () => {
+        if (n === 1) return "100%";
+        if (cols === 2) {
+            return `calc(50% - ${gapVal / 2}em)`;
+        }
+        return `calc(33.333% - ${(gapVal * 2) / 3}em)`;
+    };
+
     return (
-        <div className={`grid ${gridCols} ${gapClass} max-w-[95cqw] mx-auto my-[1.5cqw] items-stretch`}>
-            {content.map((ele, i) => (
-                <div 
-                    key={i} 
-                    className={`${padClass} ${radiusClass} border theme-border flex flex-col relative group/item`}
-                    style={{ backgroundColor: "var(--theme-card-bg)" }}
-                >
-                    <EditableElement
-                        as="h2"
-                        className={`font-bold theme-heading ${headerSize} ${marginClass} pr-[2cqw]`}
-                        value={ele.header}
-                        onChange={(val) => onUpdateItem?.(i, "header", val)}
-                        readOnly={!onUpdateItem}
-                        placeholder="Header"
-                    />
-                    <EditableElement
-                        as="p"
-                        className={`${descSize} theme-text-muted w-full text-wrap`}
-                        value={ele.description}
-                        onChange={(val) => onUpdateItem?.(i, "description", val)}
-                        readOnly={!onUpdateItem}
-                        placeholder="Description..."
-                    />
-                    {onDeleteItem && (
-                        <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
-                            <ItemActionsMenu
-                                onAddBefore={() => onAddItem?.(i, "before")}
-                                onAddAfter={() => onAddItem?.(i, "after")}
-                                onDelete={() => onDeleteItem(i)}
-                            />
-                        </div>
-                    )}
-                </div>
-            ))}
+        <div className="max-w-[95cqw] mx-auto my-[1.5em] w-full">
+            <div className={`flex flex-wrap justify-center ${gapClass} items-stretch`}>
+                {content.map((ele, i) => (
+                    <div 
+                        key={i} 
+                        className={`${padClass} ${radiusClass} border theme-border flex flex-col relative group/item`}
+                        style={{ backgroundColor: "var(--theme-card-bg)", flex: `0 1 ${getFlexBasis()}` }}
+                    >
+                        <EditableElement
+                            as="h2"
+                            className={`font-bold theme-heading ${headerSize} ${marginClass} pr-[2em]`}
+                            value={ele.header}
+                            onChange={(val) => onUpdateItem?.(i, "header", val)}
+                            readOnly={!onUpdateItem}
+                            placeholder="Header"
+                        />
+                        <EditableElement
+                            as="p"
+                            className={`${descSize} theme-text-muted w-full text-wrap`}
+                            value={ele.description}
+                            onChange={(val) => onUpdateItem?.(i, "description", val)}
+                            readOnly={!onUpdateItem}
+                            placeholder="Description..."
+                        />
+                        {onDeleteItem && (
+                            <div className="absolute -top-[1.2em] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                                <ItemActionsMenu
+                                    onAddBefore={() => onAddItem?.(i, "before")}
+                                    onAddAfter={() => onAddItem?.(i, "after")}
+                                    onDelete={() => onDeleteItem(i)}
+                                />
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };

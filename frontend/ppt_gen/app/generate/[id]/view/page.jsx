@@ -920,6 +920,38 @@ export default function PPTSlidesViewerPage({ params }) {
         updateSlidesState(updatedSlides);
     };
 
+    const handleSplitSlide = (slideIndex, splitIndex) => {
+        if (!editableSlides || !editableSlides[slideIndex]) return;
+
+        const currentSlide = editableSlides[slideIndex];
+        const currentItems = currentSlide.items || [];
+
+        if (splitIndex <= 0 || splitIndex >= currentItems.length) return;
+
+        const keepItems = currentItems.slice(0, splitIndex);
+        const moveItems = currentItems.slice(splitIndex);
+
+        const newSlide = {
+            ...JSON.parse(JSON.stringify(currentSlide)),
+            items: moveItems,
+            title: currentSlide.title.endsWith(" (Cont.)")
+                ? currentSlide.title
+                : `${currentSlide.title} (Cont.)`,
+        };
+
+        const updatedCurrentSlide = {
+            ...currentSlide,
+            items: keepItems,
+        };
+
+        const updatedSlides = [...editableSlides];
+        updatedSlides.splice(slideIndex, 1, updatedCurrentSlide, newSlide);
+
+        updateSlidesState(updatedSlides);
+        setActiveSlideIndex(slideIndex + 1);
+        toast.info("Slide content split automatically due to text overflow.");
+    };
+
     const handleAddItem = () => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
 
@@ -927,8 +959,8 @@ export default function PPTSlidesViewerPage({ params }) {
         const slide = updatedSlides[activeSlideIndex];
         const currentItems = slide.items || [];
 
-        if (currentItems.length >= 10) {
-            toast.error("Maximum of 10 points allowed per slide");
+        if (currentItems.length >= 15) {
+            toast.error("Maximum of 15 points allowed per slide");
             return;
         }
 
@@ -1366,10 +1398,16 @@ export default function PPTSlidesViewerPage({ params }) {
                                                     : handleAddItemAtIndex
                                             }
                                             onEditImage={
-                                                isBusy
-                                                    ? undefined
-                                                    : handleEditImage
-                                            }
+                                                 isBusy
+                                                     ? undefined
+                                                     : handleEditImage
+                                             }
+                                             onSplitSlide={
+                                                 isBusy
+                                                     ? undefined
+                                                     : handleSplitSlide
+                                             }
+                                             slideIndex={activeSlideIndex}
                                         />
                                     ) : isStreamGenerating ? (
                                         <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-white gap-4 p-8 text-center rounded-xl border border-neutral-800">

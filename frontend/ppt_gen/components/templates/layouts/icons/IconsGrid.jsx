@@ -28,20 +28,20 @@ const IconsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     const effectiveRows = rows + textInflation;
 
     let gapVal = 4;
-    let iconSize = "w-[5cqw] h-[5cqw]";
-    let headerSize = "text-[2cqw]";
-    let descSize = "text-[1.4cqw]";
+    let iconSize = "w-[5em] h-[5em]";
+    let headerSize = "text-[2em]";
+    let descSize = "text-[1.4em]";
 
     if (effectiveRows >= 4) {
         gapVal = 1;
-        iconSize = "w-[3cqw] h-[3cqw]";
-        headerSize = "text-[1.5cqw]";
-        descSize = "text-[1.1cqw]";
+        iconSize = "w-[3em] h-[3em]";
+        headerSize = "text-[1.5em]";
+        descSize = "text-[1.1em]";
     } else if (effectiveRows >= 2) {
         gapVal = 2;
-        iconSize = "w-[3.5cqw] h-[3.5cqw]";
-        headerSize = "text-[1.7cqw]";
-        descSize = "text-[1.2cqw]";
+        iconSize = "w-[3.5em] h-[3.5em]";
+        headerSize = "text-[1.7em]";
+        descSize = "text-[1.2em]";
     }
 
     const gapClass = `gap-[${gapVal}cqw]`;
@@ -60,7 +60,7 @@ const IconsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                 <div 
                     key={i} 
                     style={{ flex: `0 1 ${getFlexBasis()}` }}
-                    className="flex flex-col items-center relative group/item p-[2cqw] rounded-[1.2cqw] theme-bg-secondary border border-transparent"
+                    className="flex flex-col items-center relative group/item p-[2em] rounded-[1.2em] theme-bg-secondary border border-transparent"
                 >
                     
                         <EditableIcon
@@ -74,7 +74,7 @@ const IconsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                     
                     <EditableElement
                         as="h3"
-                        className={`font-bold theme-heading ${headerSize} leading-tight mb-[0.8cqw]`}
+                        className={`font-bold theme-heading ${headerSize} leading-tight mb-[0.8em]`}
                         value={ele.header}
                         onChange={(val) => onUpdateItem?.(i, "header", val)}
                         readOnly={!onUpdateItem}
@@ -91,7 +91,7 @@ const IconsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                     />
                     
                     {onDeleteItem && (
-                        <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 z-20">
+                        <div className="absolute -top-[1.2em] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 z-20">
                             <ItemActionsMenu
                                 onAddBefore={() => onAddItem?.(i, "before")}
                                 onAddAfter={() => onAddItem?.(i, "after")}

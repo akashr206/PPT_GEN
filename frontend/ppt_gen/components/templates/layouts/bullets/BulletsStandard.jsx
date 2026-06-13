@@ -5,8 +5,8 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 const BulletsStandard = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     const n = content.length;
     
-    const gridCols = n > 4 ? "grid-cols-2" : "grid-cols-1";
-    const itemsPerCol = n > 4 ? Math.ceil(n / 2) : n;
+    const cols = n >= 5 ? 3 : n === 3 ? 3 : n === 1 ? 1 : 2;
+    const itemsPerCol = Math.ceil(n / cols);
 
     // Adjust layout density based on text length to prevent vertical overflows
     const maxChars = content.reduce((max, ele) => {
@@ -23,39 +23,49 @@ const BulletsStandard = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
     
     const effectiveItemsPerCol = itemsPerCol + textInflation;
     
-    let gapClass = "gap-[2cqw]";
-    let bulletSize = "w-[1.2cqw] h-[1.2cqw] mt-[0.8cqw]";
-    let headerSize = "text-[2.3cqw]";
-    let descSize = "text-[1.6cqw]";
-    let marginClass = "mb-[0.3cqw]";
+    let gapVal = 2;
+    let bulletSize = "w-[1.2em] h-[1.2em] mt-[0.8em]";
+    let headerSize = "text-[2.3em]";
+    let descSize = "text-[1.6em]";
+    let marginClass = "mb-[0.3em]";
     
     if (effectiveItemsPerCol >= 6) {
-        gapClass = "gap-[0.5cqw]";
-        bulletSize = "w-[0.8cqw] h-[0.8cqw] mt-[0.6cqw]";
-        headerSize = "text-[1.5cqw]";
-        descSize = "text-[1.1cqw]";
-        marginClass = "mb-[0.1cqw]";
+        gapVal = 0.5;
+        bulletSize = "w-[0.8em] h-[0.8em] mt-[0.6em]";
+        headerSize = "text-[1.5em]";
+        descSize = "text-[1.1em]";
+        marginClass = "mb-[0.1em]";
     } else if (effectiveItemsPerCol >= 5) {
-        gapClass = "gap-[0.8cqw]";
-        bulletSize = "w-[1.0cqw] h-[1.0cqw] mt-[0.7cqw]";
-        headerSize = "text-[1.7cqw]";
-        descSize = "text-[1.3cqw]";
-        marginClass = "mb-[0.2cqw]";
+        gapVal = 0.8;
+        bulletSize = "w-[1.0em] h-[1.0em] mt-[0.7em]";
+        headerSize = "text-[1.7em]";
+        descSize = "text-[1.3em]";
+        marginClass = "mb-[0.2em]";
     } else if (effectiveItemsPerCol >= 4) {
-        gapClass = "gap-[1.2cqw]";
-        bulletSize = "w-[1.1cqw] h-[1.1cqw] mt-[0.7cqw]";
-        headerSize = "text-[2.0cqw]";
-        descSize = "text-[1.4cqw]";
-        marginClass = "mb-[0.25cqw]";
+        gapVal = 1.2;
+        bulletSize = "w-[1.1em] h-[1.1em] mt-[0.7em]";
+        headerSize = "text-[2.0em]";
+        descSize = "text-[1.4em]";
+        marginClass = "mb-[0.25em]";
     }
 
+    const gapClass = `gap-[${gapVal}em]`;
+
+    const getFlexBasis = () => {
+        if (n === 1) return "100%";
+        if (cols === 2) {
+            return `calc(50% - ${gapVal / 2}em)`;
+        }
+        return `calc(33.333% - ${(gapVal * 2) / 3}em)`;
+    };
+
     return (
-        <div className="max-w-[90cqw] mx-auto my-[1cqw]">
-            <div className={`grid ${gridCols} ${gapClass} gap-x-[4cqw] items-start`}>
+        <div className="max-w-[90cqw] mx-auto my-[1em] w-full">
+            <div className={`flex flex-wrap justify-center ${gapClass} items-start`}>
                 {content.map((ele, i) => (
-                    <div key={i} className="flex items-start gap-[1.2cqw]">
+                    <div key={i} className="flex items-start gap-[1.2em]" style={{ flex: `0 1 ${getFlexBasis()}` }}>
                         <div className={`${bulletSize} rounded-full shrink-0 theme-bg-primary`} />
-                        <div className="relative group/item flex-1 pr-[2cqw]">
+                        <div className="relative group/item flex-1 pr-[2em]">
                             <EditableElement
                                 as="h2"
                                 className={`font-bold theme-heading ${headerSize} ${marginClass}`}
@@ -73,14 +83,14 @@ const BulletsStandard = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
                                 placeholder="Description..."
                             />
                             {onDeleteItem && (
-                        <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
-                            <ItemActionsMenu
-                                onAddBefore={() => onAddItem?.(i, "before")}
-                                onAddAfter={() => onAddItem?.(i, "after")}
-                                onDelete={() => onDeleteItem(i)}
-                            />
-                        </div>
-                    )}
+                                <div className="absolute -top-[1.2em] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                                    <ItemActionsMenu
+                                        onAddBefore={() => onAddItem?.(i, "before")}
+                                        onAddAfter={() => onAddItem?.(i, "after")}
+                                        onDelete={() => onDeleteItem(i)}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}

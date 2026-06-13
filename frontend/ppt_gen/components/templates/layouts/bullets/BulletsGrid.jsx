@@ -4,7 +4,9 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
 const BulletsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     const n = content.length;
-    const rows = Math.ceil(n / 2);
+    
+    const cols = n >= 5 ? 3 : n === 3 ? 3 : n === 1 ? 1 : 2;
+    const rows = Math.ceil(n / cols);
 
     // Adjust layout density based on text length to prevent vertical overflows
     const maxChars = content.reduce((max, ele) => {
@@ -21,66 +23,78 @@ const BulletsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     
     const effectiveRows = rows + textInflation;
 
-    let gapClass = "gap-[2.5cqw]";
-    let bulletSize = "w-[1.3cqw] h-[1.3cqw] mt-[0.7cqw]";
-    let headerSize = "text-[2.2cqw]";
-    let descSize = "text-[1.6cqw]";
-    let marginClass = "mb-[0.4cqw]";
+    let gapVal = 2.5;
+    let bulletSize = "w-[1.3em] h-[1.3em] mt-[0.7em]";
+    let headerSize = "text-[2.2em]";
+    let descSize = "text-[1.6em]";
+    let marginClass = "mb-[0.4em]";
 
     if (effectiveRows >= 5) {
-        gapClass = "gap-[0.6cqw] gap-x-[3cqw]";
-        bulletSize = "w-[0.8cqw] h-[0.8cqw] mt-[0.5cqw]";
-        headerSize = "text-[1.5cqw]";
-        descSize = "text-[1.1cqw]";
-        marginClass = "mb-[0.1cqw]";
+        gapVal = 0.6;
+        bulletSize = "w-[0.8em] h-[0.8em] mt-[0.5em]";
+        headerSize = "text-[1.5em]";
+        descSize = "text-[1.1em]";
+        marginClass = "mb-[0.1em]";
     } else if (effectiveRows >= 4) {
-        gapClass = "gap-[1.0cqw] gap-x-[3cqw]";
-        bulletSize = "w-[1.0cqw] h-[1.0cqw] mt-[0.6cqw]";
-        headerSize = "text-[1.8cqw]";
-        descSize = "text-[1.3cqw]";
-        marginClass = "mb-[0.2cqw]";
+        gapVal = 1.0;
+        bulletSize = "w-[1.0em] h-[1.0em] mt-[0.6em]";
+        headerSize = "text-[1.8em]";
+        descSize = "text-[1.3em]";
+        marginClass = "mb-[0.2em]";
     } else if (effectiveRows >= 3) {
-        gapClass = "gap-[1.6cqw] gap-x-[3cqw]";
-        bulletSize = "w-[1.2cqw] h-[1.2cqw] mt-[0.6cqw]";
-        headerSize = "text-[2.0cqw]";
-        descSize = "text-[1.4cqw]";
-        marginClass = "mb-[0.3cqw]";
+        gapVal = 1.6;
+        bulletSize = "w-[1.2em] h-[1.2em] mt-[0.6em]";
+        headerSize = "text-[2.0em]";
+        descSize = "text-[1.4em]";
+        marginClass = "mb-[0.3em]";
     }
 
+    const gapClass = `gap-[${gapVal}em]`;
+
+    const getFlexBasis = () => {
+        if (n === 1) return "100%";
+        if (cols === 2) {
+            return `calc(50% - ${gapVal / 2}em)`;
+        }
+        return `calc(33.333% - ${(gapVal * 2) / 3}em)`;
+    };
+
     return (
-        <div className={`grid grid-cols-2 ${gapClass} max-w-[95cqw] mx-auto my-[1.5cqw] items-start`}>
-            {content.map((ele, i) => (
-                <div key={i} className="flex gap-[1.2cqw]">
-                    <div className={`${bulletSize} shrink-0 theme-bg-primary`} />
-                    <div className="relative group/item flex-1 pr-[1.5cqw]">
-                        <EditableElement
-                            as="h2"
-                            className={`font-bold theme-heading ${headerSize} ${marginClass}`}
-                            value={ele.header}
-                            onChange={(val) => onUpdateItem?.(i, "header", val)}
-                            readOnly={!onUpdateItem}
-                            placeholder="Header"
-                        />
-                        <EditableElement
-                            as="p"
-                            className={`${descSize} theme-text-muted w-full text-wrap`}
-                            value={ele.description}
-                            onChange={(val) => onUpdateItem?.(i, "description", val)}
-                            readOnly={!onUpdateItem}
-                            placeholder="Description..."
-                        />
-                        {onDeleteItem && (
-                        <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
-                            <ItemActionsMenu
-                                onAddBefore={() => onAddItem?.(i, "before")}
-                                onAddAfter={() => onAddItem?.(i, "after")}
-                                onDelete={() => onDeleteItem(i)}
+        <div className="max-w-[95cqw] mx-auto my-[1.5em] w-full">
+            <div className={`flex flex-wrap justify-center ${gapClass} items-start`}>
+                {content.map((ele, i) => (
+                    <div key={i} className="flex gap-[1.2em]" style={{ flex: `0 1 ${getFlexBasis()}` }}>
+                        <div className={`${bulletSize} shrink-0 theme-bg-primary`} />
+                        <div className="relative group/item flex-1 pr-[1.5em]">
+                            <EditableElement
+                                as="h2"
+                                className={`font-bold theme-heading ${headerSize} ${marginClass}`}
+                                value={ele.header}
+                                onChange={(val) => onUpdateItem?.(i, "header", val)}
+                                readOnly={!onUpdateItem}
+                                placeholder="Header"
                             />
+                            <EditableElement
+                                as="p"
+                                className={`${descSize} theme-text-muted w-full text-wrap`}
+                                value={ele.description}
+                                onChange={(val) => onUpdateItem?.(i, "description", val)}
+                                readOnly={!onUpdateItem}
+                                placeholder="Description..."
+                            />
+                            {onDeleteItem && (
+                                <div className="absolute -top-[1.2em] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                                    <ItemActionsMenu
+                                        onAddBefore={() => onAddItem?.(i, "before")}
+                                        onAddAfter={() => onAddItem?.(i, "after")}
+                                        onDelete={() => onDeleteItem(i)}
+                                    />
+                                </div>
+                            )}
                         </div>
-                    )}
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 };

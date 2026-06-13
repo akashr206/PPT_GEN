@@ -6,48 +6,48 @@ const AgendaSplit = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     const n = content.length;
 
     // Adjust layout density based on item count to avoid overflows
-    let headerSize = "text-[1.7cqw]";
-    let descSize = "text-[1.2cqw]";
-    let gapClass = "gap-[2cqw]";
-    let paddingClass = "py-[0.5cqw]";
-    let indexSize = "text-[2.2cqw]";
-    let dotSize = "w-[0.6cqw] h-[0.6cqw]";
+    let headerSize = "text-[1.7em]";
+    let descSize = "text-[1.2em]";
+    let gapClass = "gap-[2em]";
+    let paddingClass = "py-[0.5em]";
+    let indexSize = "text-[2.2em]";
+    let dotSize = "w-[0.6em] h-[0.6em]";
 
     if (n >= 10) {
-        headerSize = "text-[1.0cqw]";
-        descSize = "text-[0.8cqw]";
-        gapClass = "gap-[0.4cqw]";
-        paddingClass = "py-[0.1cqw]";
-        indexSize = "text-[1.4cqw]";
-        dotSize = "w-[0.4cqw] h-[0.4cqw]";
+        headerSize = "text-[1.0em]";
+        descSize = "text-[0.8em]";
+        gapClass = "gap-[0.4em]";
+        paddingClass = "py-[0.1em]";
+        indexSize = "text-[1.4em]";
+        dotSize = "w-[0.4em] h-[0.4em]";
     } else if (n >= 8) {
-        headerSize = "text-[1.15cqw]";
-        descSize = "text-[0.9cqw]";
-        gapClass = "gap-[0.6cqw]";
-        paddingClass = "py-[0.25cqw]";
-        indexSize = "text-[1.7cqw]";
-        dotSize = "w-[0.5cqw] h-[0.5cqw]";
+        headerSize = "text-[1.15em]";
+        descSize = "text-[0.9em]";
+        gapClass = "gap-[0.6em]";
+        paddingClass = "py-[0.25em]";
+        indexSize = "text-[1.7em]";
+        dotSize = "w-[0.5em] h-[0.5em]";
     } else if (n >= 6) {
-        headerSize = "text-[1.3cqw]";
-        descSize = "text-[1.0cqw]";
-        gapClass = "gap-[1cqw]";
-        paddingClass = "py-[0.4cqw]";
-        indexSize = "text-[2.0cqw]";
-        dotSize = "w-[0.6cqw] h-[0.6cqw]";
+        headerSize = "text-[1.3em]";
+        descSize = "text-[1.0em]";
+        gapClass = "gap-[1em]";
+        paddingClass = "py-[0.4em]";
+        indexSize = "text-[2.0em]";
+        dotSize = "w-[0.6em] h-[0.6em]";
     } else if (n >= 5) {
-        headerSize = "text-[1.5cqw]";
-        descSize = "text-[1.1cqw]";
-        gapClass = "gap-[1.5cqw]";
-        paddingClass = "py-[0.45cqw]";
-        indexSize = "text-[2.1cqw]";
-        dotSize = "w-[0.6cqw] h-[0.6cqw]";
+        headerSize = "text-[1.5em]";
+        descSize = "text-[1.1em]";
+        gapClass = "gap-[1.5em]";
+        paddingClass = "py-[0.45em]";
+        indexSize = "text-[2.1em]";
+        dotSize = "w-[0.6em] h-[0.6em]";
     }
 
     return (
-        <div className="flex w-full items-stretch justify-between h-full min-h-[30cqw] gap-[3.5cqw] max-w-[95cqw] mx-auto py-[1cqw]">
+        <div className="flex w-full items-stretch justify-between h-full min-h-[30em] gap-[3.5em] max-w-[95cqw] mx-auto py-[1em]">
             {/* Left Accent Panel */}
             <div 
-                className="w-[30%] rounded-[1.2cqw] p-[3cqw] flex flex-col justify-between relative overflow-hidden shadow-lg border"
+                className="w-[30%] rounded-[1.2em] p-[3em] flex flex-col justify-between relative overflow-hidden shadow-lg border"
                 style={{ 
                     backgroundColor: "var(--theme-secondary)",
                     borderColor: "var(--theme-card-border)"
@@ -67,20 +67,20 @@ const AgendaSplit = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                 <div className="relative z-10 flex flex-col h-full justify-between">
                     <div>
                         <div 
-                            className="w-[3cqw] h-[0.3cqw] rounded-full mb-[2cqw]" 
+                            className="w-[3em] h-[0.3em] rounded-full mb-[2em]" 
                             style={{ backgroundColor: "var(--theme-primary)" }}
                         />
                         <h2 
-                            className="text-[3cqw] font-extrabold uppercase tracking-widest leading-none theme-heading"
+                            className="text-[3em] font-extrabold uppercase tracking-widest leading-none theme-heading"
                         >
                             Agenda
                         </h2>
-                        <p className="text-[1.2cqw] theme-text-muted mt-[0.5cqw]">
+                        <p className="text-[1.2em] theme-text-muted mt-[0.5em]">
                             Presentation Outline & Key Chapters
                         </p>
                     </div>
 
-                    <div className="text-[1.0cqw] theme-text-muted mt-auto">
+                    <div className="text-[1.0em] theme-text-muted mt-auto">
                         <span className="font-bold text-foreground">{n}</span> {n === 1 ? "Section" : "Sections"} total
                     </div>
                 </div>
@@ -91,7 +91,7 @@ const AgendaSplit = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                 {content.map((ele, i) => (
                     <div 
                         key={i}
-                        className={`flex items-start gap-[2cqw] relative group/item ${paddingClass}`}
+                        className={`flex items-start gap-[2em] relative group/item ${paddingClass}`}
                     >
                         {/* Number Index */}
                         <div 
@@ -102,24 +102,24 @@ const AgendaSplit = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                         </div>
 
                         {/* Divider Dot / Line */}
-                        <div className="flex flex-col items-center self-stretch py-[0.3cqw] shrink-0">
+                        <div className="flex flex-col items-center self-stretch py-[0.3em] shrink-0">
                             <div 
                                 className={`${dotSize} rounded-full`} 
                                 style={{ backgroundColor: "var(--theme-primary)" }}
                             />
                             {i < n - 1 && (
                                 <div 
-                                    className="w-[0.1cqw] grow my-[0.5cqw]" 
+                                    className="w-[0.1em] grow my-[0.5em]" 
                                     style={{ backgroundColor: "var(--theme-card-border)" }}
                                 />
                             )}
                         </div>
 
                         {/* Title and Description */}
-                        <div className="flex flex-col grow pr-[3cqw]">
+                        <div className="flex flex-col grow pr-[3em]">
                             <EditableElement
                                 as="h3"
-                                className={`font-bold theme-heading ${headerSize} leading-tight mb-[0.2cqw]`}
+                                className={`font-bold theme-heading ${headerSize} leading-tight mb-[0.2em]`}
                                 value={ele.header}
                                 onChange={(val) => onUpdateItem?.(i, "header", val)}
                                 readOnly={!onUpdateItem}
@@ -137,7 +137,7 @@ const AgendaSplit = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
 
                         {/* Actions Menu */}
                         {onDeleteItem && (
-                            <div className="absolute -top-[1cqw] right-[1cqw] opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                            <div className="absolute -top-[1em] right-[1em] opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
                                 <ItemActionsMenu
                                     onAddBefore={() => onAddItem?.(i, "before")}
                                     onAddAfter={() => onAddItem?.(i, "after")}

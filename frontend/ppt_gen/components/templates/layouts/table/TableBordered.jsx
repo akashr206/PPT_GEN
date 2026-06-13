@@ -10,7 +10,7 @@ const TableBordered = ({ content, onUpdateSlide }) => {
 
     if (n === 0) {
         return (
-            <div className="max-w-[90cqw] mx-auto my-[2cqw] text-center text-[1.6cqw] theme-text-muted">
+            <div className="max-w-[90cqw] mx-auto my-[2em] text-center text-[1.6em] theme-text-muted">
                 No items available.
             </div>
         );
@@ -134,9 +134,9 @@ const TableBordered = ({ content, onUpdateSlide }) => {
     };
 
     return (
-        <div className="relative w-full h-full flex flex-col justify-center py-[1cqw]">
+        <div className="relative w-full h-full flex flex-col justify-center py-[1em]">
             <div className="max-w-[90cqw] w-full mx-auto">
-                <table className="w-full border-collapse text-left border-[0.15cqw] table-fixed" style={{ borderColor: "var(--theme-card-border)" }}>
+                <table className="w-full border-collapse text-left border-[0.15em] table-fixed" style={{ borderColor: "var(--theme-card-border)" }}>
                     <colgroup>
                         {Array.from({ length: numCols }).map((_, colIdx) => (
                             <col key={colIdx} style={{ width: getColWidth(colIdx, numCols) }} />
@@ -147,7 +147,7 @@ const TableBordered = ({ content, onUpdateSlide }) => {
                             {headerRow.cells.map((cell, colIdx) => (
                                 <th 
                                     key={colIdx} 
-                                    className="font-bold border-[0.1cqw] relative group/colHeader"
+                                    className="font-bold border-[0.1em] relative group/colHeader"
                                     style={{ 
                                         ...paddingStyle,
                                         fontSize: headerTextSize,
@@ -155,7 +155,7 @@ const TableBordered = ({ content, onUpdateSlide }) => {
                                         color: "var(--theme-primary)" 
                                     }}
                                 >
-                                    <div className="flex items-center justify-between gap-[0.5cqw]">
+                                    <div className="flex items-center justify-between gap-[0.5em]">
                                         <EditableElement
                                             as="span"
                                             className="w-full bg-transparent border-none focus:outline-none"
@@ -190,7 +190,7 @@ const TableBordered = ({ content, onUpdateSlide }) => {
                                     {row.cells.map((cell, colIdx) => (
                                         <td 
                                             key={colIdx} 
-                                            className={`align-top border-[0.1cqw] ${colIdx === 0 ? "relative" : ""}`}
+                                            className={`align-top border-[0.1em] ${colIdx === 0 ? "relative" : ""}`}
                                             style={{ 
                                                 ...paddingStyle,
                                                 fontSize: rowTextSize,

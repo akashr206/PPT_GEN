@@ -20,24 +20,24 @@ const TimelineHorizontal = ({ content, onUpdateItem, onDeleteItem, onAddItem }) 
     
     const effectiveN = n + textInflation;
     
-    let padClass = "p-[1.0cqw]";
-    let headerSize = "text-[1.8cqw]";
-    let descSize = "text-[1.3cqw]";
-    let marginClass = "mb-[0.3cqw]";
-    let nodeSize = "w-[1.6cqw] h-[1.6cqw]";
+    let padClass = "p-[1.0em]";
+    let headerSize = "text-[1.8em]";
+    let descSize = "text-[1.3em]";
+    let marginClass = "mb-[0.3em]";
+    let nodeSize = "w-[1.6em] h-[1.6em]";
     
     if (effectiveN >= 6) {
-        padClass = "p-[0.5cqw]";
-        headerSize = "text-[1.2cqw]";
-        descSize = "text-[1.0cqw]";
-        marginClass = "mb-[0.1cqw]";
-        nodeSize = "w-[1.0cqw] h-[1.0cqw]";
+        padClass = "p-[0.5em]";
+        headerSize = "text-[1.2em]";
+        descSize = "text-[1.0em]";
+        marginClass = "mb-[0.1em]";
+        nodeSize = "w-[1.0em] h-[1.0em]";
     } else if (effectiveN >= 4) {
-        padClass = "p-[0.8cqw]";
-        headerSize = "text-[1.5cqw]";
-        descSize = "text-[1.1cqw]";
-        marginClass = "mb-[0.2cqw]";
-        nodeSize = "w-[1.3cqw] h-[1.3cqw]";
+        padClass = "p-[0.8em]";
+        headerSize = "text-[1.5em]";
+        descSize = "text-[1.1em]";
+        marginClass = "mb-[0.2em]";
+        nodeSize = "w-[1.3em] h-[1.3em]";
     }
 
     const dx = 100 / n;
@@ -117,7 +117,7 @@ const TimelineHorizontal = ({ content, onUpdateItem, onDeleteItem, onAddItem }) 
                             />
                             
                             {onDeleteItem && (
-                                <div className={`absolute ${isTop ? "-top-[1.2cqw]" : "-bottom-[1.2cqw]"} left-1/2 -translate-x-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity z-20`}>
+                                <div className={`absolute ${isTop ? "-top-[1.2em]" : "-bottom-[1.2em]"} left-1/2 -translate-x-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity z-20`}>
                                     <ItemActionsMenu
                                         onAddBefore={() => onAddItem?.(i, "before")}
                                         onAddAfter={() => onAddItem?.(i, "after")}

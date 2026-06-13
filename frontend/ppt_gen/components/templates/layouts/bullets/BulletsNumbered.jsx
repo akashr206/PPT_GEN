@@ -4,8 +4,9 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
 const BulletsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     const n = content.length;
-    const isTwoCol = n > 4;
-    const itemsPerCol = isTwoCol ? Math.ceil(n / 2) : n;
+    
+    const cols = n >= 5 ? 3 : n === 3 ? 3 : n === 1 ? 1 : 2;
+    const itemsPerCol = Math.ceil(n / cols);
 
     // Adjust layout density based on text length to prevent vertical overflows
     const maxChars = content.reduce((max, ele) => {
@@ -22,46 +23,55 @@ const BulletsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
     
     const effectiveItemsPerCol = itemsPerCol + textInflation;
     
-    let gapClass = "gap-[2.5cqw]";
-    let numSize = "text-[4.5cqw]";
-    let barWidth = "w-[0.6cqw]";
-    let headerSize = "text-[2.2cqw]";
-    let descSize = "text-[1.6cqw]";
-    let marginClass = "mb-[0.3cqw]";
+    let gapVal = 2.5;
+    let numSize = "text-[4.5em]";
+    let barWidth = "w-[0.6em]";
+    let headerSize = "text-[2.2em]";
+    let descSize = "text-[1.6em]";
+    let marginClass = "mb-[0.3em]";
 
     if (effectiveItemsPerCol >= 6) {
-        gapClass = "gap-[0.5cqw]";
-        numSize = "text-[2.8cqw]";
-        barWidth = "w-[0.3cqw]";
-        headerSize = "text-[1.5cqw]";
-        descSize = "text-[1.1cqw]";
-        marginClass = "mb-[0.1cqw]";
+        gapVal = 0.5;
+        numSize = "text-[2.8em]";
+        barWidth = "w-[0.3em]";
+        headerSize = "text-[1.5em]";
+        descSize = "text-[1.1em]";
+        marginClass = "mb-[0.1em]";
     } else if (effectiveItemsPerCol >= 5) {
-        gapClass = "gap-[0.8cqw]";
-        numSize = "text-[3.2cqw]";
-        barWidth = "w-[0.4cqw]";
-        headerSize = "text-[1.7cqw]";
-        descSize = "text-[1.3cqw]";
-        marginClass = "mb-[0.2cqw]";
+        gapVal = 0.8;
+        numSize = "text-[3.2em]";
+        barWidth = "w-[0.4em]";
+        headerSize = "text-[1.7em]";
+        descSize = "text-[1.3em]";
+        marginClass = "mb-[0.2em]";
     } else if (effectiveItemsPerCol >= 4) {
-        gapClass = "gap-[1.2cqw]";
-        numSize = "text-[3.8cqw]";
-        barWidth = "w-[0.5cqw]";
-        headerSize = "text-[2.0cqw]";
-        descSize = "text-[1.4cqw]";
-        marginClass = "mb-[0.25cqw]";
+        gapVal = 1.2;
+        numSize = "text-[3.8em]";
+        barWidth = "w-[0.5em]";
+        headerSize = "text-[2.0em]";
+        descSize = "text-[1.4em]";
+        marginClass = "mb-[0.25em]";
     }
 
-    const renderColumn = (items, startIdx) => {
-        return (
-            <div className={`flex flex-col ${gapClass} w-full`}>
-                {items.map((ele, idx) => {
-                    const globalIdx = startIdx + idx;
-                    const displayNum = String(globalIdx + 1).padStart(2, '0');
+    const gapClass = `gap-[${gapVal}em]`;
+
+    const getFlexBasis = () => {
+        if (n === 1) return "100%";
+        if (cols === 2) {
+            return `calc(50% - ${gapVal / 2}em)`;
+        }
+        return `calc(33.333% - ${(gapVal * 2) / 3}em)`;
+    };
+
+    return (
+        <div className="max-w-[95cqw] mx-auto my-[1.5em] w-full">
+            <div className={`flex flex-wrap justify-center ${gapClass} items-stretch`}>
+                {content.map((ele, idx) => {
+                    const displayNum = String(idx + 1).padStart(2, '0');
                     return (
-                        <div key={globalIdx} className="flex items-stretch gap-[1cqw] w-full">
+                        <div key={idx} className="flex items-stretch gap-[1em]" style={{ flex: `0 1 ${getFlexBasis()}` }}>
                             {/* Giant Index Number */}
-                            <div className={`${numSize} font-bold theme-text-accent tracking-tighter shrink-0 flex items-center justify-center min-w-[5cqw]`}>
+                            <div className={`${numSize} font-bold theme-text-accent tracking-tighter shrink-0 flex items-center justify-center min-w-[3em]`}>
                                 {displayNum}
                             </div>
                             
@@ -72,12 +82,12 @@ const BulletsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
                             />
                             
                             {/* Content */}
-                            <div className="flex flex-col justify-center grow relative group/item pr-[2.5cqw]">
+                            <div className="flex flex-col justify-center grow relative group/item pr-[2.5em]">
                                 <EditableElement
                                     as="h2"
                                     className={`font-bold theme-heading ${headerSize} ${marginClass} leading-tight`}
                                     value={ele.header}
-                                    onChange={(val) => onUpdateItem?.(globalIdx, "header", val)}
+                                    onChange={(val) => onUpdateItem?.(idx, "header", val)}
                                     readOnly={!onUpdateItem}
                                     placeholder="Header"
                                 />
@@ -85,16 +95,16 @@ const BulletsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
                                     as="p"
                                     className={`${descSize} theme-text-muted w-full text-wrap`}
                                     value={ele.description}
-                                    onChange={(val) => onUpdateItem?.(globalIdx, "description", val)}
+                                    onChange={(val) => onUpdateItem?.(idx, "description", val)}
                                     readOnly={!onUpdateItem}
                                     placeholder="Description..."
                                 />
                                 {onDeleteItem && (
-                                    <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                                    <div className="absolute -top-[1.2em] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
                                         <ItemActionsMenu
-                                            onAddBefore={() => onAddItem?.(globalIdx, "before")}
-                                            onAddAfter={() => onAddItem?.(globalIdx, "after")}
-                                            onDelete={() => onDeleteItem(globalIdx)}
+                                            onAddBefore={() => onAddItem?.(idx, "before")}
+                                            onAddAfter={() => onAddItem?.(idx, "after")}
+                                            onDelete={() => onDeleteItem(idx)}
                                         />
                                     </div>
                                 )}
@@ -103,23 +113,6 @@ const BulletsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
                     );
                 })}
             </div>
-        );
-    };
-
-    if (isTwoCol) {
-        const col1 = content.slice(0, itemsPerCol);
-        const col2 = content.slice(itemsPerCol);
-        return (
-            <div className="flex gap-[2cqw] max-w-[95cqw] mx-auto my-[1.5cqw] items-start justify-between">
-                {renderColumn(col1, 0)}
-                {renderColumn(col2, itemsPerCol)}
-            </div>
-        );
-    }
-
-    return (
-        <div className="max-w-[85cqw] mx-auto my-[2cqw]">
-            {renderColumn(content, 0)}
         </div>
     );
 };

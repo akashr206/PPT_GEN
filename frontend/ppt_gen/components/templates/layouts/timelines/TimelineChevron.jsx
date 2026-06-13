@@ -26,7 +26,7 @@ const TimelineChevron = ({
     const overlap = n > 0 ? 7.2 / n : 1.2;
 
     return (
-        <div className="w-full max-w-[95cqw] mx-auto flex flex-col justify-center items-center py-[2cqw]">
+        <div className="w-full max-w-[95cqw] mx-auto flex flex-col justify-center items-center py-[2em]">
             <div className="flex flex-row items-stretch w-full justify-center overflow-visible">
                 {content.map((ele, i) => {
                     const isFirst = i === 0;
@@ -44,11 +44,11 @@ const TimelineChevron = ({
                                 zIndex: n - i,
                             }}
                         >
-                            <div className="w-full h-[15cqw] flex flex-col items-center justify-end relative pb-[1.5cqw]">
+                            <div className="w-full h-[15em] flex flex-col items-center justify-end relative pb-[1.5em]">
                                 {isEven ? (
                                     <div className="flex flex-col items-center justify-end h-full w-full">
                                         <div
-                                            className="w-[3.6cqw] h-[3.6cqw] rounded-full flex items-center justify-center shadow-md border-[0.2cqw] border-white relative z-30"
+                                            className="w-[3.6em] h-[3.6em] rounded-full flex items-center justify-center shadow-md border-[0.2em] border-white relative z-30"
                                             style={{
                                                 backgroundColor: themeColor,
                                             }}
@@ -70,12 +70,12 @@ const TimelineChevron = ({
                                                 recommendedIcons={
                                                     ele.recommendedIcons
                                                 }
-                                                className="w-[1.8cqw] h-[1.8cqw] flex items-center justify-center relative z-30"
+                                                className="w-[1.8em] h-[1.8em] flex items-center justify-center relative z-30"
                                                 iconClassName="w-full h-full [&_svg]:!text-white [&_svg]:!my-0 [&_svg]:relative [&_svg]:z-30"
                                             />
                                         </div>
                                         <svg
-                                            className="w-[1cqw] grow my-[0.5cqw] pointer-events-none"
+                                            className="w-[1em] grow my-[0.5em] pointer-events-none"
                                             viewBox="0 0 10 100"
                                             preserveAspectRatio="none"
                                             width="100%"
@@ -95,10 +95,10 @@ const TimelineChevron = ({
                                     </div>
                                 ) : (
                                     // Text Description (centered above)
-                                    <div className="w-full px-[1cqw] text-center mb-[1cqw]">
+                                    <div className="w-full px-[1em] text-center mb-[1em]">
                                         <EditableElement
                                             as="p"
-                                            className="text-[1.15cqw] theme-text-muted w-full text-balance line-clamp-4"
+                                            className="text-[1.15em] theme-text-muted w-full text-balance line-clamp-4"
                                             value={ele.description}
                                             onChange={(val) =>
                                                 onUpdateItem?.(
@@ -115,7 +115,7 @@ const TimelineChevron = ({
                             </div>
 
                             {/* Middle Chevron Cell */}
-                            <div className="w-full h-[5cqw] flex items-center justify-center relative z-20">
+                            <div className="w-full h-[5em] flex items-center justify-center relative z-20">
                                 {/* SVG Chevron Background (supported by the PPTX exporter) */}
                                 <svg
                                     className="absolute inset-0 w-full h-full pointer-events-none"
@@ -148,7 +148,7 @@ const TimelineChevron = ({
                                 >
                                     <EditableElement
                                         as="span"
-                                        className="font-bold text-center w-full text-[1.6cqw] truncate"
+                                        className="font-bold text-center w-full text-[1.6em] truncate"
                                         value={ele.header}
                                         onChange={(val) =>
                                             onUpdateItem?.(i, "header", val)
@@ -160,13 +160,13 @@ const TimelineChevron = ({
                             </div>
 
                             {/* Bottom Content Cell */}
-                            <div className="w-full h-[15cqw] flex flex-col items-center justify-start relative pt-[1.5cqw]">
+                            <div className="w-full h-[15em] flex flex-col items-center justify-start relative pt-[1.5em]">
                                 {isEven ? (
                                     // Text Description (centered below)
-                                    <div className="w-full px-[1cqw] text-center mt-[1cqw]">
+                                    <div className="w-full px-[1em] text-center mt-[1em]">
                                         <EditableElement
                                             as="p"
-                                            className="text-[1.15cqw] theme-text-muted w-full text-balance line-clamp-4"
+                                            className="text-[1.15em] theme-text-muted w-full text-balance line-clamp-4"
                                             value={ele.description}
                                             onChange={(val) =>
                                                 onUpdateItem?.(
@@ -183,7 +183,7 @@ const TimelineChevron = ({
                                     // Dotted Line and Icon going down
                                     <div className="flex flex-col items-center justify-start h-full w-full">
                                         <svg
-                                            className="w-[1cqw] grow my-[0.5cqw] pointer-events-none"
+                                            className="w-[1em] grow my-[0.5em] pointer-events-none"
                                             viewBox="0 0 10 100"
                                             preserveAspectRatio="none"
                                             width="100%"
@@ -201,7 +201,7 @@ const TimelineChevron = ({
                                             />
                                         </svg>
                                         <div
-                                            className="w-[3.6cqw] h-[3.6cqw] rounded-full flex items-center justify-center shadow-md border-[0.2cqw] border-white relative z-30"
+                                            className="w-[3.6em] h-[3.6em] rounded-full flex items-center justify-center shadow-md border-[0.2em] border-white relative z-30"
                                             style={{
                                                 backgroundColor: themeColor,
                                             }}
@@ -223,7 +223,7 @@ const TimelineChevron = ({
                                                 recommendedIcons={
                                                     ele.recommendedIcons
                                                 }
-                                                className="w-[1.8cqw] h-[1.8cqw] flex items-center justify-center relative z-30"
+                                                className="w-[1.8em] h-[1.8em] flex items-center justify-center relative z-30"
                                                 iconClassName="w-full h-full [&_svg]:!text-white [&_svg]:!my-0 [&_svg]:relative [&_svg]:z-30"
                                             />
                                         </div>
@@ -233,7 +233,7 @@ const TimelineChevron = ({
 
                             {/* Actions Menu (hover active only, no animations or transitions) */}
                             {onDeleteItem && (
-                                <div className="absolute top-[14.5cqw] left-1/2 -translate-x-1/2 z-30 opacity-0 group-hover/col:opacity-100 pointer-events-auto">
+                                <div className="absolute top-[14.5em] left-1/2 -translate-x-1/2 z-30 opacity-0 group-hover/col:opacity-100 pointer-events-auto">
                                     <ItemActionsMenu
                                         onAddBefore={() =>
                                             onAddItem?.(i, "before")

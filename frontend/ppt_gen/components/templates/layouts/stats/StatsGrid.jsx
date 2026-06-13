@@ -23,26 +23,26 @@ const StatsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     
     const effectiveRows = rows + textInflation;
 
-    let gapClass = "gap-[3cqw]";
-    let numSize = "text-[5.5cqw]";
-    let descSize = "text-[1.6cqw]";
+    let gapClass = "gap-[3em]";
+    let numSize = "text-[5.5em]";
+    let descSize = "text-[1.6em]";
 
     if (effectiveRows >= 5) {
-        gapClass = "gap-y-[0.8cqw] gap-x-[3cqw]";
-        numSize = "text-[2.6cqw]";
-        descSize = "text-[1.1cqw]";
+        gapClass = "gap-y-[0.8em] gap-x-[3em]";
+        numSize = "text-[2.6em]";
+        descSize = "text-[1.1em]";
     } else if (effectiveRows >= 4) {
-        gapClass = "gap-y-[1.2cqw] gap-x-[3cqw]";
-        numSize = "text-[3.0cqw]";
-        descSize = "text-[1.2cqw]";
+        gapClass = "gap-y-[1.2em] gap-x-[3em]";
+        numSize = "text-[3.0em]";
+        descSize = "text-[1.2em]";
     } else if (effectiveRows >= 3) {
-        gapClass = "gap-y-[1.6cqw] gap-x-[4cqw]";
-        numSize = "text-[3.6cqw]";
-        descSize = "text-[1.3cqw]";
+        gapClass = "gap-y-[1.6em] gap-x-[4em]";
+        numSize = "text-[3.6em]";
+        descSize = "text-[1.3em]";
     } else if (effectiveRows >= 2) {
-        gapClass = "gap-y-[2cqw] gap-x-[4cqw]";
-        numSize = "text-[4.2cqw]";
-        descSize = "text-[1.4cqw]";
+        gapClass = "gap-y-[2em] gap-x-[4em]";
+        numSize = "text-[4.2em]";
+        descSize = "text-[1.4em]";
     }
 
     return (
@@ -54,7 +54,7 @@ const StatsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                     {/* Big Hero Number / Stat */}
                     <EditableElement
                         as="div"
-                        className={`font-bold theme-heading ${numSize} leading-none mb-[0.5cqw]`}
+                        className={`font-bold theme-heading ${numSize} leading-none mb-[0.5em]`}
                         value={ele.header}
                         onChange={(val) => onUpdateItem?.(i, "header", val)}
                         readOnly={!onUpdateItem}
@@ -70,7 +70,7 @@ const StatsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
                         placeholder="Description..."
                     />
                     {onDeleteItem && (
-                        <div className="absolute -top-[1.2cqw] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
+                        <div className="absolute -top-[1.2em] left-1/2 -translate-x-1/2 cqw opacity-0 group-hover/item:opacity-100 transition-opacity z-20">
                             <ItemActionsMenu
                                 onAddBefore={() => onAddItem?.(i, "before")}
                                 onAddAfter={() => onAddItem?.(i, "after")}
