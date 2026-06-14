@@ -38,7 +38,7 @@ export function PromptBox({
 
             <form
                 onSubmit={handleGenerate}
-                className="relative bg-white dark:bg-zinc-900/80 rounded-2xl shadow-xl dark:shadow-2xl border border-zinc-200 dark:border-zinc-800/80 backdrop-blur-xl transition-all overflow-hidden flex flex-col"
+                className="relative bg-white dark:bg-zinc-900/80 rounded-lg shadow-xl dark:shadow-2xl border border-zinc-200 dark:border-zinc-800/80 backdrop-blur-xl transition-all overflow-hidden flex flex-col"
             >
                 <Textarea
                     value={prompt}
@@ -153,7 +153,7 @@ export function PromptBox({
                         type="submit"
                         disabled={!prompt.trim() || isGenerating}
                         size="icon"
-                        className="w-10 h-10 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all mt-3 sm:mt-0"
+                        className="w-10 h-10 rounded-md bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all mt-3 sm:mt-0"
                     >
                         {isGenerating ? (
                             <Loader2 size={18} className="animate-spin" />

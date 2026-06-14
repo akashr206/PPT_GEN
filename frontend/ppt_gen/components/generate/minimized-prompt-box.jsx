@@ -17,7 +17,7 @@ export function MinimizedPromptBox({
 
             <form
                 onSubmit={handleGenerate}
-                className="relative bg-white dark:bg-zinc-900/80 rounded-2xl shadow-xl dark:shadow-2xl border border-zinc-200 dark:border-zinc-800/80 backdrop-blur-xl transition-all overflow-hidden flex items-center p-2 sm:p-3 gap-3"
+                className="relative bg-white dark:bg-zinc-900/80 rounded-lg shadow-xl dark:shadow-2xl border border-zinc-200 dark:border-zinc-800/80 backdrop-blur-xl transition-all overflow-hidden flex items-center p-2 sm:p-3 gap-3"
             >
                 <Textarea
                     value={prompt}
@@ -37,7 +37,7 @@ export function MinimizedPromptBox({
                     type="submit"
                     disabled={!prompt.trim() || isGenerating}
                     size="icon"
-                    className="w-10 h-10 rounded-xl shrink-0 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all self-end mb-0.5 mr-0.5"
+                    className="w-10 h-10 rounded-md shrink-0 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all self-end mb-0.5 mr-0.5"
                 >
                     {isGenerating ? (
                         <Loader2 size={18} className="animate-spin" />

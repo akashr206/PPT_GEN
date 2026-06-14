@@ -117,30 +117,55 @@ export default function ImageSidebar({
             {/* Grid of Search Results */}
             <div className="flex-grow overflow-y-auto p-4">
                 {isSearching ? (
-                    <div className="grid grid-cols-2 gap-3">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <div
-                                key={i}
-                                className="aspect-[16/9] rounded-md skeleton-sweep border border-border/50"
-                            />
-                        ))}
+                    <div className="w-full overflow-hidden">
+                        <div className="columns-2 gap-3">
+                            <div className="aspect-[4/3] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[100px]" />
+                            <div className="aspect-[3/4] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[130px]" />
+                            <div className="aspect-video rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[80px]" />
+                            <div className="aspect-[3/2] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[95px]" />
+                        </div>
                     </div>
                 ) : searchResults.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="columns-2 gap-3">
                         {searchResults.map((img, i) => (
-                            <button
+                            <div
                                 key={i}
                                 onClick={() =>
-                                    onSelectImage(img.imageURL, searchQuery)
+                                    onSelectImage(img.imageURL, img.alt || searchQuery || "Pexels Photo")
                                 }
-                                className="relative aspect-[16/9] rounded-md overflow-hidden border border-border hover:border-blue-500 shadow-sm cursor-pointer group bg-muted transition-colors"
+                                className="break-inside-avoid relative overflow-hidden rounded-lg bg-card border border-border/40 hover:border-primary/45 group transition-all duration-300 hover:shadow-md mb-3 cursor-pointer"
                             >
+                                {/* Image */}
                                 <img
                                     src={img.previewURL}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                    className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                                     alt="Search result"
+                                    loading="lazy"
                                 />
-                            </button>
+
+                                {/* Floating default title badge */}
+                                <div className="absolute bottom-1.5 left-1.5 right-1.5 backdrop-blur-md bg-black/65 border border-white/5 rounded px-2 py-1 flex items-center justify-between text-white transition-all duration-300 group-hover:opacity-0 group-hover:translate-y-1.5 pointer-events-none z-10">
+                                    <span className="text-[9px] font-medium truncate max-w-[85%]">
+                                        {img.alt || searchQuery || "Pexels Photo"}
+                                    </span>
+                                </div>
+
+                                {/* Hover Overlay */}
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-300 p-2 flex flex-col justify-between pointer-events-none z-20">
+                                    {/* Center check indicator (Apply) */}
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        {/* Icon container */}
+                                        <div className="w-7 h-7 rounded-full bg-primary/95 text-primary-foreground flex items-center justify-center shadow-lg border border-white/15 scale-90 group-hover:scale-100 transition-transform duration-300">
+                                            <span className="text-sm font-bold">+</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom text */}
+                                    <span className="text-[9px] font-semibold text-white truncate w-full pt-1.5 border-t border-white/10 mt-auto">
+                                        {img.alt || "Select Photo"}
+                                    </span>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 ) : (

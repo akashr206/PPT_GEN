@@ -40,7 +40,7 @@ export default function LayoutSelectorModal({
             open={isOpen && !isBusy}
             onOpenChange={isBusy ? undefined : onClose}
         >
-            <DialogContent className="max-w-4xl sm:max-w-4xl max-h-[90vh] flex flex-col bg-popover border-border text-popover-foreground rounded-xl p-6 shadow-2xl z-50">
+            <DialogContent className="max-w-4xl sm:max-w-4xl max-h-[90vh] flex flex-col bg-popover border-border text-popover-foreground rounded-md p-6 shadow-2xl z-50">
                 <DialogHeader className="shrink-0 mb-4">
                     <DialogTitle className="text-lg font-bold">
                         Select Slide Layout
@@ -128,7 +128,7 @@ export default function LayoutSelectorModal({
                                                         );
                                                         onClose();
                                                     }}
-                                                    className={`flex flex-col text-left p-2.5 rounded-xl border transition-all text-xs cursor-pointer gap-2 bg-card ${
+                                                    className={`flex flex-col text-left p-2.5 rounded-md border transition-all text-xs cursor-pointer gap-2 bg-card ${
                                                         isSelected
                                                             ? "border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)] ring-1 ring-blue-500/20 opacity-100"
                                                             : "border-border hover:border-muted-foreground/20 opacity-75 hover:opacity-100"

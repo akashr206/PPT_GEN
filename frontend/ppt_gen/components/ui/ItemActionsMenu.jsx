@@ -45,7 +45,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                     align="end"
-                    className="flex justify-between bg-popover border-border text-popover-foreground rounded-xl shadow-2xl z-50 p-1 gap-1"
+                    className="flex justify-between bg-popover border-border text-popover-foreground rounded-md shadow-2xl z-50 p-1 gap-1"
                 >
                     <Tooltip>
                         <TooltipTrigger asChild>

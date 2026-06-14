@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { generatePPT, getStatus, getPPTById, getAllPPTs, deletePPT, updateTemplate, searchImages, searchIcons, streamPPT, convertPPT } from "../controllers/ppt.js";
+import { generatePPT, getStatus, getPPTById, getAllPPTs, deletePPT, updateTemplate, searchImages, searchIcons, streamPPT, convertPPT, editSlide } from "../controllers/ppt.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 const router = Router();
 
@@ -16,6 +16,7 @@ router.use(authMiddleware)
 // /api/ppt/status/ppt_id: Gets status of that ppt_id
 
 router.post("/", generatePPT);
+router.post("/edit-slide", editSlide);
 router.get("/", getAllPPTs);
 router.get("/images/search", searchImages);
 router.get("/icons/search", searchIcons);

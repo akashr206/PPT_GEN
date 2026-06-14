@@ -7,7 +7,9 @@ import {
     fetchUserIcons,
     createIcon,
     deleteIcon,
-    fetchIconById
+    fetchIconById,
+    deleteFromStorage,
+    calculateUserStorageUsed
 } from "../services/library.js"
 import { sendSuccess, sendError } from "../utils/response.js";
 
@@ -38,8 +40,19 @@ export const uploadImage = async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded." })
         }
-        const name = req.file.originalname;
+        
         const size = req.file.size;
+        
+        // Capacity check (100 MB storage limit)
+        const STORAGE_LIMIT_BYTES = 100 * 1024 * 1024;
+        const totalUsed = await calculateUserStorageUsed({ user_id: userId });
+        if (totalUsed + size > STORAGE_LIMIT_BYTES) {
+            return res.status(400).json({ 
+                error: `Upload limit exceeded. You have used ${(totalUsed / (1024 * 1024)).toFixed(2)} MB of your 100 MB storage capacity limit.` 
+            });
+        }
+        
+        const name = req.file.originalname;
         const url = await uploadToStorage("images", req.file);
         await createImage({ user_id: userId, name, url, size });
         sendSuccess(res, { url })
@@ -54,6 +67,11 @@ export const removeImage = async (req, res) => {
         const { id } = req.params;
         const imageExists = await fetchImageById({ id, user_id: userId });
         if (!imageExists) return sendError(res, "Image not found");
+        
+        if (imageExists.url) {
+            await deleteFromStorage(imageExists.url);
+        }
+        
         const image = await deleteImage({ id });
         sendSuccess(res, { image })
     } catch (error) {
@@ -81,6 +99,18 @@ export const uploadIcon = async (req, res) => {
         const name = req.body.name || req.file.originalname;
         const iconType = (req.file.mimetype === "image/svg+xml" || req.file.originalname.toLowerCase().endsWith(".svg")) ? "svg" : "image";
         
+        // Capacity check (100 MB storage limit) for binary icon uploads
+        if (iconType !== "svg") {
+            const size = req.file.size;
+            const STORAGE_LIMIT_BYTES = 100 * 1024 * 1024;
+            const totalUsed = await calculateUserStorageUsed({ user_id: userId });
+            if (totalUsed + size > STORAGE_LIMIT_BYTES) {
+                return res.status(400).json({ 
+                    error: `Upload limit exceeded. You have used ${(totalUsed / (1024 * 1024)).toFixed(2)} MB of your 100 MB storage capacity limit.` 
+                });
+            }
+        }
+        
         let iconContent = "";
         if (iconType === "svg") {
             iconContent = req.file.buffer.toString("utf-8");
@@ -104,6 +134,11 @@ export const removeIcon = async (req, res) => {
         const { id } = req.params;
         const iconExists = await fetchIconById({ id, user_id: userId });
         if (!iconExists) return sendError(res, "Icon not found");
+        
+        if (iconExists.icon_type === "image" && iconExists.icon_content) {
+            await deleteFromStorage(iconExists.icon_content);
+        }
+        
         const icon = await deleteIcon({ id });
         sendSuccess(res, mapIconResponse(icon), "Icon deleted successfully");
     } catch (error) {

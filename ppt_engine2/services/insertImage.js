@@ -51,6 +51,8 @@ export const searchPexelsImages = async (query) => {
         
         if (data && data.photos && Array.isArray(data.photos)) {
             return data.photos.map(photo => ({
+                alt: photo.alt || '',
+                photographer: photo.photographer || '',
                 imageURL: photo.src?.large || photo.src?.original || '',
                 previewURL: photo.src?.medium || photo.src?.small || ''
             }));

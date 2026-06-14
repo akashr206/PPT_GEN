@@ -447,7 +447,7 @@ export default function LibrarySidebar({
                             {imageSubTab === "uploads" ? (
                                 <div className="flex-1 flex flex-col gap-4 min-h-0">
                                     {/* Upload Box */}
-                                    <label className="border-2 border-dashed border-border hover:border-primary/50 bg-secondary/10 hover:bg-secondary/20 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all group shrink-0 relative overflow-hidden">
+                                    <label className="border-2 border-dashed border-border hover:border-primary/50 bg-secondary/10 hover:bg-secondary/20 rounded-md p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all group shrink-0 relative overflow-hidden">
                                         <input
                                             type="file"
                                             accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
@@ -467,18 +467,16 @@ export default function LibrarySidebar({
                                     {/* Images List */}
                                     <div className="flex-1 overflow-y-auto min-h-0">
                                         {isLoadingImages ? (
-                                            <div className="grid grid-cols-2 gap-3">
-                                                {Array.from({ length: 4 }).map(
-                                                    (_, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className="aspect-[16/9] rounded-md skeleton-sweep border border-border/50"
-                                                        />
-                                                    ),
-                                                )}
+                                            <div className="w-full overflow-hidden">
+                                                <div className="columns-2 gap-3">
+                                                    <div className="aspect-[3/4] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[120px]" />
+                                                    <div className="aspect-video rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[80px]" />
+                                                    <div className="aspect-[4/3] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[100px]" />
+                                                    <div className="aspect-[3/2] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[90px]" />
+                                                </div>
                                             </div>
                                         ) : userImages.length > 0 ? (
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="columns-2 gap-3">
                                                 {userImages.map((img) => (
                                                     <div
                                                         key={img.id}
@@ -488,35 +486,58 @@ export default function LibrarySidebar({
                                                                 img.name,
                                                             )
                                                         }
-                                                        className="relative aspect-[16/9] rounded-md overflow-hidden border border-border hover:border-primary shadow-sm cursor-pointer group bg-muted transition-all"
+                                                        className="break-inside-avoid relative overflow-hidden rounded-lg bg-card border border-border/40 hover:border-primary/45 group transition-all duration-300 hover:shadow-md mb-3 cursor-pointer"
                                                     >
+                                                        {/* Image */}
                                                         <img
                                                             src={img.url}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                                            className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                                                             alt={img.name}
+                                                            loading="lazy"
                                                         />
-                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                                            <span className="text-[10px] text-white font-bold bg-primary/90 px-2 py-0.5 rounded-full">
-                                                                Apply
+
+                                                        {/* Floating default title badge */}
+                                                        <div className="absolute bottom-1.5 left-1.5 right-1.5 backdrop-blur-md bg-black/65 border border-white/5 rounded px-2 py-1 flex items-center justify-between text-white transition-all duration-300 group-hover:opacity-0 group-hover:translate-y-1.5 pointer-events-none z-10">
+                                                            <span className="text-[9px] font-medium truncate max-w-[85%]">
+                                                                {img.name}
                                                             </span>
                                                         </div>
-                                                        <button
-                                                            onClick={(e) =>
-                                                                handleDeleteImage(
-                                                                    img.id,
-                                                                    e,
-                                                                )
-                                                            }
-                                                            className="absolute top-1.5 right-1.5 p-1 rounded bg-black/60 hover:bg-destructive/90 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer border border-white/10"
-                                                            title="Delete Image"
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </button>
+
+                                                        {/* Hover Overlay */}
+                                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-300 p-2 flex flex-col justify-between pointer-events-none z-20">
+                                                            {/* Top actions */}
+                                                            <div className="flex justify-end pointer-events-auto">
+                                                                <button
+                                                                    onClick={(e) =>
+                                                                        handleDeleteImage(
+                                                                            img.id,
+                                                                            e,
+                                                                        )
+                                                                    }
+                                                                    className="p-1 rounded bg-black/60 hover:bg-destructive/90 text-white backdrop-blur-md border border-white/10 transition-colors cursor-pointer"
+                                                                    title="Delete Image"
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Center check indicator (Apply) */}
+                                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                                <div className="w-7 h-7 rounded-full bg-primary/95 text-primary-foreground flex items-center justify-center shadow-lg border border-white/15 scale-90 group-hover:scale-100 transition-transform duration-300">
+                                                                    <Plus className="w-3.5 h-3.5" />
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Bottom Title */}
+                                                            <span className="text-[9px] font-semibold text-white truncate w-full pt-1.5 border-t border-white/10 mt-auto">
+                                                                {img.name}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border rounded-xl">
+                                            <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border rounded-md">
                                                 <span className="text-xs text-muted-foreground">
                                                     No images uploaded yet.
                                                 </span>
@@ -567,35 +588,57 @@ export default function LibrarySidebar({
 
                                     <div className="flex-1 overflow-y-auto min-h-0">
                                         {isSearchingPexels ? (
-                                            <div className="grid grid-cols-2 gap-3">
-                                                {Array.from({ length: 6 }).map(
-                                                    (_, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className="aspect-[16/9] rounded-md skeleton-sweep border border-border/50"
-                                                        />
-                                                    ),
-                                                )}
+                                            <div className="w-full overflow-hidden">
+                                                <div className="columns-2 gap-3">
+                                                    <div className="aspect-[4/3] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[100px]" />
+                                                    <div className="aspect-[3/4] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[130px]" />
+                                                    <div className="aspect-video rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[80px]" />
+                                                    <div className="aspect-[3/2] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[95px]" />
+                                                </div>
                                             </div>
                                         ) : pexelsResults.length > 0 ? (
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="columns-2 gap-3">
                                                 {pexelsResults.map((img, i) => (
-                                                    <button
+                                                    <div
                                                         key={i}
                                                         onClick={() =>
                                                             handleSelectImageItem(
                                                                 img.imageURL,
-                                                                pexelsQuery,
+                                                                img.alt || pexelsQuery || "Pexels Photo",
                                                             )
                                                         }
-                                                        className="relative aspect-[16/9] rounded-md overflow-hidden border border-border hover:border-primary shadow-sm cursor-pointer group bg-muted transition-colors"
+                                                        className="break-inside-avoid relative overflow-hidden rounded-lg bg-card border border-border/40 hover:border-primary/45 group transition-all duration-300 hover:shadow-md mb-3 cursor-pointer"
                                                     >
+                                                        {/* Image */}
                                                         <img
                                                             src={img.previewURL}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                                            className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
                                                             alt="Pexels Result"
+                                                            loading="lazy"
                                                         />
-                                                    </button>
+
+                                                        {/* Floating default title badge */}
+                                                        <div className="absolute bottom-1.5 left-1.5 right-1.5 backdrop-blur-md bg-black/65 border border-white/5 rounded px-2 py-1 flex items-center justify-between text-white transition-all duration-300 group-hover:opacity-0 group-hover:translate-y-1.5 pointer-events-none z-10">
+                                                            <span className="text-[9px] font-medium truncate max-w-[85%]">
+                                                                {img.alt || pexelsQuery || "Pexels Photo"}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Hover Overlay */}
+                                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-300 p-2 flex flex-col justify-between pointer-events-none z-20">
+                                                            {/* Center check indicator (Apply) */}
+                                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                                <div className="w-7 h-7 rounded-full bg-primary/95 text-primary-foreground flex items-center justify-center shadow-lg border border-white/15 scale-90 group-hover:scale-100 transition-transform duration-300">
+                                                                    <Plus className="w-3.5 h-3.5" />
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Bottom text */}
+                                                            <span className="text-[9px] font-semibold text-white truncate w-full pt-1.5 border-t border-white/10 mt-auto">
+                                                                {img.alt || "Select Photo"}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 ))}
                                             </div>
                                         ) : (
@@ -643,7 +686,7 @@ export default function LibrarySidebar({
                                 <div className="flex-grow flex flex-col gap-4 min-h-0">
                                     {!showPasteArea ? (
                                         <div className="flex gap-2 shrink-0">
-                                            <label className="flex-1 border-2 border-dashed border-border hover:border-primary/50 bg-secondary/10 hover:bg-secondary/20 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all group relative">
+                                            <label className="flex-1 border-2 border-dashed border-border hover:border-primary/50 bg-secondary/10 hover:bg-secondary/20 rounded-md p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all group relative">
                                                 <input
                                                     type="file"
                                                     accept=".svg, image/png, image/jpeg, image/webp"
@@ -661,7 +704,7 @@ export default function LibrarySidebar({
                                                 onClick={() =>
                                                     setShowPasteArea(true)
                                                 }
-                                                className="px-4 border border-border hover:bg-secondary/40 rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition-all gap-1 text-muted-foreground hover:text-foreground"
+                                                className="px-4 border border-border hover:bg-secondary/40 rounded-md flex flex-col items-center justify-center text-center cursor-pointer transition-all gap-1 text-muted-foreground hover:text-foreground"
                                             >
                                                 <Code className="w-5 h-5" />
                                                 <span className="text-[10px] font-semibold">
@@ -672,7 +715,7 @@ export default function LibrarySidebar({
                                     ) : (
                                         <form
                                             onSubmit={handlePasteIconSubmit}
-                                            className="border border-border/80 bg-secondary/5 rounded-xl p-3 shrink-0 flex flex-col gap-2.5"
+                                            className="border border-border/80 bg-secondary/5 rounded-md p-3 shrink-0 flex flex-col gap-2.5"
                                         >
                                             <div className="flex justify-between items-center">
                                                 <span className="text-[11px] font-bold text-foreground">
@@ -723,15 +766,17 @@ export default function LibrarySidebar({
                                     {/* User Uploaded Custom Icons List */}
                                     <div className="flex-grow overflow-y-auto min-h-0">
                                         {isLoadingIcons ? (
-                                            <div className="grid grid-cols-4 gap-3">
-                                                {Array.from({ length: 8 }).map(
-                                                    (_, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className="aspect-square rounded-md skeleton-sweep border border-border/50"
-                                                        />
-                                                    ),
-                                                )}
+                                            <div className="w-full overflow-hidden">
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    {Array.from({ length: 8 }).map(
+                                                        (_, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className="aspect-square rounded-md skeleton-sweep border border-border/50"
+                                                            />
+                                                        ),
+                                                    )}
+                                                </div>
                                             </div>
                                         ) : userIcons.length > 0 ? (
                                             <div className="grid grid-cols-4 gap-3">
@@ -743,7 +788,7 @@ export default function LibrarySidebar({
                                                                 icn,
                                                             )
                                                         }
-                                                        className="relative aspect-square rounded-xl border border-border/60 hover:border-primary p-2 cursor-pointer group bg-card hover:bg-secondary/15 flex items-center justify-center transition-all"
+                                                        className="relative aspect-square rounded-md border border-border/60 hover:border-primary p-2 cursor-pointer group bg-card hover:bg-secondary/15 flex items-center justify-center transition-all"
                                                         title={icn.name}
                                                     >
                                                         {icn.iconType ===
@@ -764,7 +809,7 @@ export default function LibrarySidebar({
                                                             />
                                                         )}
 
-                                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-xl transition-opacity">
+                                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-md transition-opacity">
                                                             <span className="text-[9px] text-white font-bold bg-primary/90 px-1.5 py-0.5 rounded-full">
                                                                 Apply
                                                             </span>
@@ -786,7 +831,7 @@ export default function LibrarySidebar({
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border rounded-xl">
+                                            <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border rounded-md">
                                                 <span className="text-xs text-muted-foreground">
                                                     No custom icons saved yet.
                                                 </span>

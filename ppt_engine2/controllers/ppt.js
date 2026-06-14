@@ -1,6 +1,6 @@
 import { chat, chatStream } from "../utils/llmChat.js";
 import partialJsonParser from "partial-json-parser";
-import { pptSystemPrompt } from "../utils/prompts.js";
+import { pptSystemPrompt, editSlideSystemPrompt } from "../utils/prompts.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import { nanoid } from "nanoid";
 import { initPPT, updateStatus, addPPTContent, readStatus, deletePPTById, getUserPpts, updateTheme, updateSlides, fetchPPTById } from "../services/ppt.js";
@@ -333,5 +333,36 @@ export const convertPPT = async (req, res) => {
             });
         }
         return sendError(res, 'Error occurred during layout conversion', err, 500);
+    }
+};
+
+export const editSlide = async (req, res) => {
+    const { slide, prompt, presentationTitle, slideTitles, slideIndex } = req.body;
+
+    if (!slide || !prompt) {
+        return sendError(res, "Slide and prompt are required", null, 400);
+    }
+
+    try {
+        const contextInfo = `
+Presentation Context:
+- Topic/Title: ${presentationTitle || 'N/A'}
+- Total Slides: ${slideTitles?.length || 0}
+- Current Slide Position: Slide ${slideIndex !== undefined ? slideIndex + 1 : 'N/A'} of ${slideTitles?.length || 0}
+- Sequence of Slide Titles in Deck: ${slideTitles ? slideTitles.map((t, idx) => `\n  ${idx + 1}. ${t}`).join('') : 'N/A'}
+`.trim();
+
+        const userPrompt = `${contextInfo}\n\n====================\n\nCurrent Slide JSON to Edit:\n${JSON.stringify(slide, null, 2)}\n\nEdit Instruction:\n${prompt}`;
+
+        const response = await chat(editSlideSystemPrompt, userPrompt);
+        const parsedSlide = parseLLMJson(response);
+
+        // Fetch icons if needed
+        await insertIconsToContent([parsedSlide]);
+
+        return sendSuccess(res, parsedSlide, "Slide edited successfully");
+    } catch (error) {
+        console.error("Edit slide failed:", error);
+        return sendError(res, "Failed to edit slide with AI", error.message, 500);
     }
 };

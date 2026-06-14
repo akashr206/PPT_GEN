@@ -40,7 +40,7 @@ export function Sidebar() {
                 {isCollapsed ? (
                     <Button
                         size="icon"
-                        className="w-10 h-10 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white shadow-sm transition-all"
+                        className="w-10 h-10 rounded-md bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white shadow-sm transition-all"
                         title="New Presentation"
                     >
                         <Plus size={18} />

@@ -85,7 +85,7 @@ export default function LandingPage() {
                   )}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#121218] border-white/10 text-white min-w-[200px] rounded-xl p-1.5 shadow-2xl">
+              <DropdownMenuContent align="end" className="bg-[#121218] border-white/10 text-white min-w-[200px] rounded-md p-1.5 shadow-2xl">
                 <DropdownMenuLabel className="px-2.5 py-2">
                   <div className="flex flex-col space-y-0.5">
                     <p className="text-sm font-medium text-white">{session.user.name}</p>
@@ -160,7 +160,7 @@ export default function LandingPage() {
       </main>
 
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-        <DialogContent className="max-w-[380px] bg-[#0c0c12]/95 border-white/10 text-white rounded-2xl p-6 shadow-2xl backdrop-blur-md select-none flex flex-col gap-0" showCloseButton={true}>
+        <DialogContent className="max-w-[380px] bg-[#0c0c12]/95 border-white/10 text-white rounded-lg p-6 shadow-2xl backdrop-blur-md select-none flex flex-col gap-0" showCloseButton={true}>
           <DialogHeader className="flex flex-col items-center text-center pb-4">
             <img src="/logo.png" alt="Broadside AI Logo" className="w-14 h-14 object-contain dark:invert" />
             <DialogTitle className="text-xl font-bold text-white tracking-tight">Sign in to Broadside AI</DialogTitle>
@@ -175,7 +175,7 @@ export default function LandingPage() {
                 const targetUrl = `/generate?prompt=${encodeURIComponent(prompt)}`;
                 signIn("google", { callbackUrl: targetUrl });
               }}
-              className="w-full rounded-xl bg-white text-black hover:bg-white/90 font-medium py-5 gap-2 cursor-pointer shadow-lg flex items-center justify-center text-sm"
+              className="w-full rounded-md bg-white text-black hover:bg-white/90 font-medium py-5 gap-2 cursor-pointer shadow-lg flex items-center justify-center text-sm"
             >
               <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24">
                 <path
@@ -201,7 +201,7 @@ export default function LandingPage() {
             <Button
               variant="outline"
               onClick={() => setShowLoginModal(false)}
-              className="w-full rounded-xl border-white/10 hover:bg-white/5 text-zinc-300 hover:text-white font-medium py-5 cursor-pointer text-sm bg-transparent"
+              className="w-full rounded-md border-white/10 hover:bg-white/5 text-zinc-300 hover:text-white font-medium py-5 cursor-pointer text-sm bg-transparent"
             >
               Cancel
             </Button>
