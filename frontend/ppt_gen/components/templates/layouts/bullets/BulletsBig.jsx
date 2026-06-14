@@ -26,26 +26,24 @@ const BulletsBig = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     let gapVal = 2;
     let numSize = "w-[3.5em] h-[3.5em] text-[1.5em]";
     let headerSize = "text-[2.5em]";
-    let descSize = "text-[1.75em]";
+    let descSize = "text-[1.5em]";
 
     if (effectiveRows >= 5) {
         gapVal = 0.6;
         numSize = "w-[2.2em] h-[2.2em] text-[1.0em]";
         headerSize = "text-[1.5em]";
-        descSize = "text-[1.1em]";
+        descSize = "text-[0.95em]";
     } else if (effectiveRows >= 4) {
         gapVal = 1.0;
         numSize = "w-[2.6em] h-[2.6em] text-[1.2em]";
         headerSize = "text-[1.8em]";
-        descSize = "text-[1.3em]";
+        descSize = "text-[1.1em]";
     } else if (effectiveRows >= 3) {
         gapVal = 1.4;
         numSize = "w-[3.0em] h-[3.0em] text-[1.4em]";
         headerSize = "text-[2.1em]";
-        descSize = "text-[1.5em]";
+        descSize = "text-[1.3em]";
     }
-
-    const gapClass = `gap-[${gapVal}em]`;
 
     const getFlexBasis = () => {
         if (n === 1) return "100%";
@@ -57,7 +55,7 @@ const BulletsBig = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
 
     return (
         <div className="max-w-[95cqw] mx-auto my-[1.5em] w-full">
-            <div className={`flex flex-wrap justify-center ${gapClass} items-center`}>
+            <div className="flex flex-wrap justify-center items-center" style={{ gap: `${gapVal}em` }}>
                 {content.map((ele, i) => (
                     <div
                         className="flex items-start gap-[1em]"

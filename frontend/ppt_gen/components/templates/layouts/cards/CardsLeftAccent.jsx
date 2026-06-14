@@ -29,7 +29,7 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
     let plSize = "pl-[2.0em]";
     let barWidth = "w-[0.8em]";
     let headerSize = "text-[2.2em]";
-    let descSize = "text-[1.6em]";
+    let descSize = "text-[1.4em]";
     let marginClass = "mb-[0.4em]";
 
     if (effectiveRows >= 5) {
@@ -39,7 +39,7 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
         plSize = "pl-[1.0em]";
         barWidth = "w-[0.4em]";
         headerSize = "text-[1.5em]";
-        descSize = "text-[1.1em]";
+        descSize = "text-[0.95em]";
         marginClass = "mb-[0.1em]";
     } else if (effectiveRows >= 4) {
         gapVal = 1.0;
@@ -48,7 +48,7 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
         plSize = "pl-[1.4em]";
         barWidth = "w-[0.6em]";
         headerSize = "text-[1.8em]";
-        descSize = "text-[1.3em]";
+        descSize = "text-[1.1em]";
         marginClass = "mb-[0.2em]";
     } else if (effectiveRows >= 3) {
         gapVal = 1.6;
@@ -57,11 +57,9 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
         plSize = "pl-[1.8em]";
         barWidth = "w-[0.7em]";
         headerSize = "text-[2.0em]";
-        descSize = "text-[1.4em]";
+        descSize = "text-[1.2em]";
         marginClass = "mb-[0.3em]";
     }
-
-    const gapClass = `gap-[${gapVal}em]`;
 
     const getFlexBasis = () => {
         if (n === 1) return "100%";
@@ -73,7 +71,7 @@ const CardsLeftAccent = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
 
     return (
         <div className="max-w-[95cqw] mx-auto my-[1.5em] w-full">
-            <div className={`flex flex-wrap justify-center ${gapClass} items-stretch`}>
+            <div className="flex flex-wrap justify-center items-stretch" style={{ gap: `${gapVal}em` }}>
                 {content.map((ele, i) => (
                     <div 
                         key={i} 

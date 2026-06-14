@@ -1,7 +1,7 @@
 import { configDotenv } from "dotenv";
 configDotenv();
 
-async function chat(systemPrompt, prompt) {
+async function chat(systemPrompt, prompt, thinking = "standard") {
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -21,9 +21,9 @@ async function chat(systemPrompt, prompt) {
             stop: null,
             frequency_penalty: 0,
             presence_penalty: 0,
-            // thinking: {
-            //     type: "disabled"
-            // }
+            thinking: {
+                type: thinking === "extended" ? "enabled" : "disabled"
+            }
         })
     });
 
@@ -34,12 +34,100 @@ async function chat(systemPrompt, prompt) {
 
     const data = await response.json();
     const content = data.choices[0].message.content;
-    console.log(content);
 
     return content;
 }
 
-async function chatStream(systemPrompt, prompt, onToken, signal) {
+async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "standard") {
+    // 1. Correct Endpoint and API Key
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse", {
+        method: "POST",
+        headers: {
+            "x-goog-api-key": process.env.GEMINI_API_KEY,
+            "Content-Type": "application/json"
+        },
+        signal, // Attaching the abort signal so you can stop generation if needed
+        body: JSON.stringify({
+            "system_instruction": {
+                "parts": [{ "text": systemPrompt }]
+            },
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [{ "text": prompt }]
+                }
+            ],
+            // Optional layout handling for thinking configurations
+            ...(thinking !== "standard" && {
+                "generationConfig": {
+                    "thinkingConfig": { "thinkingBudget": 1024 }
+                }
+            })
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+    }
+
+    const decoder = new TextDecoder("utf-8");
+    let buffer = "";
+
+    // 2. Reading stream chunks safely
+    const reader = response.body.getReader();
+
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            let lines = buffer.split("\n");
+            buffer = lines.pop(); // Keep incomplete line in the buffer
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) continue;
+
+                // Gemini SSE lines start with "data: "
+                if (trimmed.startsWith("data: ")) {
+                    const dataStr = trimmed.slice(6);
+
+                    try {
+                        const parsed = JSON.parse(dataStr);
+
+                        // 3. Gemini JSON Response Path Mapping
+                        // Structure: parsed.candidates[0].content.parts[0].text
+                        const token = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                        if (token) {
+                            onToken(token);
+                        }
+                    } catch (err) {
+                        console.error("Failed to parse stream line:", trimmed, err);
+                    }
+                }
+            }
+        }
+
+        // 4. Handle any trailing data left in the buffer
+        if (buffer && buffer.trim().startsWith("data: ")) {
+            try {
+                const parsed = JSON.parse(buffer.trim().slice(6));
+                const token = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (token) {
+                    onToken(token);
+                }
+            } catch (err) {
+                // Ignore trailing parser noise
+            }
+        }
+    } finally {
+        reader.releaseLock();
+    }
+}
+async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "standard") {
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -60,7 +148,7 @@ async function chatStream(systemPrompt, prompt, onToken, signal) {
             frequency_penalty: 0,
             presence_penalty: 0,
             thinking: {
-                type: "disabled"
+                type: thinking === "extended" ? "enabled" : "disabled"
             }
         }),
         signal

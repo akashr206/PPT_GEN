@@ -31,7 +31,7 @@ Output ONLY valid JSON
 Do not output explanations
 
 JSON SCHEMA INSTRUCTIONS
-To ensure high-quality decisions, your JSON output MUST start with a "_reasoning" key where you briefly explain why you chose the specific theme and the specific title layout. 
+Your JSON output MUST start exactly with a "_reasoning" key. Before generating any theme, title, or slide data, utilize this field to briefly explain (in 2 - 3 sentences) your logical rationale for selecting the specific theme and the title layout based on the user's input topic. Do not skip this step; it acts as your core decision-making anchor.
 
 Example Structure:
 {

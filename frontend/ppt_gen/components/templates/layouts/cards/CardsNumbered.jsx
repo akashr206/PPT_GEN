@@ -27,7 +27,7 @@ const CardsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     let padClass = "p-[1.6em]";
     let numSize = "w-[3.0em] h-[3.0em] text-[1.4em]";
     let headerSize = "text-[2.2em]";
-    let descSize = "text-[1.6em]";
+    let descSize = "text-[1.4em]";
     let marginClass = "mb-[0.4em]";
 
     if (effectiveRows >= 5) {
@@ -35,25 +35,23 @@ const CardsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
         padClass = "p-[0.8em]";
         numSize = "w-[2.0em] h-[2.0em] text-[0.9em]";
         headerSize = "text-[1.4em]";
-        descSize = "text-[1.1em]";
+        descSize = "text-[0.95em]";
         marginClass = "mb-[0.2em]";
     } else if (effectiveRows >= 4) {
         gapVal = 0.8;
         padClass = "p-[1.2em]";
         numSize = "w-[2.4em] h-[2.4em] text-[1.1em]";
         headerSize = "text-[1.7em]";
-        descSize = "text-[1.3em]";
+        descSize = "text-[1.1em]";
         marginClass = "mb-[0.2em]";
     } else if (effectiveRows >= 3) {
         gapVal = 1.2;
         padClass = "p-[1.4em]";
         numSize = "w-[2.8em] h-[2.8em] text-[1.3em]";
         headerSize = "text-[1.9em]";
-        descSize = "text-[1.4em]";
+        descSize = "text-[1.2em]";
         marginClass = "mb-[0.3em]";
     }
-
-    const gapClass = `gap-[${gapVal}em]`;
 
     const getFlexBasis = () => {
         if (n === 1) return "100%";
@@ -65,7 +63,7 @@ const CardsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
 
     return (
         <div className="max-w-[95cqw] mx-auto my-[1em] w-full">
-            <div className={`flex flex-wrap justify-center ${gapClass} items-stretch`}>
+            <div className="flex flex-wrap justify-center items-stretch" style={{ gap: `${gapVal}em` }}>
                 {content.map((ele, i) => (
                     <div 
                         key={i} 

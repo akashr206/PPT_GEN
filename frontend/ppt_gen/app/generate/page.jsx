@@ -36,6 +36,7 @@ function GeneratePageContent() {
     const [tone, setTone] = useState("Professional");
     const [slides, setSlides] = useState(6);
     const [autoFocus, setAutoFocus] = useState(false);
+    const [thinking, setThinking] = useState("standard");
     const searchParams = useSearchParams();
     const urlprompt = searchParams.get("prompt");
 
@@ -75,7 +76,8 @@ function GeneratePageContent() {
             `&prompt=${encodeURIComponent(prompt)}` +
             `&tone=${encodeURIComponent(tone.toLowerCase())}` +
             `&slidesCount=${Number(slides)}` +
-            `&layoutStyle=${encodeURIComponent(layoutStyle.toLowerCase())}`;
+            `&layoutStyle=${encodeURIComponent(layoutStyle.toLowerCase())}` +
+            `&thinking=${encodeURIComponent(thinking)}`;
     };
 
     return (
@@ -95,6 +97,8 @@ function GeneratePageContent() {
                         slides={slides}
                         setSlides={setSlides}
                         autoFocus={autoFocus}
+                        thinking={thinking}
+                        setThinking={setThinking}
                     />
                 </>
             ) : (

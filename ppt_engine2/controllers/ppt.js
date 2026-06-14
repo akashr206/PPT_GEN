@@ -12,7 +12,7 @@ import path from "path";
 import { convertHtmlToPptx } from "../engine/converter.js";
 
 export const generatePPT = async (req, res) => {
-    const { prompt, tone, slidesCount, layoutStyle } = req.body;
+    const { prompt, tone, slidesCount, layoutStyle, thinking } = req.body;
 
     if (!prompt || !tone || !slidesCount) {
         return sendError(res, "Required fields are missing", null, 400);
@@ -31,14 +31,14 @@ export const generatePPT = async (req, res) => {
                 const newSysPrompt = pptSystemPrompt +
                     `\nStrictly output exactly ${slidesCount} slides. Do not generate more or fewer slides under any circumstance.`;
 
-                const response = await chat(newSysPrompt, fullPrompt);
+                const response = await chat(newSysPrompt, fullPrompt, thinking);
 
                 const parsedResponse = parseLLMJson(response);
 
                 await insertIconsToContent(parsedResponse);
-                
+
                 parsedResponse.slides_count = parsedResponse.slides.length;
-                
+
                 await addPPTContent({ ppt_id, ...parsedResponse, tone, status: "SUCCESS" });
 
                 console.log(`PPT ${ppt_id} generated successfully`);
@@ -80,7 +80,7 @@ const activeGenerations = new Map(); // ppt_id -> { abortController, res }
 
 export const streamPPT = async (req, res) => {
     const { ppt_id } = req.params;
-    const { prompt, tone, slidesCount, layoutStyle } = req.query;
+    const { prompt, tone, slidesCount, layoutStyle, thinking } = req.query;
 
     if (!prompt || !tone || !slidesCount) {
         return sendError(res, "Required query parameters (prompt, tone, slidesCount) are missing", null, 400);
@@ -124,15 +124,15 @@ export const streamPPT = async (req, res) => {
         const newSysPrompt = pptSystemPrompt +
             `\nStrictly output exactly ${slidesCount} slides. Do not generate more or fewer slides under any circumstance.`;
 
-        // Pass the abort signal to chatStream
+        // Pass the abort signal and thinking config to chatStream
         await chatStream(newSysPrompt, fullPrompt, (token) => {
             accumulatedText += token;
             const partialSlides = getPartialSlides(accumulatedText);
             res.write(`data: ${JSON.stringify({ slides: partialSlides })}\n\n`);
-        }, abortController.signal);
+        }, abortController.signal, thinking);
 
         const completedResponse = parseLLMJson(accumulatedText);
-
+        completedResponse.slides_count = completedResponse.slides.length;
         await insertIconsToContent(completedResponse);
 
         await addPPTContent({

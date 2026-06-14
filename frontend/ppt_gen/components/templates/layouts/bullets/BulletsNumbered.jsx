@@ -27,7 +27,7 @@ const BulletsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
     let numSize = "text-[4.5em]";
     let barWidth = "w-[0.6em]";
     let headerSize = "text-[2.2em]";
-    let descSize = "text-[1.6em]";
+    let descSize = "text-[1.4em]";
     let marginClass = "mb-[0.3em]";
 
     if (effectiveItemsPerCol >= 6) {
@@ -35,25 +35,23 @@ const BulletsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
         numSize = "text-[2.8em]";
         barWidth = "w-[0.3em]";
         headerSize = "text-[1.5em]";
-        descSize = "text-[1.1em]";
+        descSize = "text-[0.95em]";
         marginClass = "mb-[0.1em]";
     } else if (effectiveItemsPerCol >= 5) {
         gapVal = 0.8;
         numSize = "text-[3.2em]";
         barWidth = "w-[0.4em]";
         headerSize = "text-[1.7em]";
-        descSize = "text-[1.3em]";
+        descSize = "text-[1.1em]";
         marginClass = "mb-[0.2em]";
     } else if (effectiveItemsPerCol >= 4) {
         gapVal = 1.2;
         numSize = "text-[3.8em]";
         barWidth = "w-[0.5em]";
         headerSize = "text-[2.0em]";
-        descSize = "text-[1.4em]";
+        descSize = "text-[1.2em]";
         marginClass = "mb-[0.25em]";
     }
-
-    const gapClass = `gap-[${gapVal}em]`;
 
     const getFlexBasis = () => {
         if (n === 1) return "100%";
@@ -65,13 +63,13 @@ const BulletsNumbered = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => 
 
     return (
         <div className="max-w-[95cqw] mx-auto my-[1.5em] w-full">
-            <div className={`flex flex-wrap justify-center ${gapClass} items-stretch`}>
+            <div className="flex flex-wrap justify-center items-stretch" style={{ gap: `${gapVal}em` }}>
                 {content.map((ele, idx) => {
                     const displayNum = String(idx + 1).padStart(2, '0');
                     return (
                         <div key={idx} className="flex items-stretch gap-[1em]" style={{ flex: `0 1 ${getFlexBasis()}` }}>
                             {/* Giant Index Number */}
-                            <div className={`${numSize} font-bold theme-text-accent tracking-tighter shrink-0 flex items-center justify-center min-w-[3em]`}>
+                            <div className={`${numSize} font-bold theme-text-accent tracking-tighter shrink-0 flex items-center justify-center min-w-[1.5em]`}>
                                 {displayNum}
                             </div>
                             

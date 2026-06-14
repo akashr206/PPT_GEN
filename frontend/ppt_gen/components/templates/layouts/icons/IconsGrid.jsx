@@ -44,8 +44,6 @@ const IconsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
         descSize = "text-[1.2em]";
     }
 
-    const gapClass = `gap-[${gapVal}cqw]`;
-
     const getFlexBasis = () => {
         if (n === 1) return "100%";
         if (n === 2 || n === 4) {
@@ -55,7 +53,7 @@ const IconsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem }) => {
     };
 
     return (
-        <div className={`flex flex-wrap justify-center ${gapClass} max-w-[95cqw] mx-auto items-stretch text-center`}>
+        <div className="flex flex-wrap justify-center max-w-[95cqw] mx-auto items-stretch text-center" style={{ gap: `${gapVal}cqw` }}>
             {content.map((ele, i) => (
                 <div 
                     key={i} 

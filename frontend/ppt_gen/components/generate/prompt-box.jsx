@@ -32,6 +32,8 @@ export function PromptBox({
     slides,
     setSlides,
     autoFocus,
+    thinking = "standard",
+    setThinking,
 }) {
     let slidesArray = Array.from({ length: 10 }, (_, i) => i + 1);
     slidesArray = slidesArray.concat([15, 20]);
@@ -53,7 +55,7 @@ export function PromptBox({
                 />
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3 md:px-5 md:py-3 bg-zinc-50/80 dark:bg-zinc-950/50 border-t border-zinc-100 dark:border-zinc-800/80 backdrop-blur-md gap-3 sm:gap-2">
-                    <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-2">
+                    <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -156,6 +158,38 @@ export function PromptBox({
                                         {s} Slides
                                     </DropdownMenuItem>
                                 ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-full justify-between sm:w-auto sm:justify-start gap-1.5 text-[11px] sm:text-xs text-zinc-600 dark:text-zinc-300 px-2 sm:px-3"
+                                >
+                                    <span className="flex items-center gap-1.5 min-w-0 truncate">
+                                        <Sparkles
+                                            size={13}
+                                            className="text-amber-500 dark:text-amber-400 shrink-0"
+                                        />
+                                        <span className="truncate">
+                                            {thinking === "extended" ? "Extended (Thinking)" : "Standard Model"}
+                                        </span>
+                                    </span>
+                                    <ChevronDown
+                                        size={13}
+                                        className="opacity-50 shrink-0"
+                                    />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => setThinking("standard")}>
+                                    Standard Model
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setThinking("extended")}>
+                                    Extended (Thinking)
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import SlideLayout from "./layouts/SlideLayout";
 import { EditableElement } from "@/components/ui/EditableElement";
 import "./global-slide.css";
@@ -12,7 +12,6 @@ const Slide = ({
     onAddItem,
     theme,
     onEditImage,
-    onSplitSlide,
     slideIndex,
 }) => {
     const categoryLower = slide_content.layout?.category?.toLowerCase() || "";
@@ -23,86 +22,6 @@ const Slide = ({
         categoryLower === "closing" ||
         categoryLower === "closings";
 
-    const contentRef = useRef(null);
-
-    const fitContentToSlide = () => {
-        const contentEl = contentRef.current;
-        if (!contentEl) return;
-
-        // Reset to default scale before measuring
-        contentEl.style.setProperty("--scale-factor", "1");
-
-        const scrollHeight = contentEl.scrollHeight;
-        const clientHeight = contentEl.clientHeight;
-
-        if (scrollHeight > clientHeight) {
-            const ratio = clientHeight / scrollHeight;
-            const newScale = ratio * 0.95;
-
-            if (newScale < 0.5) {
-                // Clamp to minimum scale
-                contentEl.style.setProperty("--scale-factor", "0.5");
-                
-                // Force sync reflow and measure again
-                const finalScrollHeight = contentEl.scrollHeight;
-                const finalClientHeight = contentEl.clientHeight;
-
-                if (finalScrollHeight > finalClientHeight) {
-                    // Trigger slide splitting!
-                    if (onSplitSlide && slideIndex !== undefined) {
-                        const items = contentEl.querySelectorAll(".group\\/item");
-                        if (items.length > 1) {
-                            const contentRect = contentEl.getBoundingClientRect();
-                            const contentBottom = contentRect.bottom;
-                            let firstOverflowingIndex = -1;
-
-                            for (let i = 0; i < items.length; i++) {
-                                const itemRect = items[i].getBoundingClientRect();
-                                if (itemRect.bottom > contentBottom + 5) {
-                                    firstOverflowingIndex = i;
-                                    break;
-                                }
-                            }
-
-                            if (firstOverflowingIndex === -1) {
-                                firstOverflowingIndex = items.length - 1;
-                            }
-
-                            if (firstOverflowingIndex > 0) {
-                                onSplitSlide(slideIndex, firstOverflowingIndex);
-                            }
-                        }
-                    }
-                }
-            } else {
-                contentEl.style.setProperty("--scale-factor", newScale.toString());
-            }
-        }
-    };
-
-    useEffect(() => {
-        const contentEl = contentRef.current;
-        if (!contentEl) return;
-
-        // Run immediately to auto-fit on load / layout changes
-        fitContentToSlide();
-
-        let debounceTimeout;
-        const handleInput = () => {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(() => {
-                fitContentToSlide();
-            }, 150); // 150ms debounce
-        };
-
-        contentEl.addEventListener("input", handleInput);
-
-        return () => {
-            contentEl.removeEventListener("input", handleInput);
-            clearTimeout(debounceTimeout);
-        };
-    }, [slide_content, theme]);
-
     return (
         <div
             className="slide border flex flex-col theme-container group/slide"
@@ -110,19 +29,13 @@ const Slide = ({
         >
             {hasLayout ? (
                 <div
-                    ref={contentRef}
                     className="slide-content"
                 >
                     {!isTitleLayout && (
                         <div className="flex flex-col gap-[0.5em] px-[4em] pt-[4em] mb-[2em] text-left w-full overflow-hidden shrink-0">
                             <EditableElement
                                 as="h1"
-                                className={`font-bold leading-tight truncate w-full ${(() => {
-                                    const len = slide_content.title?.length || 0;
-                                    if (len > 35) return "text-[2.6em]";
-                                    if (len > 22) return "text-[3.4em]";
-                                    return "text-[4.5em]";
-                                })()}`}
+                                className="font-bold leading-tight text-[3.2em] w-full text-wrap"
                                 value={slide_content.title}
                                 onChange={(val) => onUpdateSlide?.("title", val)}
                                 readOnly={!onUpdateSlide}

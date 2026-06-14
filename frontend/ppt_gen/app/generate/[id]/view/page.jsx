@@ -14,6 +14,7 @@ import {
     FolderOpen,
     SlidersHorizontal,
     Diamond,
+    Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -952,6 +953,66 @@ export default function PPTSlidesViewerPage({ params }) {
         toast.info("Slide content split automatically due to text overflow.");
     };
 
+    const handleAddSlide = useCallback((index) => {
+        const newSlide = {
+            title: "New Slide",
+            subtitle: "Add description...",
+            layout: {
+                category: "bullets",
+                type: "standard",
+            },
+            items: [
+                { header: "Point 1", description: "Details about this point" },
+                { header: "Point 2", description: "Details about this point" },
+            ],
+        };
+        const updatedSlides = [...editableSlidesRef.current];
+        const insertIndex = typeof index === "number" ? index : activeSlideIndexRef.current + 1;
+        updatedSlides.splice(insertIndex, 0, newSlide);
+        updateSlidesState(updatedSlides);
+        setActiveSlideIndex(insertIndex);
+        toast.success("New slide added");
+    }, []);
+
+    const handleDeleteSlide = useCallback((index) => {
+        const currentSlides = editableSlidesRef.current;
+        const targetIndex = typeof index === "number" ? index : activeSlideIndexRef.current;
+        if (!currentSlides || currentSlides.length <= 1) {
+            toast.error("A presentation must have at least one slide.");
+            return;
+        }
+
+        const updatedSlides = currentSlides.filter((_, idx) => idx !== targetIndex);
+        updateSlidesState(updatedSlides);
+
+        const activeIndex = activeSlideIndexRef.current;
+        if (activeIndex >= updatedSlides.length) {
+            setActiveSlideIndex(Math.max(0, updatedSlides.length - 1));
+        } else if (activeIndex > targetIndex) {
+            setActiveSlideIndex(activeIndex - 1);
+        }
+        toast.success("Slide deleted");
+    }, []);
+
+    const handleMoveSlide = useCallback((fromIndex, toIndex) => {
+        const currentSlides = editableSlidesRef.current;
+        if (fromIndex === toIndex || toIndex < 0 || toIndex >= currentSlides.length) return;
+        const updatedSlides = [...currentSlides];
+        const [movedSlide] = updatedSlides.splice(fromIndex, 1);
+        updatedSlides.splice(toIndex, 0, movedSlide);
+        updateSlidesState(updatedSlides);
+
+        // Update activeSlideIndex to track the moved slide
+        const activeIndex = activeSlideIndexRef.current;
+        if (activeIndex === fromIndex) {
+            setActiveSlideIndex(toIndex);
+        } else if (activeIndex > fromIndex && activeIndex <= toIndex) {
+            setActiveSlideIndex(activeIndex - 1);
+        } else if (activeIndex < fromIndex && activeIndex >= toIndex) {
+            setActiveSlideIndex(activeIndex + 1);
+        }
+    }, []);
+
     const handleAddItem = () => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
 
@@ -1216,6 +1277,24 @@ export default function PPTSlidesViewerPage({ params }) {
                         </button>
                     </div>
                     <div className="flex gap-2 max-md:hidden text-xs">
+                        <Button
+                            variant="outline"
+                            onClick={() => handleAddSlide()}
+                            className="cursor-pointer text-xs rounded-sm"
+                            disabled={isBusy}
+                        >
+                            <Plus size={14} />
+                            <span>Add Slide</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => handleDeleteSlide()}
+                            className="cursor-pointer text-xs rounded-sm text-destructive hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isBusy || !editableSlides || editableSlides.length <= 1}
+                        >
+                            <Trash2 size={14} />
+                            <span>Delete Slide</span>
+                        </Button>
                         {editableSlides &&
                             editableSlides[activeSlideIndex] &&
                             !["title", "titles"].includes(
@@ -1273,6 +1352,21 @@ export default function PPTSlidesViewerPage({ params }) {
                             align="start"
                             className="min-w-[180px] bg-popover border-border text-popover-foreground rounded-md p-1.5 shadow-2xl z-50"
                         >
+                            <DropdownMenuItem
+                                onClick={() => handleAddSlide()}
+                                className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
+                            >
+                                <Plus size={14} />
+                                <span>Add Slide</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={() => handleDeleteSlide()}
+                                disabled={!editableSlides || editableSlides.length <= 1}
+                                className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md text-destructive focus:text-destructive"
+                            >
+                                <Trash2 size={14} />
+                                <span>Delete Slide</span>
+                            </DropdownMenuItem>
                             {editableSlides &&
                                 editableSlides[activeSlideIndex] &&
                                 !["title", "titles"].includes(
@@ -1509,6 +1603,9 @@ export default function PPTSlidesViewerPage({ params }) {
                             isBusy={isBusy}
                             theme={pptData?.theme || "sunset"}
                             resolveSlideContent={resolveSlideContent}
+                            handleAddSlide={handleAddSlide}
+                            handleDeleteSlide={handleDeleteSlide}
+                            handleMoveSlide={handleMoveSlide}
                         />
                     </div>
                 </div>

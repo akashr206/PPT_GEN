@@ -9,6 +9,9 @@
 .slide-content {
     --scale-factor: 1;
     font-size: calc(var(--scale-factor, 1) * 1cqw);
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
     display: flex;
