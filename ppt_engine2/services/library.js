@@ -1,6 +1,13 @@
 import { nanoid } from "nanoid";
 import { supabase } from "../utils/getClient.js";
-import path from "path"
+import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const fetchUserImages = async ({ user_id }) => {
     try {
@@ -101,13 +108,77 @@ export const deleteIcon = async ({ id }) => {
 }
 
 export const uploadToStorage = async (folder, file) => {
-    const fileId = nanoid();
-    const { data: uploadData, error } = await supabase.storage.from("library").upload(`${folder}/${fileId}${path.extname(file.originalname)}`, file.buffer, {
-        contentType: file.mimetype, 
-        upsert: false,
-        cacheControl: 'max-age=31536000, public',
+    return new Promise((resolve, reject) => {
+        const fileId = nanoid();
+        const folderPath = `broadside/${folder}`;
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: folderPath,
+                public_id: fileId,
+                resource_type: "auto",
+            },
+            (error, result) => {
+                if (error) {
+                    console.error("Cloudinary upload error:", error);
+                    reject(error);
+                } else {
+                    resolve(result.secure_url);
+                }
+            }
+        );
+        uploadStream.end(file.buffer);
     });
-    if (error) throw error;
-    const { data } = supabase.storage.from("library").getPublicUrl(`${folder}/${fileId}${path.extname(file.originalname)}`);
-    return data.publicUrl;
+}
+
+export const getPublicIdFromUrl = (url) => {
+    try {
+        if (!url) return null;
+        // Example: https://res.cloudinary.com/cloud-name/image/upload/v1612345678/library/images/file_id.jpg
+        const splitUrl = url.split('/upload/');
+        if (splitUrl.length < 2) return null;
+        
+        let pathWithExtension = splitUrl[1];
+        // Remove version prefix (e.g., v12345678/) if it exists
+        if (pathWithExtension.startsWith('v')) {
+            const index = pathWithExtension.indexOf('/');
+            if (index !== -1) {
+                pathWithExtension = pathWithExtension.substring(index + 1);
+            }
+        }
+        
+        // Remove file extension
+        const lastDot = pathWithExtension.lastIndexOf('.');
+        if (lastDot !== -1) {
+            return pathWithExtension.substring(0, lastDot);
+        }
+        return pathWithExtension;
+    } catch (error) {
+        console.error("Error parsing Cloudinary public ID:", error);
+        return null;
+    }
+}
+
+export const deleteFromStorage = async (url) => {
+    try {
+        const publicId = getPublicIdFromUrl(url);
+        if (!publicId) return false;
+        
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log(`Cloudinary deletion result for ${publicId}:`, result);
+        return result.result === 'ok';
+    } catch (error) {
+        console.error("Error deleting file from Cloudinary:", error);
+        return false;
+    }
+}
+
+export const calculateUserStorageUsed = async ({ user_id }) => {
+    try {
+        const images = await fetchUserImages({ user_id });
+        const totalSize = images.reduce((acc, img) => acc + (img.size || 0), 0);
+        return totalSize;
+    } catch (error) {
+        console.error("Error calculating user storage used:", error);
+        return 0;
+    }
 }

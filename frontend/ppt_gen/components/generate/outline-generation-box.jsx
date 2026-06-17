@@ -53,7 +53,7 @@ export function OutlineGenerationBox() {
                 }}
             />
 
-            <div className="w-full max-w-[800px] aspect-[16/9] relative bg-card/40 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)] border border-border/50 overflow-hidden p-8 flex flex-col justify-between">
+            <div className="w-full max-w-[800px] aspect-[16/9] relative bg-card/40 backdrop-blur-xl rounded-lg shadow-[0_20px_50px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)] border border-border/50 overflow-hidden p-8 flex flex-col justify-between">
                 <div className="sweep-glow" />
 
                 <div className="w-full space-y-2 z-10 relative">
@@ -66,7 +66,7 @@ export function OutlineGenerationBox() {
                     {[...Array(3)].map((_, i) => (
                         <div
                             key={i}
-                            className="p-4 rounded-xl border border-border/30 bg-card/20 space-y-3"
+                            className="p-4 rounded-md border border-border/30 bg-card/20 space-y-3"
                         >
                             <Skeleton className="h-4 w-1/2 rounded" />
                             <Skeleton className="h-3.5 w-full rounded" />

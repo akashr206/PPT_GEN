@@ -43,7 +43,7 @@ export function PromptBox({
 
             <form
                 onSubmit={handleGenerate}
-                className="relative bg-white dark:bg-zinc-900/80 rounded-2xl shadow-xl dark:shadow-2xl border border-zinc-200 dark:border-zinc-800/80 backdrop-blur-xl transition-all overflow-hidden flex flex-col"
+                className="relative bg-white dark:bg-zinc-900/80 rounded-lg shadow-xl dark:shadow-2xl border border-zinc-200 dark:border-zinc-800/80 backdrop-blur-xl transition-all overflow-hidden flex flex-col"
             >
                 <Textarea
                     value={prompt}
@@ -174,7 +174,9 @@ export function PromptBox({
                                             className="text-amber-500 dark:text-amber-400 shrink-0"
                                         />
                                         <span className="truncate">
-                                            {thinking === "extended" ? "Extended (Thinking)" : "Standard Model"}
+                                            {thinking === "extended"
+                                                ? "Extended (Thinking)"
+                                                : "Standard Model"}
                                         </span>
                                     </span>
                                     <ChevronDown
@@ -184,10 +186,14 @@ export function PromptBox({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => setThinking("standard")}>
+                                <DropdownMenuItem
+                                    onClick={() => setThinking("standard")}
+                                >
                                     Standard Model
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setThinking("extended")}>
+                                <DropdownMenuItem
+                                    onClick={() => setThinking("extended")}
+                                >
                                     Extended (Thinking)
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -198,7 +204,7 @@ export function PromptBox({
                         type="submit"
                         disabled={!prompt.trim() || isGenerating}
                         size="default"
-                        className="w-full sm:w-10 h-10 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer sm:p-0"
+                        className="w-full sm:w-10 h-10 rounded-md bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer sm:p-0"
                     >
                         {isGenerating ? (
                             <Loader2 size={18} className="animate-spin" />

@@ -15,6 +15,7 @@ import {
     SlidersHorizontal,
     Diamond,
     Trash2,
+    Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +25,20 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import Slide from "@/components/templates/Slide";
 import { toast } from "sonner";
@@ -51,6 +66,17 @@ export default function PPTSlidesViewerPage({ params }) {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [isExtractingPPTX, setIsExtractingPPTX] = useState(false);
+    const [isEditWithAIModalOpen, setIsEditWithAIModalOpen] = useState(false);
+    const [editWithAIPrompt, setEditWithAIPrompt] = useState("");
+    const [isEditWithAILoading, setIsEditWithAILoading] = useState(false);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+    useEffect(() => {
+        setIsTouchDevice(
+            typeof window !== "undefined" &&
+                ("ontouchstart" in window || navigator.maxTouchPoints > 0),
+        );
+    }, []);
 
     const searchParams = useSearchParams();
     const isGeneratingParam = searchParams?.get("generating") === "true";
@@ -814,9 +840,7 @@ export default function PPTSlidesViewerPage({ params }) {
     }, [pptData, isLoading, pptId, isStreamGenerating]);
 
     const handleDownloadAsPPT = async (e) => {
-        const toastId = toast.loading(
-            "Preparing slides for PowerPoint export",
-        );
+        const toastId = toast.loading("Preparing slides for PowerPoint export");
 
         // 1. Mount the full-size slides off-screen
         setIsExtractingPPTX(true);
@@ -967,7 +991,8 @@ export default function PPTSlidesViewerPage({ params }) {
             ],
         };
         const updatedSlides = [...editableSlidesRef.current];
-        const insertIndex = typeof index === "number" ? index : activeSlideIndexRef.current + 1;
+        const insertIndex =
+            typeof index === "number" ? index : activeSlideIndexRef.current + 1;
         updatedSlides.splice(insertIndex, 0, newSlide);
         updateSlidesState(updatedSlides);
         setActiveSlideIndex(insertIndex);
@@ -976,13 +1001,16 @@ export default function PPTSlidesViewerPage({ params }) {
 
     const handleDeleteSlide = useCallback((index) => {
         const currentSlides = editableSlidesRef.current;
-        const targetIndex = typeof index === "number" ? index : activeSlideIndexRef.current;
+        const targetIndex =
+            typeof index === "number" ? index : activeSlideIndexRef.current;
         if (!currentSlides || currentSlides.length <= 1) {
             toast.error("A presentation must have at least one slide.");
             return;
         }
 
-        const updatedSlides = currentSlides.filter((_, idx) => idx !== targetIndex);
+        const updatedSlides = currentSlides.filter(
+            (_, idx) => idx !== targetIndex,
+        );
         updateSlidesState(updatedSlides);
 
         const activeIndex = activeSlideIndexRef.current;
@@ -996,7 +1024,12 @@ export default function PPTSlidesViewerPage({ params }) {
 
     const handleMoveSlide = useCallback((fromIndex, toIndex) => {
         const currentSlides = editableSlidesRef.current;
-        if (fromIndex === toIndex || toIndex < 0 || toIndex >= currentSlides.length) return;
+        if (
+            fromIndex === toIndex ||
+            toIndex < 0 ||
+            toIndex >= currentSlides.length
+        )
+            return;
         const updatedSlides = [...currentSlides];
         const [movedSlide] = updatedSlides.splice(fromIndex, 1);
         updatedSlides.splice(toIndex, 0, movedSlide);
@@ -1012,6 +1045,49 @@ export default function PPTSlidesViewerPage({ params }) {
             setActiveSlideIndex(activeIndex + 1);
         }
     }, []);
+
+    const handleEditSlideWithAI = useCallback(async () => {
+        if (!editWithAIPrompt.trim()) {
+            toast.error("Please enter a prompt.");
+            return;
+        }
+
+        const activeIndex = activeSlideIndexRef.current;
+        const currentSlides = editableSlidesRef.current;
+        const activeSlide = currentSlides[activeIndex];
+
+        setIsEditWithAILoading(true);
+        const toastId = toast.loading("AI is editing your slide...");
+
+        try {
+            const res = await api.post(`/api/ppt/edit-slide`, {
+                slide: activeSlide,
+                prompt: editWithAIPrompt,
+                presentationTitle: pptData?.title || "Presentation",
+                slideTitles: currentSlides.map(
+                    (s) => s.title || "Untitled Slide",
+                ),
+                slideIndex: activeIndex,
+            });
+
+            if (res?.success && res.data) {
+                const updatedSlides = [...currentSlides];
+                updatedSlides[activeIndex] = res.data;
+                updateSlidesState(updatedSlides);
+                toast.success("Slide edited successfully with AI!");
+                setIsEditWithAIModalOpen(false);
+                setEditWithAIPrompt("");
+            } else {
+                throw new Error(res?.message || "Failed to edit slide");
+            }
+        } catch (err) {
+            console.error("AI Slide Edit failed:", err);
+            toast.error(err.message || "Failed to edit slide with AI");
+        } finally {
+            setIsEditWithAILoading(false);
+            toast.dismiss(toastId);
+        }
+    }, [editWithAIPrompt]);
 
     const handleAddItem = () => {
         if (!editableSlides || !editableSlides[activeSlideIndex]) return;
@@ -1233,7 +1309,7 @@ export default function PPTSlidesViewerPage({ params }) {
     if (isLoading || authStatus === "loading") {
         return (
             <div className="w-full flex-1 flex flex-col justify-center items-center p-8 min-h-[60vh]">
-                <div className="w-full max-w-[1000px] aspect-[16/9] bg-card/25 border border-border/30 rounded-xl p-6 flex flex-col justify-between relative overflow-hidden">
+                <div className="w-full max-w-[1000px] aspect-[16/9] bg-card/25 border border-border/30 rounded-md p-6 flex flex-col justify-between relative overflow-hidden">
                     <div className="space-y-3">
                         <Skeleton className="h-5 w-20" />
                         <Skeleton className="h-7 w-3/4 max-w-[450px]" />
@@ -1277,24 +1353,6 @@ export default function PPTSlidesViewerPage({ params }) {
                         </button>
                     </div>
                     <div className="flex gap-2 max-md:hidden text-xs">
-                        <Button
-                            variant="outline"
-                            onClick={() => handleAddSlide()}
-                            className="cursor-pointer text-xs rounded-sm"
-                            disabled={isBusy}
-                        >
-                            <Plus size={14} />
-                            <span>Add Slide</span>
-                        </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => handleDeleteSlide()}
-                            className="cursor-pointer text-xs rounded-sm text-destructive hover:bg-destructive/10 hover:text-destructive disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={isBusy || !editableSlides || editableSlides.length <= 1}
-                        >
-                            <Trash2 size={14} />
-                            <span>Delete Slide</span>
-                        </Button>
                         {editableSlides &&
                             editableSlides[activeSlideIndex] &&
                             !["title", "titles"].includes(
@@ -1352,21 +1410,6 @@ export default function PPTSlidesViewerPage({ params }) {
                             align="start"
                             className="min-w-[180px] bg-popover border-border text-popover-foreground rounded-md p-1.5 shadow-2xl z-50"
                         >
-                            <DropdownMenuItem
-                                onClick={() => handleAddSlide()}
-                                className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
-                            >
-                                <Plus size={14} />
-                                <span>Add Slide</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => handleDeleteSlide()}
-                                disabled={!editableSlides || editableSlides.length <= 1}
-                                className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md text-destructive focus:text-destructive"
-                            >
-                                <Trash2 size={14} />
-                                <span>Delete Slide</span>
-                            </DropdownMenuItem>
                             {editableSlides &&
                                 editableSlides[activeSlideIndex] &&
                                 !["title", "titles"].includes(
@@ -1492,19 +1535,19 @@ export default function PPTSlidesViewerPage({ params }) {
                                                     : handleAddItemAtIndex
                                             }
                                             onEditImage={
-                                                 isBusy
-                                                     ? undefined
-                                                     : handleEditImage
-                                             }
-                                             onSplitSlide={
-                                                 isBusy
-                                                     ? undefined
-                                                     : handleSplitSlide
-                                             }
-                                             slideIndex={activeSlideIndex}
+                                                isBusy
+                                                    ? undefined
+                                                    : handleEditImage
+                                            }
+                                            onSplitSlide={
+                                                isBusy
+                                                    ? undefined
+                                                    : handleSplitSlide
+                                            }
+                                            slideIndex={activeSlideIndex}
                                         />
                                     ) : isStreamGenerating ? (
-                                        <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-white gap-4 p-8 text-center rounded-xl border border-neutral-800">
+                                        <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-white gap-4 p-8 text-center rounded-md border border-neutral-800">
                                             <Loader2 className="animate-spin text-primary w-8 h-8" />
                                             <div className="flex flex-col gap-1">
                                                 <p className="text-sm font-semibold text-neutral-200">
@@ -1518,13 +1561,77 @@ export default function PPTSlidesViewerPage({ params }) {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-neutral-500 rounded-xl border border-neutral-800">
+                                        <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-neutral-500 rounded-md border border-neutral-800">
                                             <p className="text-sm">
                                                 No slides available
                                             </p>
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Floating Hover/Control Menu */}
+                                {!isFullscreen &&
+                                    editableSlides &&
+                                    editableSlides[activeSlideIndex] && (
+                                        <div
+                                            className={`absolute top-4 right-4 z-30 flex items-center gap-2.5 p-1.5 px-2.5 bg-white/95 dark:bg-black/95 border rounded-sm border-border/80  shadow-lg transition-opacity duration-200 ${
+                                                isTouchDevice
+                                                    ? "opacity-100 shadow-xl"
+                                                    : "opacity-0 group-hover:opacity-100"
+                                            }`}
+                                        >
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() =>
+                                                                setIsEditWithAIModalOpen(
+                                                                    true,
+                                                                )
+                                                            }
+                                                            className="h-4 w-4 p-1 cursor-pointer"
+                                                            disabled={isBusy}
+                                                        >
+                                                            <Sparkles
+                                                                size={8}
+                                                            />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>
+                                                            Edit slide with AI
+                                                        </p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() =>
+                                                                handleDeleteSlide(
+                                                                    activeSlideIndex,
+                                                                )
+                                                            }
+                                                            className="h-4 w-4 text-destructive hover:text-destructive hover:bg-destructive/25 p-1 cursor-pointer"
+                                                            disabled={
+                                                                isBusy ||
+                                                                editableSlides.length <=
+                                                                    1
+                                                            }
+                                                        >
+                                                            <Trash2 size={8} />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Delete slide</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </div>
+                                    )}
 
                                 {isFullscreen && (
                                     <>
@@ -1627,7 +1734,6 @@ export default function PPTSlidesViewerPage({ params }) {
                 />
             </div>
 
-            {/* Layout Selector Modal */}
             <LayoutSelectorModal
                 isOpen={isLayoutModalOpen}
                 isBusy={isBusy}
@@ -1638,6 +1744,77 @@ export default function PPTSlidesViewerPage({ params }) {
                 resolveSlideContent={resolveSlideContent}
                 onLayoutChange={handleLayoutChange}
             />
+
+            {/* Edit Slide with AI Dialog */}
+            <Dialog
+                open={isEditWithAIModalOpen}
+                onOpenChange={(open) => {
+                    if (!isEditWithAILoading) {
+                        setIsEditWithAIModalOpen(open);
+                        if (!open) setEditWithAIPrompt("");
+                    }
+                }}
+            >
+                <DialogContent className="max-w-md bg-popover border-border text-popover-foreground rounded-md p-6 shadow-2xl z-50">
+                    <DialogHeader className="shrink-0 mb-4">
+                        <DialogTitle className="text-lg font-bold flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                            <span>Edit Slide with AI</span>
+                        </DialogTitle>
+                        <DialogDescription className="text-xs text-muted-foreground">
+                            Describe how you want to modify this slide. You can
+                            ask the AI to rewrite text, add/remove points, or
+                            adjust layout styling.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        <Textarea
+                            value={editWithAIPrompt}
+                            onChange={(e) =>
+                                setEditWithAIPrompt(e.target.value)
+                            }
+                            placeholder="e.g., Change layout to stats grid and add metrics for user satisfaction and growth."
+                            className="min-h-[100px] resize-none"
+                            disabled={isEditWithAILoading}
+                        />
+
+                        <div className="flex justify-end gap-2.5">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setIsEditWithAIModalOpen(false);
+                                    setEditWithAIPrompt("");
+                                }}
+                                disabled={isEditWithAILoading}
+                                className="cursor-pointer text-xs"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleEditSlideWithAI}
+                                disabled={
+                                    isEditWithAILoading ||
+                                    !editWithAIPrompt.trim()
+                                }
+                                className="cursor-pointer text-xs flex items-center gap-2"
+                            >
+                                {isEditWithAILoading ? (
+                                    <>
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                        <span>Editing...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                        <span>Apply Changes</span>
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {isGeneratingPDF && (
                 <div

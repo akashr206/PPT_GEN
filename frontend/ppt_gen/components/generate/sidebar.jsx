@@ -192,7 +192,7 @@ export function Sidebar() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="end"
-                            className="bg-popover border-border text-popover-foreground min-w-[200px] rounded-xl p-1.5 shadow-2xl"
+                            className="bg-popover border-border text-popover-foreground min-w-[200px] rounded-md p-1.5 shadow-2xl"
                         >
                             <DropdownMenuLabel className="px-2.5 py-2">
                                 <div className="flex flex-col space-y-0.5">
