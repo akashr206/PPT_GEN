@@ -44,15 +44,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-50 font-sans selection:bg-blue-500/30 relative overflow-hidden flex flex-col">
-
-      <div
-        className="absolute inset-0 z-0 opacity-20 pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-          backgroundSize: '32px 32px'
-        }}
-      ></div>
-
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}

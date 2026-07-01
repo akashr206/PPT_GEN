@@ -357,7 +357,6 @@ export default function PPTSlidesViewerPage({ params }) {
             setFetchedImages((prev) => ({ ...prev, [cacheKey]: imageUrl }));
 
             updateSlidesState(updatedSlides);
-            toast.success("Image updated successfully");
         },
         [imageEditContext, editableSlides, activeSlideIndex],
     );
@@ -646,7 +645,7 @@ export default function PPTSlidesViewerPage({ params }) {
             } catch (err) {
                 console.error("Failed to fetch presentation:", err);
                 if (active) {
-                    toast.error(err.message || "Failed to load presentation");
+                    toast.error( "Failed to load presentation");
                 }
             } finally {
                 if (active) {
@@ -761,7 +760,6 @@ export default function PPTSlidesViewerPage({ params }) {
         const handleComplete = () => {
             if (!active) return;
             console.log("[Stream] Complete event received.");
-            toast.success("Presentation generated successfully!");
             setIsStreamGenerating(false);
             clearQueryParams();
 
@@ -831,7 +829,7 @@ export default function PPTSlidesViewerPage({ params }) {
                     err,
                 );
                 toast.error(
-                    err.message || "Failed to save presentation changes",
+                     "Failed to save presentation changes",
                 );
             }
         }, 1000);
@@ -909,7 +907,6 @@ export default function PPTSlidesViewerPage({ params }) {
         };
 
         updateSlidesState(updatedSlides);
-        toast.success(`Layout changed to ${category} (${type})`);
     };
 
     const handleUpdateSlide = (field, value) => {
@@ -996,7 +993,6 @@ export default function PPTSlidesViewerPage({ params }) {
         updatedSlides.splice(insertIndex, 0, newSlide);
         updateSlidesState(updatedSlides);
         setActiveSlideIndex(insertIndex);
-        toast.success("New slide added");
     }, []);
 
     const handleDeleteSlide = useCallback((index) => {
@@ -1019,7 +1015,6 @@ export default function PPTSlidesViewerPage({ params }) {
         } else if (activeIndex > targetIndex) {
             setActiveSlideIndex(activeIndex - 1);
         }
-        toast.success("Slide deleted");
     }, []);
 
     const handleMoveSlide = useCallback((fromIndex, toIndex) => {
@@ -1074,7 +1069,7 @@ export default function PPTSlidesViewerPage({ params }) {
                 const updatedSlides = [...currentSlides];
                 updatedSlides[activeIndex] = res.data;
                 updateSlidesState(updatedSlides);
-                toast.success("Slide edited successfully with AI!");
+                toast.success("AI successfull edited the Slide!");
                 setIsEditWithAIModalOpen(false);
                 setEditWithAIPrompt("");
             } else {
@@ -1206,7 +1201,6 @@ export default function PPTSlidesViewerPage({ params }) {
             if (e.detail && e.detail.theme) {
                 const newTheme = e.detail.theme;
                 setPptData((prev) => ({ ...prev, theme: newTheme }));
-                toast.success(`Theme updated to ${newTheme}`);
             }
         };
 

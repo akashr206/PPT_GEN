@@ -48,6 +48,7 @@ export function HistoryProvider({ children }) {
         }
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
     useEffect(() => {
         fetchHistory();
     }, [status]);

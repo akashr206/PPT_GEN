@@ -17,6 +17,16 @@ import {
     FileUp,
 } from "lucide-react";
 import * as phosphorIcons from "@phosphor-icons/react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function LibrarySidebar({
     isOpen,
@@ -49,6 +59,8 @@ export default function LibrarySidebar({
     const [pastedSvg, setPastedSvg] = useState("");
     const [pastedIconName, setPastedIconName] = useState("");
     const [showPasteArea, setShowPasteArea] = useState(false);
+
+    const [itemToDelete, setItemToDelete] = useState(null); // { id, type }
 
     useEffect(() => {
         if (isOpen) {
@@ -157,7 +169,6 @@ export default function LibrarySidebar({
 
             const res = await api.post("/api/library/images/upload", formData);
             if (res?.success) {
-                toast.success("Image uploaded successfully!", { id: toastId });
                 fetchUserImages();
             } else {
                 throw new Error(res?.message || "Upload failed");
@@ -187,7 +198,6 @@ export default function LibrarySidebar({
 
             const res = await api.post("/api/library/icons/upload", formData);
             if (res?.success) {
-                toast.success("Icon uploaded successfully!", { id: toastId });
                 fetchUserIcons();
             } else {
                 throw new Error(res?.message || "Upload failed");
@@ -224,7 +234,6 @@ export default function LibrarySidebar({
 
             const res = await api.post("/api/library/icons/upload", formData);
             if (res?.success) {
-                toast.success("SVG icon saved successfully!", { id: toastId });
                 setPastedSvg("");
                 setPastedIconName("");
                 setShowPasteArea(false);
@@ -245,34 +254,37 @@ export default function LibrarySidebar({
     // ----------------------------------------------------
     // Delete Handlers
     // ----------------------------------------------------
-    const handleDeleteImage = async (id, e) => {
+    const handleDeleteImage = (id, e) => {
         e.stopPropagation();
-        if (!confirm("Are you sure you want to delete this image?")) return;
-
-        const toastId = toast.loading("Deleting image");
-        try {
-            await api.delete(`/api/library/images/${id}`);
-            toast.success("Image deleted", { id: toastId });
-            fetchUserImages();
-        } catch (err) {
-            console.error("Failed to delete image:", err);
-            toast.error("Failed to delete image.", { id: toastId });
-        }
+        setItemToDelete({ id, type: 'image' });
     };
 
-    const handleDeleteIcon = async (id, e) => {
+    const handleDeleteIcon = (id, e) => {
         e.stopPropagation();
-        if (!confirm("Are you sure you want to delete this custom icon?"))
-            return;
+        setItemToDelete({ id, type: 'custom icon' });
+    };
 
-        const toastId = toast.loading("Deleting icon");
+    const confirmDelete = async () => {
+        if (!itemToDelete) return;
+
+        const { id, type } = itemToDelete;
+        const toastId = toast.loading(`Deleting ${type}...`);
+        
         try {
-            await api.delete(`/api/library/icons/${id}`);
-            toast.success("Icon deleted", { id: toastId });
-            fetchUserIcons();
+            if (type === 'image') {
+                await api.delete(`/api/library/images/${id}`);
+                toast.success("Image deleted", { id: toastId });
+                fetchUserImages();
+            } else if (type === 'custom icon') {
+                await api.delete(`/api/library/icons/${id}`);
+                toast.success("Icon deleted", { id: toastId });
+                fetchUserIcons();
+            }
         } catch (err) {
-            console.error("Failed to delete icon:", err);
-            toast.error("Failed to delete icon.", { id: toastId });
+            console.error(`Failed to delete ${type}:`, err);
+            toast.error(`Failed to delete ${type}.`, { id: toastId });
+        } finally {
+            setItemToDelete(null);
         }
     };
 
@@ -301,10 +313,8 @@ export default function LibrarySidebar({
 
         if (onSelectIcon) {
             onSelectIcon(value);
-            toast.success("Icon applied to slide");
         } else if (iconEditCallback) {
             iconEditCallback(value);
-            toast.success("Icon applied to slide");
         } else {
             toast.info("Select an icon slot on a slide to apply this icon.");
         }
@@ -314,10 +324,8 @@ export default function LibrarySidebar({
         const value = `${iconName}:${weight}`;
         if (onSelectIcon) {
             onSelectIcon(value);
-            toast.success("Icon applied to slide");
         } else if (iconEditCallback) {
             iconEditCallback(value);
-            toast.success("Icon applied to slide");
         } else {
             toast.info("Select an icon slot on a slide to apply this icon.");
         }
@@ -949,6 +957,26 @@ export default function LibrarySidebar({
                     )}
                 </div>
             </div>
+
+            <AlertDialog open={itemToDelete !== null} onOpenChange={(open) => { if (!open) setItemToDelete(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="capitalize">Delete {itemToDelete?.type}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this {itemToDelete?.type}? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            variant="destructive"
+                            onClick={confirmDelete}
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

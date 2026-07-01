@@ -4,7 +4,9 @@ import { configDotenv } from 'dotenv';
 import morgan from 'morgan';
 import pptRouter from './routes/ppt.js';
 import userRouter from './routes/user.js';
-import libraryRouter from "./routes/library.js"
+import libraryRouter from "./routes/library.js";
+import themeRouter from "./routes/theme.js";
+import multer from 'multer';
 configDotenv();
 
 const app = express();
@@ -22,6 +24,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/api/ppt', pptRouter);
 app.use('/api/user', userRouter);
 app.use('/api/library', libraryRouter);
+app.use('/api/themes', themeRouter);
 
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) {
