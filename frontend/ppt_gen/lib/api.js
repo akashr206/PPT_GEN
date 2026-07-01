@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import { getSession } from "next-auth/react";
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
-
 export class APIError extends Error {
   constructor(message, status, data) {
     super(message);
@@ -79,6 +78,11 @@ async function apiCall(endpoint, options = {}) {
         data = await response.text();
       }
       const errorMessage = data?.message || data?.error || `HTTP error! Status: ${response.status}`;
+      if (response.status === 429 && typeof window !== "undefined") {
+        import("sonner").then(({ toast }) => {
+          toast.error(errorMessage);
+        }).catch((err) => console.error("Toast error:", err));
+      }
       throw new APIError(errorMessage, response.status, data);
     }
 

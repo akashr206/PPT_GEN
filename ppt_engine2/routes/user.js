@@ -11,7 +11,7 @@ router.post("/", authSecretVerification, addUserController)
 
 router.post("/dev-login", (req, res, next) => {
     if (process.env.NODE_ENV !== "development") {
-        return sendError(res, "Not allowed in production");
+        return sendError(res, "Not allowed, good boi");
     }
     next();
 },

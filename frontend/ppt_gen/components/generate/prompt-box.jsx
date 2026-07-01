@@ -27,8 +27,6 @@ export function PromptBox({
     handleGenerate,
     layoutStyle,
     setLayoutStyle,
-    tone,
-    setTone,
     slides,
     setSlides,
     autoFocus,
@@ -36,7 +34,7 @@ export function PromptBox({
     setThinking,
 }) {
     let slidesArray = Array.from({ length: 10 }, (_, i) => i + 1);
-    slidesArray = slidesArray.concat([15, 20]);
+    slidesArray = slidesArray.concat([15]);
     return (
         <div className="w-full max-w-3xl mx-auto flex flex-col gap-3 relative z-10 group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-violet-600 rounded-3xl blur opacity-0 group-focus-within:opacity-20 transition duration-500"></div>
@@ -84,41 +82,6 @@ export function PromptBox({
                                         <DropdownMenuItem
                                             key={t}
                                             onClick={() => setLayoutStyle(t)}
-                                        >
-                                            {t}
-                                        </DropdownMenuItem>
-                                    ),
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        {/* Tone Dropdown */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-full justify-between sm:w-auto sm:justify-start gap-1.5 text-[11px] sm:text-xs text-zinc-600 dark:text-zinc-300 px-2 sm:px-3"
-                                >
-                                    <span className="flex items-center gap-1.5 min-w-0 truncate">
-                                        <Type
-                                            size={13}
-                                            className="text-violet-500 dark:text-violet-400 shrink-0"
-                                        />
-                                        <span className="truncate">{tone}</span>
-                                    </span>
-                                    <ChevronDown
-                                        size={13}
-                                        className="opacity-50 shrink-0"
-                                    />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                {["Professional", "Casual", "Enthusiastic"].map(
-                                    (t) => (
-                                        <DropdownMenuItem
-                                            key={t}
-                                            onClick={() => setTone(t)}
                                         >
                                             {t}
                                         </DropdownMenuItem>
