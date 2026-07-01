@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Save, Sparkles, Heading, CaseSensitive, ChevronDown } from "lucide-react";
@@ -228,7 +228,7 @@ const ColorSelector = React.memo(({ label, name, value, onChange, onInstantStyle
 });
 ColorSelector.displayName = "ColorSelector";
 
-export default function ThemeGeneratorPage() {
+function ThemeGeneratorContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const themeId = searchParams.get("id");
@@ -559,5 +559,20 @@ export default function ThemeGeneratorPage() {
                 </main>
             </div>
         </div>
+    );
+}
+
+export default function ThemeGeneratorPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen w-full items-center justify-center bg-background">
+                <div className="flex flex-col items-center gap-2">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                    <p className="text-sm text-muted-foreground">Loading theme generator...</p>
+                </div>
+            </div>
+        }>
+            <ThemeGeneratorContent />
+        </Suspense>
     );
 }

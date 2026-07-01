@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Navbar } from "@/components/generate/navbar";
 import { motion } from "framer-motion";
 
@@ -10,7 +10,9 @@ export default function GenerateLayout({ children }) {
 
       <div className="absolute top-0 left-0 w-full z-50 pointer-events-none">
         <div className="pointer-events-auto">
-          <Navbar />
+          <Suspense fallback={<div className="h-14 w-full"></div>}>
+            <Navbar />
+          </Suspense>
         </div>
       </div>
 

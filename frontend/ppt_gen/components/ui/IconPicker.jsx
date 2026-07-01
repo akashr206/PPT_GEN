@@ -64,6 +64,7 @@ export function IconPicker({
     const [selectedWeight, setSelectedWeight] = useState(defaultWeight);
 
     // Sync weight when modal opens
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     React.useEffect(() => {
         if (open) {
             setSelectedWeight(defaultWeight);
@@ -117,6 +118,7 @@ export function IconPicker({
         );
     }, [searchQuery, allIconNames]);
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     React.useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery]);
@@ -231,7 +233,7 @@ export function IconPicker({
                 <div className="flex-1 min-h-[350px] w-full p-2 flex flex-col">
                     {filteredIcons.length === 0 ? (
                         <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                            No icons found for "{searchQuery}"
+                            No icons found for &quot;{searchQuery}&quot;
                         </div>
                     ) : (
                         <>
