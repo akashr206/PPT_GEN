@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
     LogOut,
     User,
@@ -14,6 +14,9 @@ import {
     Play,
     Menu,
     X,
+    Bolt,
+    Image,
+    Layout,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/generate/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -35,12 +38,35 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import metadata from "@/components/templates/metadata.json";
-
-const themesList = metadata.themes;
+import UserMenu from "../user-menu";
+import { useThemes } from "@/hooks/use-themes";
 
 export function Navbar() {
     const { data: session } = useSession();
+    const { customThemes } = useThemes();
     const pathname = usePathname();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const themesList = [
+        ...metadata.themes,
+        ...(customThemes || []).map((t) => ({
+            id: t.id,
+            name: t.name,
+            bg: t.bg,
+            fg: t.fg,
+            primary: t.primary_color,
+            accent: t.accent,
+            desc: "Custom Theme"
+        }))
+    ];
+
+    const activeTab = searchParams.get("tab") || "presentations";
+
+    const handleTabClick = (tab) => {
+        setIsMobileMenuOpen(false);
+        router.push(`/dashboard?tab=${tab}`);
+    };
 
     const pathSegments = pathname.split("/");
     const isDetailPage =
@@ -53,6 +79,8 @@ export function Navbar() {
     });
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [activeThemeTab, setActiveThemeTab] = useState("all");
+
 
     useEffect(() => {
         if (!isDetailPage) return;
@@ -229,48 +257,7 @@ export function Navbar() {
                         </Button>
 
                         {session?.user ? (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Avatar className="w-7.5 h-7.5 cursor-pointer border border-border/60 hover:opacity-90 transition-opacity">
-                                        <AvatarImage
-                                            src={session.user.image}
-                                            alt={session.user.name || "User"}
-                                        />
-                                        <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                                            {(
-                                                session.user.name ||
-                                                session.user.email ||
-                                                "U"
-                                            )
-                                                .charAt(0)
-                                                .toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                    align="end"
-                                    className="bg-popover border-border text-popover-foreground min-w-[200px] rounded-md p-1.5 shadow-2xl z-50"
-                                >
-                                    <DropdownMenuLabel className="px-2.5 py-2">
-                                        <div className="flex flex-col space-y-0.5">
-                                            <p className="text-sm font-medium text-popover-foreground">
-                                                {session.user.name}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground truncate">
-                                                {session.user.email}
-                                            </p>
-                                        </div>
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator className="bg-border" />
-                                    <DropdownMenuItem
-                                        onClick={() => signOut()}
-                                        className="px-2.5 py-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-md cursor-pointer flex items-center gap-2"
-                                    >
-                                        <LogOut size={16} />
-                                        <span>Sign out</span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <UserMenu />
                         ) : (
                             <div className="w-7.5 h-7.5 rounded-full bg-muted flex items-center justify-center">
                                 <User
@@ -404,19 +391,111 @@ export function Navbar() {
                                     Navigation & Settings
                                 </span>
 
-                                {/* Dashboard */}
-                                <Link
-                                    href="/dashboard"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                                        pathname === "/dashboard"
-                                            ? "bg-accent text-accent-foreground font-semibold"
-                                            : "text-zinc-700 dark:text-zinc-300 hover:bg-accent hover:text-accent-foreground"
-                                    }`}
-                                >
-                                    <LayoutDashboard className="h-4 w-4 text-primary" />
-                                    <span>Dashboard</span>
-                                </Link>
+                                {pathname === "/dashboard" ? (
+                                    <div className="flex flex-col gap-1.5 border border-border/40 p-2 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
+                                        {/* Presentations */}
+                                        <button
+                                            onClick={() =>
+                                                handleTabClick("presentations")
+                                            }
+                                            className={`flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all w-full text-left cursor-pointer ${
+                                                activeTab === "presentations"
+                                                    ? "bg-primary/10 text-primary shadow-xs"
+                                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-accent hover:text-accent-foreground"
+                                            }`}
+                                        >
+                                            <Presentation className="h-4 w-4" />
+                                            <span>Presentations</span>
+                                        </button>
+
+                                        {/* Stock Photos */}
+                                        <button
+                                            onClick={() =>
+                                                handleTabClick("pexels")
+                                            }
+                                            className={`flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all w-full text-left cursor-pointer ${
+                                                activeTab === "pexels" ||
+                                                activeTab === "uploads"
+                                                    ? "bg-primary/10 text-primary shadow-xs"
+                                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-accent hover:text-accent-foreground"
+                                            }`}
+                                        >
+                                            <Image className="h-4 w-4" />
+                                            <span>Media</span>
+                                        </button>
+
+                                        {/* Custom Icons */}
+                                        <button
+                                            onClick={() =>
+                                                handleTabClick("icons")
+                                            }
+                                            className={`flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all w-full text-left cursor-pointer ${
+                                                activeTab === "icons" ||
+                                                activeTab === "system-icons"
+                                                    ? "bg-primary/10 text-primary shadow-xs"
+                                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-accent hover:text-accent-foreground"
+                                            }`}
+                                        >
+                                            <Bolt className="h-4 w-4" />
+                                            <span>Icons</span>
+                                        </button>
+
+                                        {/* Themes */}
+                                        <button
+                                            onClick={() =>
+                                                handleTabClick("themes")
+                                            }
+                                            className={`flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-lg transition-all w-full text-left cursor-pointer relative ${
+                                                activeTab === "themes"
+                                                    ? "bg-primary/10 text-primary shadow-xs"
+                                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-accent hover:text-accent-foreground"
+                                            }`}
+                                        >
+                                            <span className="flex items-center gap-2.5">
+                                                <Palette className="h-4 w-4" />
+                                                <span>Themes</span>
+                                            </span>
+                                            <span className="text-[8px] font-bold uppercase tracking-wider bg-primary/10 border border-primary/20 text-primary px-1 py-0.5 rounded-md">
+                                                Locked
+                                            </span>
+                                        </button>
+
+                                        {/* Layouts */}
+                                        <button
+                                            onClick={() =>
+                                                handleTabClick("layouts")
+                                            }
+                                            className={`flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-lg transition-all w-full text-left cursor-pointer relative ${
+                                                activeTab === "layouts"
+                                                    ? "bg-primary/10 text-primary shadow-xs"
+                                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-accent hover:text-accent-foreground"
+                                            }`}
+                                        >
+                                            <span className="flex items-center gap-2.5">
+                                                <Layout className="h-4 w-4" />
+                                                <span>Layouts</span>
+                                            </span>
+                                            <span className="text-[8px] font-bold uppercase tracking-wider bg-primary/10 border border-primary/20 text-primary px-1 py-0.5 rounded-md">
+                                                Locked
+                                            </span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        href="/dashboard"
+                                        onClick={() =>
+                                            setIsMobileMenuOpen(false)
+                                        }
+                                        className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-colors ${
+                                            pathname === "/dashboard"
+                                                ? "bg-primary/10 text-primary font-semibold"
+                                                : "text-zinc-700 dark:text-zinc-300 hover:bg-accent hover:text-accent-foreground"
+                                        }`}
+                                    >
+                                        <LayoutDashboard className="h-4 w-4 text-primary" />
+                                        <span>Dashboard</span>
+                                    </Link>
+                                )}
 
                                 {/* Theme Toggle */}
                                 <div className="flex items-center justify-between px-3 py-1 bg-muted/40 rounded-md">
@@ -491,23 +570,64 @@ export function Navbar() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 my-4">
-                        {themesList.map((t) => {
-                            const isActive = pptInfo.theme === t.id;
+                    {/* Tab Navigation */}
+                    <div className="flex border-b border-border mt-3 mb-4 gap-1">
+                        <button
+                            onClick={() => setActiveThemeTab("all")}
+                            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+                                activeThemeTab === "all"
+                                    ? "border-primary text-primary"
+                                    : "border-transparent text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            All Themes
+                        </button>
+                        <button
+                            onClick={() => setActiveThemeTab("system")}
+                            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+                                activeThemeTab === "system"
+                                    ? "border-primary text-primary"
+                                    : "border-transparent text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            System Themes
+                        </button>
+                        <button
+                            onClick={() => setActiveThemeTab("custom")}
+                            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+                                activeThemeTab === "custom"
+                                    ? "border-primary text-primary"
+                                    : "border-transparent text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            My Themes
+                        </button>
+                    </div>
 
-                            return (
-                                <button
-                                    key={t.id}
-                                    onClick={() => {
-                                        handleThemeChange(t.id);
-                                        setIsThemeModalOpen(false);
-                                    }}
-                                    className={`flex flex-col text-left p-2.5 rounded-md border transition-all text-xs cursor-pointer gap-2 ${
-                                        isActive
-                                            ? "border-primary ring-2 ring-primary/20 bg-accent/10"
-                                            : "border-border hover:border-muted-foreground/30 hover:bg-muted/10 bg-card"
-                                    }`}
-                                >
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 my-4 max-h-[50vh] overflow-y-auto pr-1">
+                        {themesList
+                            .filter((t) => {
+                                if (activeThemeTab === "all") return true;
+                                if (activeThemeTab === "system") return !t.desc || t.desc !== "Custom Theme";
+                                if (activeThemeTab === "custom") return t.desc === "Custom Theme";
+                                return true;
+                            })
+                            .map((t) => {
+                                const isActive = pptInfo.theme === t.id;
+
+                                return (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => {
+                                            handleThemeChange(t.id);
+                                            setIsThemeModalOpen(false);
+                                        }}
+                                        className={`flex flex-col text-left p-2.5 rounded-md border transition-all text-xs cursor-pointer gap-2 ${
+                                            isActive
+                                                ? "border-primary ring-2 ring-primary/20 bg-accent/10"
+                                                : "border-border hover:border-muted-foreground/30 hover:bg-muted/10 bg-card"
+                                        }`}
+                                    >
                                     <span className="font-semibold text-foreground capitalize text-[11px] truncate w-full px-0.5 mb-0.5">
                                         {t.name}
                                     </span>

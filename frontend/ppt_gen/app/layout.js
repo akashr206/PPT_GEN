@@ -47,6 +47,7 @@ import { SessionProvider } from "next-auth/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { HistoryProvider } from "@/contexts/history-context";
+import CustomThemesStyles from "@/components/dashboard/CustomThemesStyles";
 
 export default function RootLayout({ children }) {
   return (
@@ -66,6 +67,21 @@ export default function RootLayout({ children }) {
             <HistoryProvider>
               <TooltipProvider>
                 {children}
+                <CustomThemesStyles />
+                {/* Light Mode dot grid background */}
+                <div className="pointer-events-none fixed inset-0 z-1 dark:hidden"
+                  style={{
+                    backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.15) 1.5px, transparent 0)',
+                    backgroundSize: '32px 32px'
+                  }}
+                />
+                {/* Dark Mode dot grid background */}
+                <div className="pointer-events-none fixed inset-0 z-1 hidden dark:block"
+                  style={{
+                    backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.15) 1.5px, transparent 0)',
+                    backgroundSize: '32px 32px'
+                  }}
+                />
                 <Toaster richColors closeButton position="bottom-right" />
               </TooltipProvider>
             </HistoryProvider>

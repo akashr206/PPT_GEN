@@ -7,6 +7,8 @@ export const imageUpload = multer({
         fileSize: 25 * 1024 * 1024, // 25 MB
     },
     fileFilter: (req, file, cb) => {
+        console.log("coming");
+        
         const allowedFileTypes = /jpeg|jpg|png|webp|ico/;
         const extension = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
         const mimeType = allowedFileTypes.test(file.mimetype);

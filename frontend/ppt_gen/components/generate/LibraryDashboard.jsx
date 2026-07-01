@@ -34,12 +34,16 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 
-export default function LibraryDashboard({ activeTab: parentActiveTab, setActiveTab: setParentActiveTab }) {
-    const activeTab = parentActiveTab === "uploads" || parentActiveTab === "pexels" 
-        ? "images" 
-        : parentActiveTab === "icons" || parentActiveTab === "system-icons" 
-            ? "icons" 
-            : parentActiveTab;
+export default function LibraryDashboard({
+    activeTab: parentActiveTab,
+    setActiveTab: setParentActiveTab,
+}) {
+    const activeTab =
+        parentActiveTab === "uploads" || parentActiveTab === "pexels"
+            ? "images"
+            : parentActiveTab === "icons" || parentActiveTab === "system-icons"
+              ? "icons"
+              : parentActiveTab;
 
     // Images States
     const [pexelsQuery, setPexelsQuery] = useState("");
@@ -61,7 +65,6 @@ export default function LibraryDashboard({ activeTab: parentActiveTab, setActive
     const [pastedIconName, setPastedIconName] = useState("");
     const [showPasteArea, setShowPasteArea] = useState(false);
 
-    
     const fetchUserImages = useCallback(async () => {
         setIsLoadingImages(true);
         try {
@@ -127,13 +130,6 @@ export default function LibraryDashboard({ activeTab: parentActiveTab, setActive
             setIsUploadingImage(false);
             e.target.value = "";
         }
-    };
-
-    const handleCopyUrl = (url, id) => {
-        navigator.clipboard.writeText(url);
-        setCopiedUrl(id);
-        toast.success("Image URL copied to clipboard!");
-        setTimeout(() => setCopiedUrl(null), 2000);
     };
 
     const handleDeleteImage = async (id, e) => {
@@ -303,13 +299,25 @@ export default function LibraryDashboard({ activeTab: parentActiveTab, setActive
     const filteredSystemIcons = useMemo(() => {
         const query = systemIconQuery.toLowerCase().trim();
         const allNames = Object.keys(phosphorIcons).filter((name) => {
-            return (
-                name !== "default" &&
-                name !== "IconContext" &&
-                name !== "IconBase" &&
-                /^[A-Z]/.test(name) &&
-                !name.endsWith("Props")
-            );
+            if (
+                name === "default" ||
+                name === "IconContext" ||
+                name === "IconBase" ||
+                !/^[A-Z]/.test(name) ||
+                name.endsWith("Props")
+            ) {
+                return false;
+            }
+
+            // De-duplicate icons that are exported both as "Name" and "NameIcon"
+            if (name.endsWith("Icon")) {
+                const baseName = name.slice(0, -4);
+                if (phosphorIcons[baseName] !== undefined) {
+                    return false;
+                }
+            }
+
+            return true;
         });
         if (!query) return allNames.slice(0, 72);
         return allNames
@@ -341,358 +349,372 @@ export default function LibraryDashboard({ activeTab: parentActiveTab, setActive
     return (
         <div className="w-full bg-card/20 dark:bg-card/10 border border-border/50 rounded-lg p-6 min-h-[500px] flex flex-col">
             <AnimatePresence mode="wait">
-                    {parentActiveTab === "uploads" && (
-                        <motion.div
-                            key="uploads"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex-1 flex flex-col"
-                        >
-                            {/* Inner header bar with upload action */}
-                            <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-6 flex-wrap gap-4">
-                                <h3 className="text-sm font-semibold text-foreground">Media Assets</h3>
-                                <label className="relative flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold shadow-sm cursor-pointer transition-colors">
+                {parentActiveTab === "uploads" && (
+                    <motion.div
+                        key="uploads"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex-1 flex flex-col"
+                    >
+                        {/* Inner header bar with upload action */}
+                        <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-6 flex-wrap gap-4">
+                            <h3 className="text-sm font-semibold text-foreground">
+                                Media Assets
+                            </h3>
+                            <label className="relative flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold shadow-sm cursor-pointer transition-colors">
+                                <input
+                                    type="file"
+                                    accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
+                                    onChange={handleImageUpload}
+                                    disabled={isUploadingImage}
+                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                />
+                                <Upload className="w-3.5 h-3.5" />
+                                <span>Upload Image</span>
+                            </label>
+                        </div>
+
+                        <div className="flex-1 flex flex-col min-h-0">
+                            {isLoadingImages ? (
+                                <div className="w-full overflow-hidden">
+                                    <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
+                                        <div className="aspect-[3/4] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[280px]" />
+                                        <div className="aspect-video rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[160px]" />
+                                        <div className="aspect-[3/2] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[180px]" />
+                                        <div className="aspect-video rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[160px]" />
+                                    </div>
+                                </div>
+                            ) : userImages.length > 0 ? (
+                                <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
+                                    {userImages.map((img) => (
+                                        <motion.div
+                                            key={img.id}
+                                            layoutId={`img-${img.id}`}
+                                            className="break-inside-avoid relative overflow-hidden rounded-xl group transition-all duration-300 mb-4 cursor-zoom-in"
+                                        >
+                                            {/* Image container */}
+                                            <div
+                                                onClick={() =>
+                                                    setPreviewImage(img)
+                                                }
+                                                className="w-full relative bg-muted/20 dark:bg-muted/10 overflow-hidden rounded-xl"
+                                            >
+                                                <img
+                                                    src={img.url}
+                                                    className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
+                                                    alt={img.name}
+                                                    loading="lazy"
+                                                />
+                                            </div>
+
+                                            {/* Single premium glassmorphic overlay on hover */}
+                                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/90 via-black/45 to-black/15 transition-all duration-300 p-3.5 flex flex-col justify-between pointer-events-none rounded-xl z-20">
+                                                {/* Top action row */}
+                                                <div className="flex justify-end gap-2 pointer-events-auto">
+                                                    
+                                                    <button
+                                                        onClick={(e) =>
+                                                            handleDeleteImage(
+                                                                img.id,
+                                                                e,
+                                                            )
+                                                        }
+                                                        className="p-1.5 rounded-lg bg-black/55 hover:bg-destructive text-white backdrop-blur-md border border-white/10 transition-all cursor-pointer hover:scale-105"
+                                                        title="Delete Image"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+
+                                                {/* Bottom details info */}
+                                                <div className="flex flex-col gap-0.5">
+                                                    <span
+                                                        className="text-xs font-semibold text-white tracking-tight line-clamp-2"
+                                                        title={img.name}
+                                                    >
+                                                        {img.name}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 text-[9px] text-zinc-300 font-light mt-1 border-t border-white/10 pt-1.5">
+                                                        <span className="flex items-center gap-1">
+                                                            <FileText className="w-3 h-3 opacity-85" />
+                                                            {formatBytes(
+                                                                img.size,
+                                                            )}
+                                                        </span>
+                                                        <span>•</span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="w-3 h-3 opacity-85" />
+                                                            {formatDate(
+                                                                img.created_at ||
+                                                                    img.createdAt,
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex-1 flex flex-col items-center justify-center text-center py-20 border-2 border-dashed border-border/60 bg-secondary/5 rounded-lg">
+                                    <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 text-primary mb-4">
+                                        <Upload className="w-6 h-6" />
+                                    </div>
+                                    <h4 className="font-bold text-sm text-foreground">
+                                        Upload your first image
+                                    </h4>
+                                    <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-6 font-light">
+                                        Upload images (PNG, JPG, WEBP, or SVG)
+                                        to customize and insert them inside your
+                                        slide decks easily.
+                                    </p>
+                                    <label className="relative flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold shadow-sm cursor-pointer transition-colors">
+                                        <input
+                                            type="file"
+                                            accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
+                                            onChange={handleImageUpload}
+                                            disabled={isUploadingImage}
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                        />
+                                        <Upload className="w-4 h-4" />
+                                        <span>Upload Image</span>
+                                    </label>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+
+                {parentActiveTab === "pexels" && (
+                    <motion.div
+                        key="pexels"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex-1 flex flex-col"
+                    >
+                        <div className="flex-1 flex flex-col min-h-0">
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleSearchPexels(pexelsQuery);
+                                }}
+                                className="flex gap-2.5 max-w-md w-full mb-4 shrink-0"
+                            >
+                                <div className="relative flex-grow">
+                                    <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                                     <input
-                                        type="file"
-                                        accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
-                                        onChange={handleImageUpload}
-                                        disabled={isUploadingImage}
-                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        type="text"
+                                        value={pexelsQuery}
+                                        onChange={(e) =>
+                                            setPexelsQuery(e.target.value)
+                                        }
+                                        placeholder="Search royalty-free stock photos..."
+                                        className="w-full pl-9 pr-4 py-2 border border-border rounded-md text-xs bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
                                     />
-                                    <Upload className="w-3.5 h-3.5" />
-                                    <span>Upload Image</span>
-                                </label>
+                                </div>
+                                <Button
+                                    type="submit"
+                                    disabled={isSearchingPexels}
+                                    className="px-4 rounded-md text-xs font-semibold cursor-pointer h-9 bg-primary hover:bg-primary/90"
+                                >
+                                    {isSearchingPexels ? (
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                        "Search"
+                                    )}
+                                </Button>
+                            </form>
+                            <div className="text-[10px] text-muted-foreground mb-6 flex items-center gap-1.5">
+                                <span>Photos powered by</span>
+                                <a
+                                    href="https://www.pexels.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline font-semibold"
+                                >
+                                    Pexels
+                                </a>
                             </div>
 
-                            <div className="flex-1 flex flex-col min-h-0">
-                                {isLoadingImages ? (
+                            <div className="flex-1 overflow-y-auto">
+                                {isSearchingPexels ? (
                                     <div className="w-full overflow-hidden">
-                                        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
-                                            <div className="aspect-[3/4] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[280px]" />
-                                            <div className="aspect-video rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[160px]" />
-                                            <div className="aspect-[3/2] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[180px]" />
-                                            <div className="aspect-video rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[160px]" />
+                                        <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
+                                            <div className="aspect-[3/4] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[200px]" />
+                                            <div className="aspect-[4/3] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[130px]" />
+                                            <div className="aspect-video rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[110px]" />
+                                            <div className="aspect-[3/2] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[140px]" />
+                                            <div className="aspect-[3/4] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[200px]" />
+                                            <div className="aspect-[4/3] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[130px]" />
                                         </div>
                                     </div>
-                                ) : userImages.length > 0 ? (
-                                    <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
-                                        {userImages.map((img) => (
-                                            <motion.div
-                                                key={img.id}
-                                                layoutId={`img-${img.id}`}
-                                                className="break-inside-avoid relative overflow-hidden rounded-xl group transition-all duration-300 mb-4 cursor-zoom-in"
+                                ) : pexelsResults.length > 0 ? (
+                                    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
+                                        {pexelsResults.map((img, i) => (
+                                            <div
+                                                key={i}
+                                                onClick={() =>
+                                                    setPreviewImage({
+                                                        name:
+                                                            img.alt ||
+                                                            pexelsQuery ||
+                                                            "Pexels Photo",
+                                                        url: img.imageURL,
+                                                        source: "pexels",
+                                                    })
+                                                }
+                                                className="break-inside-avoid mb-4 relative rounded-xl overflow-hidden group transition-all duration-300 cursor-zoom-in"
                                             >
-                                                {/* Image container */}
-                                                <div
-                                                    onClick={() => setPreviewImage(img)}
-                                                    className="w-full relative bg-muted/20 dark:bg-muted/10 overflow-hidden rounded-xl"
-                                                >
+                                                <div className="w-full overflow-hidden rounded-xl bg-muted/20 dark:bg-muted/10">
                                                     <img
-                                                        src={img.url}
+                                                        src={img.previewURL}
                                                         className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
-                                                        alt={img.name}
+                                                        alt="Pexels photo"
                                                         loading="lazy"
                                                     />
                                                 </div>
 
-                                                {/* Single premium glassmorphic overlay on hover */}
+                                                {/* Hover Glass Overlay */}
                                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/90 via-black/45 to-black/15 transition-all duration-300 p-3.5 flex flex-col justify-between pointer-events-none rounded-xl z-20">
                                                     {/* Top action row */}
                                                     <div className="flex justify-end gap-2 pointer-events-auto">
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                setPreviewImage(img);
+                                                                setPreviewImage(
+                                                                    {
+                                                                        name:
+                                                                            img.alt ||
+                                                                            pexelsQuery ||
+                                                                            "Pexels Photo",
+                                                                        url: img.imageURL,
+                                                                        source: "pexels",
+                                                                    },
+                                                                );
                                                             }}
                                                             className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10 transition-all cursor-pointer hover:scale-105"
-                                                            title="Preview Image"
+                                                            title="Preview"
                                                         >
                                                             <Search className="w-3.5 h-3.5" />
                                                         </button>
                                                         <button
-                                                            onClick={(e) => handleDeleteImage(img.id, e)}
-                                                            className="p-1.5 rounded-lg bg-black/55 hover:bg-destructive text-white backdrop-blur-md border border-white/10 transition-all cursor-pointer hover:scale-105"
-                                                            title="Delete Image"
+                                                            onClick={(e) =>
+                                                                handleSavePexelsToLibrary(
+                                                                    img.imageURL,
+                                                                    img.alt ||
+                                                                        pexelsQuery ||
+                                                                        "Pexels Photo",
+                                                                    e,
+                                                                )
+                                                            }
+                                                            className="p-1.5 rounded-lg bg-primary hover:bg-primary/95 text-primary-foreground backdrop-blur-md border border-white/10 transition-all cursor-pointer hover:scale-105"
+                                                            title="Save to library uploads"
                                                         >
-                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            <Plus className="w-3.5 h-3.5" />
                                                         </button>
                                                     </div>
 
                                                     {/* Bottom details info */}
                                                     <div className="flex flex-col gap-0.5">
-                                                        <span className="text-xs font-semibold text-white tracking-tight line-clamp-2" title={img.name}>
-                                                            {img.name}
+                                                        <span className="text-xs font-semibold text-white tracking-tight line-clamp-2">
+                                                            {img.alt ||
+                                                                pexelsQuery ||
+                                                                "Pexels Photo"}
                                                         </span>
-                                                        <div className="flex items-center gap-2 text-[9px] text-zinc-300 font-light mt-1 border-t border-white/10 pt-1.5">
-                                                            <span className="flex items-center gap-1">
-                                                                <FileText className="w-3 h-3 opacity-85" />
-                                                                {formatBytes(img.size)}
-                                                            </span>
-                                                            <span>•</span>
-                                                            <span className="flex items-center gap-1">
-                                                                <Calendar className="w-3 h-3 opacity-85" />
-                                                                {formatDate(img.created_at || img.createdAt)}
-                                                            </span>
-                                                        </div>
+                                                        <span className="text-[9px] text-zinc-300 font-light mt-1 border-t border-white/10 pt-1.5">
+                                                            Royalty-free photo
+                                                            via Pexels
+                                                        </span>
                                                     </div>
                                                 </div>
-                                            </motion.div>
+                                            </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="flex-1 flex flex-col items-center justify-center text-center py-20 border-2 border-dashed border-border/60 bg-secondary/5 rounded-lg">
-                                        <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 text-primary mb-4">
-                                            <Upload className="w-6 h-6" />
-                                        </div>
-                                        <h4 className="font-bold text-sm text-foreground">
-                                            Upload your first image
+                                    <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground border border-dashed border-border/60 rounded-lg bg-secondary/5">
+                                        <Search className="w-10 h-10 opacity-30 mb-3" />
+                                        <h4 className="font-bold text-xs text-foreground">
+                                            Find royalty-free photos
                                         </h4>
-                                        <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-6 font-light">
-                                            Upload images (PNG, JPG, WEBP, or SVG) to customize and insert them inside your slide decks easily.
+                                        <p className="text-[11px] text-muted-foreground max-w-xs mt-0.5">
+                                            Search millions of free,
+                                            high-resolution stock images
+                                            provided by the Pexels API.
                                         </p>
-                                        <label className="relative flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold shadow-sm cursor-pointer transition-colors">
-                                            <input
-                                                type="file"
-                                                accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
-                                                onChange={handleImageUpload}
-                                                disabled={isUploadingImage}
-                                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                            />
-                                            <Upload className="w-4 h-4" />
-                                            <span>Upload Image</span>
-                                        </label>
                                     </div>
                                 )}
                             </div>
-                        </motion.div>
-                    )}
+                        </div>
+                    </motion.div>
+                )}
 
-                    {parentActiveTab === "pexels" && (
-                        <motion.div
-                            key="pexels"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex-1 flex flex-col"
-                        >
-                            <div className="flex-1 flex flex-col min-h-0">
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        handleSearchPexels(pexelsQuery);
-                                    }}
-                                    className="flex gap-2.5 max-w-md w-full mb-4 shrink-0"
+                {parentActiveTab === "icons" && (
+                    <motion.div
+                        key="icons"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex-1 flex flex-col"
+                    >
+                        {/* Action Bar for Custom Icons */}
+                        <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-6 flex-wrap gap-4">
+                            <h3 className="text-sm font-semibold text-foreground">
+                                Custom Icons
+                            </h3>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setShowPasteArea(true)}
+                                    className="h-9 px-4 text-xs font-semibold gap-1.5 rounded-md border-border/60 hover:bg-secondary/40 cursor-pointer"
                                 >
-                                    <div className="relative flex-grow">
-                                        <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-                                        <input
-                                            type="text"
-                                            value={pexelsQuery}
-                                            onChange={(e) =>
-                                                setPexelsQuery(
-                                                    e.target.value,
-                                                )
-                                            }
-                                            placeholder="Search royalty-free stock photos..."
-                                            className="w-full pl-9 pr-4 py-2 border border-border rounded-md text-xs bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
-                                        />
-                                    </div>
-                                    <Button
-                                        type="submit"
-                                        disabled={isSearchingPexels}
-                                        className="px-4 rounded-md text-xs font-semibold cursor-pointer h-9 bg-primary hover:bg-primary/90"
-                                    >
-                                        {isSearchingPexels ? (
-                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                        ) : (
-                                            "Search"
-                                        )}
-                                    </Button>
-                                </form>
-                                <div className="text-[10px] text-muted-foreground mb-6 flex items-center gap-1.5">
-                                    <span>Photos powered by</span>
-                                    <a
-                                        href="https://www.pexels.com/"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-primary hover:underline font-semibold"
-                                    >
-                                        Pexels
-                                    </a>
-                                </div>
+                                    <Code className="w-3.5 h-3.5" />
+                                    <span>Paste SVG</span>
+                                </Button>
 
-                                <div className="flex-1 overflow-y-auto">
-                                    {isSearchingPexels ? (
-                                        <div className="w-full overflow-hidden">
-                                            <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
-                                                <div className="aspect-[3/4] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[200px]" />
-                                                <div className="aspect-[4/3] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[130px]" />
-                                                <div className="aspect-video rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[110px]" />
-                                                <div className="aspect-[3/2] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[140px]" />
-                                                <div className="aspect-[3/4] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[200px]" />
-                                                <div className="aspect-[4/3] rounded-xl skeleton-sweep border border-border/30 mb-4 break-inside-avoid h-[130px]" />
-                                            </div>
-                                        </div>
-                                    ) : pexelsResults.length > 0 ? (
-                                        <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-4">
-                                            {pexelsResults.map((img, i) => (
-                                                <div
-                                                    key={i}
-                                                    onClick={() =>
-                                                        setPreviewImage({
-                                                            name: img.alt || pexelsQuery || "Pexels Photo",
-                                                            url: img.imageURL,
-                                                            source: "pexels",
-                                                        })
-                                                    }
-                                                    className="break-inside-avoid mb-4 relative rounded-xl overflow-hidden group transition-all duration-300 cursor-zoom-in"
-                                                >
-                                                    <div className="w-full overflow-hidden rounded-xl bg-muted/20 dark:bg-muted/10">
-                                                        <img
-                                                            src={img.previewURL}
-                                                            className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
-                                                            alt="Pexels photo"
-                                                            loading="lazy"
-                                                        />
-                                                    </div>
-
-                                                    {/* Hover Glass Overlay */}
-                                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/90 via-black/45 to-black/15 transition-all duration-300 p-3.5 flex flex-col justify-between pointer-events-none rounded-xl z-20">
-                                                        {/* Top action row */}
-                                                        <div className="flex justify-end gap-2 pointer-events-auto">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setPreviewImage({
-                                                                        name: img.alt || pexelsQuery || "Pexels Photo",
-                                                                        url: img.imageURL,
-                                                                        source: "pexels",
-                                                                    });
-                                                                }}
-                                                                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10 transition-all cursor-pointer hover:scale-105"
-                                                                title="Preview"
-                                                            >
-                                                                <Search className="w-3.5 h-3.5" />
-                                                            </button>
-                                                            <button
-                                                                onClick={(e) =>
-                                                                    handleSavePexelsToLibrary(
-                                                                        img.imageURL,
-                                                                        img.alt || pexelsQuery || "Pexels Photo",
-                                                                        e,
-                                                                    )
-                                                                }
-                                                                className="p-1.5 rounded-lg bg-primary hover:bg-primary/95 text-primary-foreground backdrop-blur-md border border-white/10 transition-all cursor-pointer hover:scale-105"
-                                                                title="Save to library uploads"
-                                                            >
-                                                                <Plus className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </div>
-
-                                                        {/* Bottom details info */}
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <span className="text-xs font-semibold text-white tracking-tight line-clamp-2">
-                                                                {img.alt || pexelsQuery || "Pexels Photo"}
-                                                            </span>
-                                                            <span className="text-[9px] text-zinc-300 font-light mt-1 border-t border-white/10 pt-1.5">
-                                                                Royalty-free photo via Pexels
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground border border-dashed border-border/60 rounded-lg bg-secondary/5">
-                                            <Search className="w-10 h-10 opacity-30 mb-3" />
-                                            <h4 className="font-bold text-xs text-foreground">
-                                                Find royalty-free photos
-                                            </h4>
-                                            <p className="text-[11px] text-muted-foreground max-w-xs mt-0.5">
-                                                Search millions of free, high-resolution stock images provided by the Pexels API.
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
+                                <label className="relative flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold shadow-sm cursor-pointer transition-colors">
+                                    <input
+                                        type="file"
+                                        accept=".svg, image/png, image/jpeg, image/webp"
+                                        onChange={handleIconUpload}
+                                        disabled={isUploadingIcon}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                    />
+                                    <Upload className="w-3.5 h-3.5" />
+                                    <span>Upload Icon File</span>
+                                </label>
                             </div>
-                        </motion.div>
-                    )}
+                        </div>
 
-                    {parentActiveTab === "icons" && (
-                        <motion.div
-                            key="icons"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex-1 flex flex-col"
-                        >
-                            {/* Action Bar for Custom Icons */}
-                            <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-6 flex-wrap gap-4">
-                                <h3 className="text-sm font-semibold text-foreground">Custom SVGs</h3>
-                                {!showPasteArea && (
-                                    <div className="flex gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() =>
-                                                setShowPasteArea(true)
-                                            }
-                                            className="h-9 px-4 text-xs font-semibold gap-1.5 rounded-md border-border/60 hover:bg-secondary/40 cursor-pointer"
-                                        >
-                                            <Code className="w-3.5 h-3.5" />
-                                            <span>Paste SVG</span>
-                                        </Button>
+                        <div className="flex-grow flex flex-col min-h-0 gap-6">
+                            <Dialog open={showPasteArea} onOpenChange={(open) => {
+                                setShowPasteArea(open);
+                                if (!open) {
+                                    setPastedSvg("");
+                                    setPastedIconName("");
+                                }
+                            }}>
+                                <DialogContent className="max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2">
+                                            <Code className="w-4 h-4 text-primary" />
+                                            Paste Raw SVG Code
+                                        </DialogTitle>
+                                        <DialogDescription className="text-xs">
+                                            Paste your custom SVG icon code below to add it to your library.
+                                        </DialogDescription>
+                                    </DialogHeader>
 
-                                        <label className="relative flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold shadow-sm cursor-pointer transition-colors">
-                                            <input
-                                                type="file"
-                                                accept=".svg, image/png, image/jpeg, image/webp"
-                                                onChange={handleIconUpload}
-                                                disabled={isUploadingIcon}
-                                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                            />
-                                            <Upload className="w-3.5 h-3.5" />
-                                            <span>Upload Icon File</span>
-                                        </label>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="flex-grow flex flex-col min-h-0 gap-6">
-                                {showPasteArea && (
-                                    <motion.form
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{
-                                            opacity: 1,
-                                            height: "auto",
-                                        }}
-                                        exit={{ opacity: 0, height: 0 }}
+                                    <form
                                         onSubmit={handlePasteIconSubmit}
-                                        className="border border-border/80 bg-secondary/10 dark:bg-zinc-900/40 rounded-lg p-5 flex flex-col gap-4 max-w-lg w-full"
+                                        className="flex flex-col gap-4 mt-2"
                                     >
-                                        <div className="flex justify-between items-center pb-2 border-b border-border/30">
-                                            <span className="text-xs font-bold text-foreground flex items-center gap-2">
-                                                <Code className="w-4 h-4 text-primary" />{" "}
-                                                Paste Raw SVG Code
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setShowPasteArea(false);
-                                                    setPastedSvg("");
-                                                    setPastedIconName("");
-                                                }}
-                                                className="text-[11px] text-muted-foreground hover:text-foreground font-semibold"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-
-                                        <div className="space-y-3">
+                                        <div className="space-y-4">
                                             <div className="flex flex-col gap-1.5">
                                                 <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
                                                     Icon Label / Name
@@ -718,268 +740,290 @@ export default function LibraryDashboard({ activeTab: parentActiveTab, setActive
                                                 <textarea
                                                     placeholder="<svg ...> ... </svg>"
                                                     required
-                                                    rows={4}
+                                                    rows={6}
                                                     value={pastedSvg}
                                                     onChange={(e) =>
-                                                        setPastedSvg(
-                                                            e.target.value,
-                                                        )
+                                                        setPastedSvg(e.target.value)
                                                     }
                                                     className="w-full p-3 text-xs border border-border bg-background rounded-md font-mono focus:outline-none focus:ring-1 focus:ring-primary/40 resize-y"
                                                 />
                                             </div>
                                         </div>
 
-                                        <Button
-                                            type="submit"
-                                            disabled={isUploadingIcon}
-                                            className="w-full py-2 rounded-md text-xs font-semibold cursor-pointer h-9 bg-primary hover:bg-primary/95"
-                                        >
-                                            {isUploadingIcon ? (
-                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                            ) : (
-                                                "Save Custom Icon"
-                                            )}
-                                        </Button>
-                                    </motion.form>
-                                )}
-
-                                {/* Icons List */}
-                                <div className="flex-1 overflow-y-auto">
-                                    {isLoadingIcons ? (
-                                        <div className="w-full overflow-hidden">
-                                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-                                                {Array.from({ length: 16 }).map(
-                                                    (_, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className="aspect-square rounded-md skeleton-sweep border border-border/50"
-                                                        />
-                                                    ),
+                                        <div className="flex justify-end gap-2 pt-2">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={() => {
+                                                    setShowPasteArea(false);
+                                                    setPastedSvg("");
+                                                    setPastedIconName("");
+                                                }}
+                                                className="h-9 px-4 text-xs font-semibold cursor-pointer"
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={isUploadingIcon}
+                                                className="h-9 px-4 rounded-md text-xs font-semibold cursor-pointer bg-primary hover:bg-primary/95"
+                                            >
+                                                {isUploadingIcon ? (
+                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                ) : (
+                                                    "Save Custom Icon"
                                                 )}
-                                            </div>
+                                            </Button>
                                         </div>
-                                    ) : userIcons.length > 0 ? (
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-                                            {userIcons.map((icn) => (
-                                                <div
-                                                    key={icn.id}
-                                                    className="relative aspect-square rounded-md border border-border/80 hover:border-primary p-4 cursor-default group bg-card/60 dark:bg-zinc-900/60 flex flex-col items-center justify-center transition-all gap-2"
-                                                    title={icn.name}
-                                                >
-                                                    <div className="flex-grow flex items-center justify-center">
-                                                        {icn.iconType === "svg" ? (
-                                                            <div
-                                                                className="w-10 h-10 text-primary flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-current [&_svg]:text-current"
-                                                                dangerouslySetInnerHTML={{
-                                                                    __html: icn.iconContent,
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <img
-                                                                src={icn.iconContent}
-                                                                className="w-10 h-10 object-contain"
-                                                                alt={icn.name}
-                                                            />
-                                                        )}
-                                                    </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
 
-                                                    <span className="text-[10px] text-muted-foreground font-semibold truncate w-full text-center max-w-[80px]">
-                                                        {icn.name}
-                                                    </span>
-
-                                                    <button
-                                                        onClick={(e) =>
-                                                            handleDeleteIcon(icn.id, e)
-                                                        }
-                                                        className="absolute top-1.5 right-1.5 p-1 rounded-lg bg-black/60 dark:bg-black/80 hover:bg-destructive text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer border border-white/10"
-                                                        title="Delete Icon"
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="flex-grow flex flex-col items-center justify-center text-center py-20 border-2 border-dashed border-border/60 bg-secondary/5 rounded-lg">
-                                            <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 text-primary mb-4">
-                                                <Code className="w-6 h-6" />
-                                            </div>
-                                            <h4 className="font-bold text-sm text-foreground">
-                                                Save your custom icons
-                                            </h4>
-                                            <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-6 font-light">
-                                                Upload custom vector SVG files or paste XML markup code to reuse custom branding and graphics across your presentations.
-                                            </p>
-                                            <div className="flex gap-2 justify-center">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        setShowPasteArea(true)
-                                                    }
-                                                    className="px-4 text-xs font-semibold gap-1.5 rounded-md border-border/60 hover:bg-secondary/40 cursor-pointer"
-                                                >
-                                                    <Code className="w-3.5 h-3.5" />
-                                                    <span>Paste SVG</span>
-                                                </Button>
-
-                                                <label className="relative flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold shadow-sm cursor-pointer transition-colors">
-                                                    <input
-                                                        type="file"
-                                                        accept=".svg, image/png, image/jpeg, image/webp"
-                                                        onChange={handleIconUpload}
-                                                        disabled={isUploadingIcon}
-                                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                            {/* Icons List */}
+                            <div className="flex-1 overflow-y-auto">
+                                {isLoadingIcons ? (
+                                    <div className="w-full overflow-hidden">
+                                        <div className="grid grid-cols-4 sm:grid-cols-64 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-4">
+                                            {Array.from({ length: 16 }).map(
+                                                (_, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className="aspect-square rounded-md skeleton-sweep border border-border/50"
                                                     />
-                                                    <Upload className="w-4 h-4" />
-                                                    <span>Upload Icon File</span>
-                                                </label>
-                                            </div>
+                                                ),
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {parentActiveTab === "system-icons" && (
-                        <motion.div
-                            key="system-icons"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex-1 flex flex-col"
-                        >
-                            <div className="flex-grow flex flex-col min-h-0 gap-6">
-                                <div className="flex flex-col gap-1 shrink-0">
-                                    <div className="relative max-w-md w-full">
-                                        <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-                                        <input
-                                            type="text"
-                                            value={systemIconQuery}
-                                            onChange={(e) =>
-                                                setSystemIconQuery(
-                                                    e.target.value,
-                                                )
-                                            }
-                                            placeholder="Search system Phosphor icons..."
-                                            className="w-full pl-9 pr-4 py-2 border border-border rounded-md text-xs bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
-                                        />
                                     </div>
-                                    <p className="text-[10px] text-muted-foreground mt-1.5 font-light">
-                                        Click any icon to copy its identifier. You can paste/type this icon identifier inside slide text elements or icon fields.
-                                    </p>
-                                </div>
-
-                                <div className="flex-1 overflow-y-auto">
-                                    <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3.5">
-                                        {filteredSystemIcons.map((name) => {
-                                            const IconComponent = phosphorIcons[name];
-                                            if (!IconComponent) return null;
-                                            return (
-                                                <button
-                                                    key={name}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        handleCopyIconName(name)
-                                                    }
-                                                    className="aspect-square flex flex-col items-center justify-center rounded-md hover:bg-accent border border-border/60 hover:border-primary transition-all group p-2 cursor-pointer bg-card/40 hover:scale-102"
-                                                    title={name}
-                                                >
-                                                    <div className="flex-grow flex items-center justify-center">
-                                                        <IconComponent
-                                                            weight="regular"
-                                                            className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors"
+                                ) : userIcons.length > 0 ? (
+                                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-8 xl:grid-cols-12 gap-4">
+                                        {userIcons.map((icn) => (
+                                            <div
+                                                key={icn.id}
+                                                className="relative aspect-square rounded-md border border-border/80 hover:border-primary p-4 cursor-default group bg-card/60 dark:bg-zinc-900/60 flex flex-col items-center justify-center transition-all gap-2"
+                                                title={icn.name}
+                                            >
+                                                <div className="flex-grow flex items-center justify-center">
+                                                    {icn.iconType === "svg" ? (
+                                                        <div
+                                                            className="w-10 h-10 text-primary flex items-center justify-center [&_svg]:w-full [&_svg]:h-full [&_svg]:fill-current [&_svg]:text-current"
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: icn.iconContent,
+                                                            }}
                                                         />
-                                                    </div>
-                                                    <span className="text-[9px] text-muted-foreground group-hover:text-foreground font-semibold truncate w-full text-center mt-1">
-                                                        {name}
-                                                    </span>
+                                                    ) : (
+                                                        <img
+                                                            src={
+                                                                icn.iconContent
+                                                            }
+                                                            className="w-10 h-10 object-contain"
+                                                            alt={icn.name}
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                <span className="text-[10px] text-muted-foreground font-semibold truncate w-full text-center max-w-[80px]">
+                                                    {icn.name}
+                                                </span>
+
+                                                <button
+                                                    onClick={(e) =>
+                                                        handleDeleteIcon(
+                                                            icn.id,
+                                                            e,
+                                                        )
+                                                    }
+                                                    className="absolute top-1.5 right-1.5 p-1 rounded-lg bg-black/60 dark:bg-black/80 hover:bg-destructive text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer border border-white/10"
+                                                    title="Delete Icon"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
-                                            );
-                                        })}
+                                            </div>
+                                        ))}
                                     </div>
+                                ) : (
+                                    <div className="flex-grow flex flex-col items-center justify-center text-center py-20 border-2 border-dashed border-border/60 bg-secondary/5 rounded-lg">
+                                        <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 text-primary mb-4">
+                                            <Code className="w-6 h-6" />
+                                        </div>
+                                        <h4 className="font-bold text-sm text-foreground">
+                                            Save your custom icons
+                                        </h4>
+                                        <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-6 font-light">
+                                            Upload custom vector SVG files or
+                                            paste XML markup code to reuse
+                                            custom branding and graphics across
+                                            your presentations.
+                                        </p>
+                                        <div className="flex gap-2 justify-center">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setShowPasteArea(true)
+                                                }
+                                                className="px-4 text-xs font-semibold gap-1.5 rounded-md border-border/60 hover:bg-secondary/40 cursor-pointer"
+                                            >
+                                                <Code className="w-3.5 h-3.5" />
+                                                <span>Paste SVG</span>
+                                            </Button>
+
+                                            <label className="relative flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/95 text-primary-foreground rounded-md text-xs font-semibold shadow-sm cursor-pointer transition-colors">
+                                                <input
+                                                    type="file"
+                                                    accept=".svg, image/png, image/jpeg, image/webp"
+                                                    onChange={handleIconUpload}
+                                                    disabled={isUploadingIcon}
+                                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                                />
+                                                <Upload className="w-4 h-4" />
+                                                <span>Upload Icon File</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {parentActiveTab === "system-icons" && (
+                    <motion.div
+                        key="system-icons"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex-1 flex flex-col"
+                    >
+                        <div className="flex-grow flex flex-col min-h-0 gap-6">
+                            <div className="flex flex-col gap-1 shrink-0">
+                                <div className="relative max-w-md w-full">
+                                    <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                                    <input
+                                        type="text"
+                                        value={systemIconQuery}
+                                        onChange={(e) =>
+                                            setSystemIconQuery(e.target.value)
+                                        }
+                                        placeholder="Search system Phosphor icons..."
+                                        className="w-full pl-9 pr-4 py-2 border border-border rounded-md text-xs bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
+                                    />
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-1.5 font-light">
+                                    Click any icon to copy its identifier. You
+                                    can paste/type this icon identifier inside
+                                    slide text elements or icon fields.
+                                </p>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto">
+                                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 2xl:grid-cols-14 gap-3.5 p-2">
+                                    {filteredSystemIcons.map((name) => {
+                                        const IconComponent =
+                                            phosphorIcons[name];
+                                        if (!IconComponent) return null;
+                                        return (
+                                            <button
+                                                key={name}
+                                                type="button"
+                                                onClick={() =>
+                                                    handleCopyIconName(name)
+                                                }
+                                                className="aspect-square flex flex-col items-center justify-center rounded-md hover:bg-accent border border-border/60 hover:border-primary transition-all group p-2 cursor-pointer bg-card/40 hover:scale-102"
+                                                title={name}
+                                            >
+                                                <div className="flex-grow flex items-center justify-center">
+                                                    <IconComponent
+                                                        weight="regular"
+                                                        className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors"
+                                                    />
+                                                </div>
+                                                <span className="text-[9px] text-muted-foreground group-hover:text-foreground font-semibold truncate w-full text-center mt-1">
+                                                    {name}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                        </motion.div>
-                    )}
+                        </div>
+                    </motion.div>
+                )}
 
-                    {activeTab === "themes" && (
-                        <motion.div
-                            key="themes"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex-1 flex flex-col items-center justify-center text-center py-20 gap-4"
-                        >
-                            <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0 animate-pulse">
-                                <Palette className="w-8 h-8" />
-                            </div>
-                            <div className="space-y-2">
-                                <h3 className="font-bold text-lg text-foreground flex items-center gap-2 justify-center">
-                                    Custom Design Themes
-                                    <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 border border-primary/25 px-2.5 py-0.5 rounded-full uppercase">
-                                        Locked
-                                    </span>
-                                </h3>
-                                <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                                    Coming soon! Define custom visual brand
-                                    identity systems, custom corporate colors,
-                                    and pair custom typography suites to apply
-                                    uniformly on slide creations.
-                                </p>
-                            </div>
-                            <div className="border border-border/50 bg-secondary/15 rounded-md p-3.5 text-left w-full max-w-sm flex items-start gap-2.5">
-                                <Lock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                                <span className="text-[11px] text-muted-foreground leading-normal font-light">
-                                    Phase 2 Library rollout will let you author
-                                    layout templates and color maps that feed
-                                    our generation engine.
+                {activeTab === "themes" && (
+                    <motion.div
+                        key="themes"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex-1 flex flex-col items-center justify-center text-center py-20 gap-4"
+                    >
+                        <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0 animate-pulse">
+                            <Palette className="w-8 h-8" />
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="font-bold text-lg text-foreground flex items-center gap-2 justify-center">
+                                Custom Design Themes
+                                <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 border border-primary/25 px-2.5 py-0.5 rounded-full uppercase">
+                                    Locked
                                 </span>
-                            </div>
-                        </motion.div>
-                    )}
+                            </h3>
+                            <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+                                Coming soon! Define custom visual brand identity
+                                systems, custom corporate colors, and pair
+                                custom typography suites to apply uniformly on
+                                slide creations.
+                            </p>
+                        </div>
+                        <div className="border border-border/50 bg-secondary/15 rounded-md p-3.5 text-left w-full max-w-sm flex items-start gap-2.5">
+                            <Lock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                            <span className="text-[11px] text-muted-foreground leading-normal font-light">
+                                Phase 2 Library rollout will let you author
+                                layout templates and color maps that feed our
+                                generation engine.
+                            </span>
+                        </div>
+                    </motion.div>
+                )}
 
-                    {/* ------------------- LAYOUTS (LOCKED) ------------------- */}
-                    {activeTab === "layouts" && (
-                        <motion.div
-                            key="layouts"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex-1 flex flex-col items-center justify-center text-center py-20 gap-4"
-                        >
-                            <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0 animate-pulse">
-                                <LayoutIcon className="w-8 h-8" />
-                            </div>
-                            <div className="space-y-2">
-                                <h3 className="font-bold text-lg text-foreground flex items-center gap-2 justify-center">
-                                    Custom Slide Layouts Builder
-                                    <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 border border-primary/25 px-2.5 py-0.5 rounded-full uppercase">
-                                        Locked
-                                    </span>
-                                </h3>
-                                <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                                    Coming soon! Arrange headers, layout grids,
-                                    image placements, and charts inside a
-                                    drag-and-drop slide template editor to build
-                                    your custom slide structural templates.
-                                </p>
-                            </div>
-                            <div className="border border-border/50 bg-secondary/15 rounded-md p-3.5 text-left w-full max-w-sm flex items-start gap-2.5">
-                                <Lock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                                <span className="text-[11px] text-muted-foreground leading-normal font-light">
-                                    Phase 2 Library rollout includes the layout
-                                    builder and canvas layout compiler.
+                {/* ------------------- LAYOUTS (LOCKED) ------------------- */}
+                {activeTab === "layouts" && (
+                    <motion.div
+                        key="layouts"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex-1 flex flex-col items-center justify-center text-center py-20 gap-4"
+                    >
+                        <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0 animate-pulse">
+                            <LayoutIcon className="w-8 h-8" />
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="font-bold text-lg text-foreground flex items-center gap-2 justify-center">
+                                Custom Slide Layouts Builder
+                                <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 border border-primary/25 px-2.5 py-0.5 rounded-full uppercase">
+                                    Locked
                                 </span>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            </h3>
+                            <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+                                Coming soon! Arrange headers, layout grids,
+                                image placements, and charts inside a
+                                drag-and-drop slide template editor to build
+                                your custom slide structural templates.
+                            </p>
+                        </div>
+                        <div className="border border-border/50 bg-secondary/15 rounded-md p-3.5 text-left w-full max-w-sm flex items-start gap-2.5">
+                            <Lock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                            <span className="text-[11px] text-muted-foreground leading-normal font-light">
+                                Phase 2 Library rollout includes the layout
+                                builder and canvas layout compiler.
+                            </span>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                {/* Lightbox Dialog preview for Images */}
+            {/* Lightbox Dialog preview for Images */}
             <Dialog
                 open={previewImage !== null}
                 onOpenChange={(open) => !open && setPreviewImage(null)}

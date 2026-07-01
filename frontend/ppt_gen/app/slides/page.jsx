@@ -4,7 +4,7 @@ import Slide from "@/components/templates/Slide";
 import { extractSlideData } from "@/utils/extractor";
 import { Button } from "@/components/ui/button";
 
-const page = () => {
+const SlidesPlaygroundPage = () => {
     const [theme, setTheme] = useState("sunset");
     const [category, setCategory] = useState("bullets");
     const [type, setType] = useState("standard");
@@ -275,4 +275,4 @@ const page = () => {
     );
 };
 
-export default page;
+export default SlidesPlaygroundPage;
