@@ -14,9 +14,6 @@ import { convertHtmlToPptx } from "../engine/converter.js";
 export const generatePPT = async (req, res) => {
     const { prompt, tone, slidesCount, layoutStyle, thinking } = req.body;
 
-    if (!prompt || !tone || !slidesCount) {
-        return sendError(res, "Required fields are missing", null, 400);
-    }
     const ppt_id = nanoid(10);
 
     try {
@@ -76,15 +73,11 @@ const getPartialSlides = (accumulatedText) => {
     return [];
 };
 
-const activeGenerations = new Map(); // ppt_id -> { abortController, res }
+const activeGenerations = new Map();
 
 export const streamPPT = async (req, res) => {
     const { ppt_id } = req.params;
     const { prompt, tone, slidesCount, layoutStyle, thinking } = req.query;
-
-    if (!prompt || !tone || !slidesCount) {
-        return sendError(res, "Required query parameters (prompt, tone, slidesCount) are missing", null, 400);
-    }
 
     // Abort existing running generation for the same ppt_id (handles React StrictMode / reconnections)
     if (activeGenerations.has(ppt_id)) {
@@ -120,7 +113,7 @@ export const streamPPT = async (req, res) => {
             console.log(`[Stream] PPT ${ppt_id} already initialized or error:`, initErr.message);
         }
 
-        const fullPrompt = `${prompt}\nTone: ${tone}\n Text content preference: ${layoutStyle || 'balanced'}\n User name: ${req.user?.name || 'User'}`.trim();
+        const fullPrompt = `${prompt.trim()}\nTone: ${tone}\n Text content preference: ${layoutStyle || 'balanced'}\n User name: ${req.user?.name || 'User'}`.trim();
         const newSysPrompt = pptSystemPrompt +
             `\nStrictly output exactly ${slidesCount} slides. Do not generate more or fewer slides under any circumstance.`;
 
@@ -339,9 +332,6 @@ export const convertPPT = async (req, res) => {
 export const editSlide = async (req, res) => {
     const { slide, prompt, presentationTitle, slideTitles, slideIndex } = req.body;
 
-    if (!slide || !prompt) {
-        return sendError(res, "Slide and prompt are required", null, 400);
-    }
 
     try {
         const contextInfo = `

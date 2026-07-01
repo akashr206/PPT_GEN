@@ -15,6 +15,8 @@ import {
     Plus,
     Code,
     FileUp,
+    FolderOpen,
+    Bolt
 } from "lucide-react";
 import * as phosphorIcons from "@phosphor-icons/react";
 import {
@@ -175,7 +177,7 @@ export default function LibrarySidebar({
             }
         } catch (err) {
             console.error("Image upload failed:", err);
-            toast.error(err.message || "Failed to upload image to backend.", {
+            toast.error( "Failed to upload image to backend.", {
                 id: toastId,
             });
         } finally {
@@ -204,7 +206,7 @@ export default function LibrarySidebar({
             }
         } catch (err) {
             console.error("Icon upload failed:", err);
-            toast.error(err.message || "Failed to upload icon to backend.", {
+            toast.error("Failed to upload icon to backend.", {
                 id: toastId,
             });
         } finally {
@@ -243,7 +245,7 @@ export default function LibrarySidebar({
             }
         } catch (err) {
             console.error("Pasted SVG upload failed:", err);
-            toast.error(err.message || "Failed to save SVG icon.", {
+            toast.error( "Failed to save SVG icon.", {
                 id: toastId,
             });
         } finally {
@@ -363,7 +365,7 @@ export default function LibrarySidebar({
                 {/* Header */}
                 <div className="p-4 border-b border-border flex items-center justify-between shrink-0 bg-secondary/10">
                     <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                        <FolderOpen className="w-4 h-4 text-primary" />
                         <h3 className="font-bold text-sm text-foreground">
                             My Library
                         </h3>
@@ -397,30 +399,8 @@ export default function LibrarySidebar({
                                 : "text-muted-foreground hover:text-foreground hover:bg-background/40"
                         }`}
                     >
-                        <Code className="w-3.5 h-3.5" />
+                        <Bolt className="w-3.5 h-3.5" />
                         <span>Icons</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("themes")}
-                        className={`flex-1 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
-                            activeTab === "themes"
-                                ? "bg-background text-foreground shadow-sm"
-                                : "text-muted-foreground hover:text-foreground hover:bg-background/40"
-                        }`}
-                    >
-                        <Palette className="w-3.5 h-3.5" />
-                        <span>Themes</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("layouts")}
-                        className={`flex-1 py-1.5 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
-                            activeTab === "layouts"
-                                ? "bg-background text-foreground shadow-sm"
-                                : "text-muted-foreground hover:text-foreground hover:bg-background/40"
-                        }`}
-                    >
-                        <LayoutIcon className="w-3.5 h-3.5" />
-                        <span>Layouts</span>
                     </button>
                 </div>
 
@@ -896,65 +876,6 @@ export default function LibrarySidebar({
                         </div>
                     )}
 
-                    {/* ---------------- THEMES TAB ---------------- */}
-                    {activeTab === "themes" && (
-                        <div className="p-6 flex flex-col items-center justify-center text-center h-full gap-4">
-                            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0">
-                                <Palette className="w-8 h-8" />
-                            </div>
-                            <div className="space-y-1">
-                                <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5 justify-center">
-                                    Custom Themes Creator
-                                    <span className="text-[9px] font-bold tracking-wide text-primary bg-primary/10 border border-primary/25 px-1.5 py-0.5 rounded-full uppercase">
-                                        Locked
-                                    </span>
-                                </h4>
-                                <p className="text-xs text-muted-foreground max-w-[280px]">
-                                    Coming soon! Create custom color schemes,
-                                    define contrast tokens, specify typography
-                                    pairing, and apply them across your
-                                    presentation in one click.
-                                </p>
-                            </div>
-                            <div className="border border-border/50 bg-secondary/15 rounded-md p-3 text-left w-full max-w-[280px] flex items-start gap-2.5">
-                                <Lock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                                <span className="text-[10px] text-muted-foreground leading-normal">
-                                    Phase 2 of Library will allow designing
-                                    color systems and custom themes.
-                                </span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ---------------- LAYOUTS TAB ---------------- */}
-                    {activeTab === "layouts" && (
-                        <div className="p-6 flex flex-col items-center justify-center text-center h-full gap-4">
-                            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0">
-                                <LayoutIcon className="w-8 h-8" />
-                            </div>
-                            <div className="space-y-1">
-                                <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5 justify-center">
-                                    Custom Slide Layouts
-                                    <span className="text-[9px] font-bold tracking-wide text-primary bg-primary/10 border border-primary/25 px-1.5 py-0.5 rounded-full uppercase">
-                                        Locked
-                                    </span>
-                                </h4>
-                                <p className="text-xs text-muted-foreground max-w-[280px]">
-                                    Coming soon! Drag-and-drop elements on a
-                                    blank canvas to build your own custom slide
-                                    layouts and save them to your layouts
-                                    library.
-                                </p>
-                            </div>
-                            <div className="border border-border/50 bg-secondary/15 rounded-md p-3 text-left w-full max-w-[280px] flex items-start gap-2.5">
-                                <Lock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                                <span className="text-[10px] text-muted-foreground leading-normal">
-                                    Phase 2 of Library will include the
-                                    drag-and-drop custom layout creator.
-                                </span>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 

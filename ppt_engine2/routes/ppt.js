@@ -1,9 +1,38 @@
 import { Router } from "express";
+import Joi from "joi";
 import { generatePPT, getStatus, getPPTById, getAllPPTs, deletePPT, updateTemplate, searchImages, searchIcons, streamPPT, convertPPT, editSlide } from "../controllers/ppt.js";
 import authMiddleware from "../middleware/authMiddleware.js";
+import { validateSchema } from "../middleware/validate.js";
+import { apiLimiter, generateLimiter } from "../middleware/rateLimiter.js";
 const router = Router();
 
-router.use(authMiddleware)
+const generateSchema = Joi.object({
+    prompt: Joi.string().max(800).required(),
+    tone: Joi.string().max(50).required(),
+    slidesCount: Joi.number().min(1).max(15).required(),
+    layoutStyle: Joi.string().max(50).optional(),
+    thinking: Joi.string().max(50).optional()
+});
+
+const streamSchema = Joi.object({
+    generating: Joi.string().optional(),
+    prompt: Joi.string().max(800).required(),
+    tone: Joi.string().max(50).required(),
+    slidesCount: Joi.number().min(1).max(15).required(),
+    layoutStyle: Joi.string().max(50).optional(),
+    thinking: Joi.string().max(50).optional()
+});
+
+const editSlideSchema = Joi.object({
+    slide: Joi.object().required(),
+    prompt: Joi.string().max(800).required(),
+    presentationTitle: Joi.string().allow('', null).optional(),
+    slideTitles: Joi.array().items(Joi.string().allow('', null)).optional(),
+    slideIndex: Joi.number().allow(null).optional()
+});
+
+router.use(authMiddleware);
+router.use(apiLimiter);
 // /api/ppt/ - POST: generates ppt content
 // /api/ppt/ - GET: gets all the ppt
 // /api/ppt/images/search - GET: searches matching images from Pixabay
@@ -15,12 +44,12 @@ router.use(authMiddleware)
 // /api/ppt/ppt_id - PATCH: Updates theme or slides array
 // /api/ppt/status/ppt_id: Gets status of that ppt_id
 
-router.post("/", generatePPT);
-router.post("/edit-slide", editSlide);
+router.post("/", generateLimiter, validateSchema(generateSchema, 'body'), generatePPT);
+router.post("/edit-slide", generateLimiter, validateSchema(editSlideSchema, 'body'), editSlide);
 router.get("/", getAllPPTs);
 router.get("/images/search", searchImages);
 router.get("/icons/search", searchIcons);
-router.get("/stream/:ppt_id", streamPPT);
+router.get("/stream/:ppt_id", generateLimiter, validateSchema(streamSchema, 'query'), streamPPT);
 router.post("/convert", convertPPT);
 router.get("/:ppt_id", getPPTById);
 router.delete("/:ppt_id", deletePPT);

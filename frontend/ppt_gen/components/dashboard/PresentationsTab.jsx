@@ -388,7 +388,6 @@ export default function PresentationsTab() {
                                                                     err
                                                                 );
                                                                 toast.error(
-                                                                    err.message ||
                                                                         "Failed to export slides to PPTX"
                                                                 );
                                                             } finally {
@@ -581,7 +580,6 @@ export default function PresentationsTab() {
                                                                     err
                                                                 );
                                                                 toast.error(
-                                                                    err.message ||
                                                                         "Failed to export slides to PPTX"
                                                                 );
                                                             } finally {

@@ -28,12 +28,9 @@ export default function GeneratePage() {
 
 function GeneratePageContent() {
     const { data: session, status } = useSession();
-    const { refreshHistory } = useHistory();
     const [isGenerating, setIsGenerating] = useState(false);
-    const [activePptId, setActivePptId] = useState(null);
     const [prompt, setPrompt] = useState("");
     const [layoutStyle, setLayoutStyle] = useState("Balanced");
-    const [tone, setTone] = useState("Professional");
     const [slides, setSlides] = useState(6);
     const [autoFocus, setAutoFocus] = useState(false);
     const [thinking, setThinking] = useState("standard");
@@ -64,17 +61,14 @@ function GeneratePageContent() {
         if (!prompt.trim()) return;
         setIsGenerating(true);
 
-        // Generate a random 10-character ID for the presentation
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let pptId = "";
         for (let i = 0; i < 10; i++) {
             pptId += chars.charAt(Math.floor(Math.random() * chars.length));
         }
 
-        // Immediately redirect to the editor view page, passing parameters in query string for SSE stream
         window.location.href = `/generate/${pptId}/view?generating=true` +
             `&prompt=${encodeURIComponent(prompt)}` +
-            `&tone=${encodeURIComponent(tone.toLowerCase())}` +
             `&slidesCount=${Number(slides)}` +
             `&layoutStyle=${encodeURIComponent(layoutStyle.toLowerCase())}` +
             `&thinking=${encodeURIComponent(thinking)}`;
@@ -92,8 +86,6 @@ function GeneratePageContent() {
                         handleGenerate={handleGenerate}
                         layoutStyle={layoutStyle}
                         setLayoutStyle={setLayoutStyle}
-                        tone={tone}
-                        setTone={setTone}
                         slides={slides}
                         setSlides={setSlides}
                         autoFocus={autoFocus}

@@ -682,7 +682,7 @@ export default function PPTSlidesViewerPage({ params }) {
             const streamUrl =
                 `${backendUrl.replace(/\/$/, "")}/api/ppt/stream/${pptId}?` +
                 `prompt=${encodeURIComponent(promptParam)}` +
-                `&tone=${encodeURIComponent(toneParam)}` +
+                `&tone=${encodeURIComponent("Suitable tone")}` +
                 `&slidesCount=${encodeURIComponent(slidesCountParam)}` +
                 `&layoutStyle=${encodeURIComponent(layoutStyleParam)}`;
 
@@ -887,7 +887,7 @@ export default function PPTSlidesViewerPage({ params }) {
             toast.success("PPTX downloaded successfully!");
         } catch (err) {
             console.error("Failed to convert slides to PowerPoint:", err);
-            toast.error(err.message || "Failed to export slides to PPTX");
+            toast.error( "Failed to export slides to PPTX");
         } finally {
             setIsExtractingPPTX(false);
             toast.dismiss(toastId);
@@ -1077,7 +1077,7 @@ export default function PPTSlidesViewerPage({ params }) {
             }
         } catch (err) {
             console.error("AI Slide Edit failed:", err);
-            toast.error(err.message || "Failed to edit slide with AI");
+            toast.error( "Failed to edit slide with AI");
         } finally {
             setIsEditWithAILoading(false);
             toast.dismiss(toastId);

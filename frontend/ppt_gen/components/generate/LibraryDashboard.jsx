@@ -123,7 +123,7 @@ export default function LibraryDashboard({
             }
         } catch (err) {
             console.error("Image upload failed:", err);
-            toast.error(err.message || "Failed to upload image.", {
+            toast.error("Failed to upload image.", {
                 id: toastId,
             });
         } finally {
@@ -173,10 +173,9 @@ export default function LibraryDashboard({
             }
         } catch (err) {
             console.error("Failed to save Pexels image:", err);
-            toast.error(
-                err.message || "Failed to save Pexels image to library.",
-                { id: toastId },
-            );
+            toast.error("Failed to save Pexels image to library.", {
+                id: toastId,
+            });
         }
     };
 
@@ -226,7 +225,7 @@ export default function LibraryDashboard({
             }
         } catch (err) {
             console.error("Icon upload failed:", err);
-            toast.error(err.message || "Failed to upload icon.", {
+            toast.error("Failed to upload icon.", {
                 id: toastId,
             });
         } finally {
@@ -266,7 +265,7 @@ export default function LibraryDashboard({
             }
         } catch (err) {
             console.error("Pasted SVG upload failed:", err);
-            toast.error(err.message || "Failed to save SVG icon.", {
+            toast.error("Failed to save SVG icon.", {
                 id: toastId,
             });
         } finally {
@@ -413,7 +412,6 @@ export default function LibraryDashboard({
                                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/90 via-black/45 to-black/15 transition-all duration-300 p-3.5 flex flex-col justify-between pointer-events-none rounded-xl z-20">
                                                 {/* Top action row */}
                                                 <div className="flex justify-end gap-2 pointer-events-auto">
-                                                    
                                                     <button
                                                         onClick={(e) =>
                                                             handleDeleteImage(
@@ -692,13 +690,16 @@ export default function LibraryDashboard({
                         </div>
 
                         <div className="flex-grow flex flex-col min-h-0 gap-6">
-                            <Dialog open={showPasteArea} onOpenChange={(open) => {
-                                setShowPasteArea(open);
-                                if (!open) {
-                                    setPastedSvg("");
-                                    setPastedIconName("");
-                                }
-                            }}>
+                            <Dialog
+                                open={showPasteArea}
+                                onOpenChange={(open) => {
+                                    setShowPasteArea(open);
+                                    if (!open) {
+                                        setPastedSvg("");
+                                        setPastedIconName("");
+                                    }
+                                }}
+                            >
                                 <DialogContent className="max-w-md">
                                     <DialogHeader>
                                         <DialogTitle className="flex items-center gap-2">
@@ -706,7 +707,8 @@ export default function LibraryDashboard({
                                             Paste Raw SVG Code
                                         </DialogTitle>
                                         <DialogDescription className="text-xs">
-                                            Paste your custom SVG icon code below to add it to your library.
+                                            Paste your custom SVG icon code
+                                            below to add it to your library.
                                         </DialogDescription>
                                     </DialogHeader>
 
@@ -743,7 +745,9 @@ export default function LibraryDashboard({
                                                     rows={6}
                                                     value={pastedSvg}
                                                     onChange={(e) =>
-                                                        setPastedSvg(e.target.value)
+                                                        setPastedSvg(
+                                                            e.target.value,
+                                                        )
                                                     }
                                                     className="w-full p-3 text-xs border border-border bg-background rounded-md font-mono focus:outline-none focus:ring-1 focus:ring-primary/40 resize-y"
                                                 />

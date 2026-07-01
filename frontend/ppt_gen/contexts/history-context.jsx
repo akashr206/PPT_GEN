@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useRef,
+} from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -40,7 +46,7 @@ export function HistoryProvider({ children }) {
             }
         } catch (err) {
             console.error("Failed to fetch history:", err);
-            toast.error(err.message || "Failed to load presentations");
+            toast.error("Failed to load presentations");
         } finally {
             if (isMounted.current) {
                 setIsLoading(false);
@@ -63,7 +69,7 @@ export function HistoryProvider({ children }) {
             return true;
         } catch (err) {
             console.error("Failed to delete presentation:", err);
-            toast.error(err.message || "Failed to delete presentation");
+            toast.error("Failed to delete presentation");
             return false;
         }
     };

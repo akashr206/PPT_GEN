@@ -33,7 +33,7 @@ export function useThemes() {
             return res?.data || res;
         } catch (err) {
             console.error("Failed to create theme:", err);
-            toast.error(err.message || "Failed to save theme", { id: toastId });
+            toast.error("Failed to save theme", { id: toastId });
             throw err;
         }
     };
@@ -47,7 +47,7 @@ export function useThemes() {
             return res?.data || res;
         } catch (err) {
             console.error("Failed to update theme:", err);
-            toast.error(err.message || "Failed to update theme", { id: toastId });
+            toast.error("Failed to update theme", { id: toastId });
             throw err;
         }
     };
@@ -60,7 +60,7 @@ export function useThemes() {
             await fetchThemes();
         } catch (err) {
             console.error("Failed to delete theme:", err);
-            toast.error(err.message || "Failed to delete theme", { id: toastId });
+            toast.error("Failed to delete theme", { id: toastId });
             throw err;
         }
     };
