@@ -18,6 +18,8 @@ import {
     Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useThemes } from "@/hooks/use-themes";
+import { useMediaStore } from "@/hooks/use-media-store";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
     DropdownMenu,
@@ -136,15 +138,15 @@ export default function PPTSlidesViewerPage({ params }) {
     const [imageEditContext, setImageEditContext] = useState(null);
     const [libraryIconCallback, setLibraryIconCallback] = useState(null);
 
+    const searchImagesStore = useMediaStore((state) => state.searchImages);
+
     const fetchImage = useCallback(async (key, query) => {
         setImageLoading((prev) => ({ ...prev, [key]: true }));
         let finalImageUrl = null;
         try {
-            const res = await api.get(`/api/ppt/images/search`, {
-                params: { description: query },
-            });
-            if (res?.success && res.data && res.data.length > 0) {
-                finalImageUrl = res.data[0].imageURL;
+            const data = await searchImagesStore(query);
+            if (data && data.length > 0) {
+                finalImageUrl = data[0].imageURL;
                 setFetchedImages((prev) => ({ ...prev, [key]: finalImageUrl }));
             } else {
                 throw new Error("No images found in search results");
@@ -158,6 +160,7 @@ export default function PPTSlidesViewerPage({ params }) {
             setImageLoading((prev) => ({ ...prev, [key]: false }));
 
             if (finalImageUrl) {
+                preLoadImage(finalImageUrl);
                 const keyParts = key.split("_");
                 const sIndex = parseInt(keyParts[1], 10);
 

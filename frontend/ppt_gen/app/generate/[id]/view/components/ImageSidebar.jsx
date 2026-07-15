@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { useMediaStore } from "@/hooks/use-media-store";
 
 export default function ImageSidebar({
     isOpen,
@@ -14,6 +15,8 @@ export default function ImageSidebar({
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+    
+    const searchImagesStore = useMediaStore(state => state.searchImages);
 
     const handleSearch = useCallback(async (query) => {
         if (!query || query.trim() === "") {
@@ -22,14 +25,8 @@ export default function ImageSidebar({
         }
         setIsSearching(true);
         try {
-            const res = await api.get(`/api/ppt/images/search`, {
-                params: { q: query },
-            });
-            if (res?.success && res.data) {
-                setSearchResults(res.data);
-            } else {
-                setSearchResults([]);
-            }
+            const data = await searchImagesStore(query);
+            setSearchResults(data);
         } catch (err) {
             console.error("Failed to search images for sidebar:", err);
             setSearchResults([]);
@@ -37,7 +34,7 @@ export default function ImageSidebar({
         } finally {
             setIsSearching(false);
         }
-    }, []);
+    }, [searchImagesStore]);
 
     useEffect(() => {
         if (isOpen && imageEditContext) {

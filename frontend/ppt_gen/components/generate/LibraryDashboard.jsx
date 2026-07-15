@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import * as phosphorIcons from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { useThemes } from "@/hooks/use-themes";
+import { useMediaStore } from "@/hooks/use-media-store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -49,8 +51,13 @@ export default function LibraryDashboard({
     const [pexelsQuery, setPexelsQuery] = useState("");
     const [pexelsResults, setPexResults] = useState([]);
     const [isSearchingPexels, setIsSearchingPexels] = useState(false);
-
-    const [userImages, setUserImages] = useState([]);
+    
+    const searchImagesStore = useMediaStore(state => state.searchImages);
+    const userImages = useMediaStore(state => state.userImages);
+    const fetchUserImagesStore = useMediaStore(state => state.fetchUserImages);
+    const userIcons = useMediaStore(state => state.userIcons);
+    const fetchUserIconsStore = useMediaStore(state => state.fetchUserIcons);
+    
     const [isLoadingImages, setIsLoadingImages] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [copiedUrl, setCopiedUrl] = useState(null);
@@ -58,42 +65,37 @@ export default function LibraryDashboard({
 
     // Icons States
     const [systemIconQuery, setSystemIconQuery] = useState("");
-    const [userIcons, setUserIcons] = useState([]);
     const [isLoadingIcons, setIsLoadingIcons] = useState(false);
     const [isUploadingIcon, setIsUploadingIcon] = useState(false);
     const [pastedSvg, setPastedSvg] = useState("");
     const [pastedIconName, setPastedIconName] = useState("");
     const [showPasteArea, setShowPasteArea] = useState(false);
 
-    const fetchUserImages = useCallback(async () => {
+    // Fetch User Images
+    const fetchUserImages = useCallback(async (force = false) => {
         setIsLoadingImages(true);
         try {
-            const res = await api.get("/api/library/images");
-            if (res?.success && res.data) {
-                setUserImages(res.data.images || []);
-            }
+            await fetchUserImagesStore(force);
         } catch (err) {
-            console.error("Failed to load user images:", err);
-            setUserImages([]);
+            console.error("Failed to fetch user images:", err);
+            toast.error("Failed to load your images.");
         } finally {
             setIsLoadingImages(false);
         }
-    }, []);
+    }, [fetchUserImagesStore]);
 
-    const fetchUserIcons = useCallback(async () => {
+    // Fetch User Icons
+    const fetchUserIcons = useCallback(async (force = false) => {
         setIsLoadingIcons(true);
         try {
-            const res = await api.get("/api/library/icons");
-            if (res?.success && res.data) {
-                setUserIcons(res.data || []);
-            }
+            await fetchUserIconsStore(force);
         } catch (err) {
-            console.error("Failed to load user icons:", err);
-            setUserIcons([]);
+            console.error("Failed to fetch user icons:", err);
+            toast.error("Failed to load your icons.");
         } finally {
             setIsLoadingIcons(false);
         }
-    }, []);
+    }, [fetchUserIconsStore]);
 
     useEffect(() => {
         if (activeTab === "images") {
@@ -117,7 +119,7 @@ export default function LibraryDashboard({
             const res = await api.post("/api/library/images/upload", formData);
             if (res?.success) {
                 toast.success("Image uploaded successfully!", { id: toastId });
-                fetchUserImages();
+                fetchUserImages(true);
             } else {
                 throw new Error(res?.message || "Upload failed");
             }
@@ -140,7 +142,7 @@ export default function LibraryDashboard({
         try {
             await api.delete(`/api/library/images/${id}`);
             toast.success("Image deleted successfully!", { id: toastId });
-            fetchUserImages();
+            fetchUserImages(true);
             if (previewImage?.id === id) {
                 setPreviewImage(null);
             }
@@ -167,7 +169,7 @@ export default function LibraryDashboard({
                 toast.success("Image saved to library uploads successfully!", {
                     id: toastId,
                 });
-                fetchUserImages();
+                fetchUserImages(true);
             } else {
                 throw new Error(res?.message || "Failed to save image");
             }
@@ -187,14 +189,8 @@ export default function LibraryDashboard({
         }
         setIsSearchingPexels(true);
         try {
-            const res = await api.get(`/api/ppt/images/search`, {
-                params: { q: query },
-            });
-            if (res?.success && res.data) {
-                setPexResults(res.data);
-            } else {
-                setPexResults([]);
-            }
+            const data = await searchImagesStore(query);
+            setPexResults(data);
         } catch (err) {
             console.error("Failed to search Pexels:", err);
             setPexResults([]);
@@ -202,7 +198,7 @@ export default function LibraryDashboard({
         } finally {
             setIsSearchingPexels(false);
         }
-    }, []);
+    }, [searchImagesStore]);
 
     const handleIconUpload = async (e) => {
         const file = e.target.files?.[0];
@@ -219,7 +215,7 @@ export default function LibraryDashboard({
             const res = await api.post("/api/library/icons/upload", formData);
             if (res?.success) {
                 toast.success("Icon uploaded successfully!", { id: toastId });
-                fetchUserIcons();
+                fetchUserIcons(true);
             } else {
                 throw new Error(res?.message || "Upload failed");
             }
@@ -255,11 +251,11 @@ export default function LibraryDashboard({
 
             const res = await api.post("/api/library/icons/upload", formData);
             if (res?.success) {
-                toast.success("SVG icon saved successfully!", { id: toastId });
+                toast.success("Custom SVG saved to library!", { id: toastId });
                 setPastedSvg("");
                 setPastedIconName("");
                 setShowPasteArea(false);
-                fetchUserIcons();
+                fetchUserIcons(true);
             } else {
                 throw new Error(res?.message || "Upload failed");
             }
@@ -1010,19 +1006,11 @@ export default function LibraryDashboard({
                                 </span>
                             </h3>
                             <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                                Coming soon! Arrange headers, layout grids,
-                                image placements, and charts inside a
-                                drag-and-drop slide template editor to build
+                                Coming soon! A slide template editor to build
                                 your custom slide structural templates.
                             </p>
                         </div>
-                        <div className="border border-border/50 bg-secondary/15 rounded-md p-3.5 text-left w-full max-w-sm flex items-start gap-2.5">
-                            <Lock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                            <span className="text-[11px] text-muted-foreground leading-normal font-light">
-                                Phase 2 Library rollout includes the layout
-                                builder and canvas layout compiler.
-                            </span>
-                        </div>
+                       
                     </motion.div>
                 )}
             </AnimatePresence>

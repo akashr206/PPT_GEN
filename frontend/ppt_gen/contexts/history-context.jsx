@@ -14,8 +14,6 @@ import api from "@/lib/api";
 
 const HistoryContext = createContext();
 
-const MOCK_HISTORY = []; // Kept empty or unused as we use the real API
-
 export function HistoryProvider({ children }) {
     const { status } = useSession();
     const [history, setHistory] = useState([]);
