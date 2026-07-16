@@ -147,9 +147,27 @@ export default function PresentationsTab() {
 
     return (
         <>
-            {viewMode === "list" ? (
-                /* Sleek List View */
-                <div className="w-full flex flex-col border border-border/50 rounded-lg bg-card/25 dark:bg-zinc-950/10 backdrop-blur-md overflow-hidden shadow-xs">
+            {!isLoading && history.length === 0 ? (
+                <div className="w-full flex flex-col items-center justify-center py-24 text-center px-4 border border-border/50 rounded-lg bg-card/25 dark:bg-zinc-950/10 backdrop-blur-md shadow-xs">
+                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                        <PresentationIcon className="w-10 h-10 text-primary" />
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">Create your first presentation</h2>
+                    <p className="text-sm md:text-base text-muted-foreground mb-8 max-w-md">
+                        Get started by entering a topic and letting our AI generate a complete, professional slide deck for you in seconds.
+                    </p>
+                    <Link href="/generate">
+                        <Button className="cursor-pointer gap-2 rounded-full px-8 shadow-md hover:shadow-lg transition-all hover:scale-105" size="lg">
+                            <Plus size={18} />
+                            <span className="font-semibold">Create Presentation</span>
+                        </Button>
+                    </Link>
+                </div>
+            ) : (
+                <>
+                    {viewMode === "list" ? (
+                        /* Sleek List View */
+                        <div className="w-full flex flex-col border border-border/50 rounded-lg bg-card/25 dark:bg-zinc-950/10 backdrop-blur-md overflow-hidden shadow-xs">
                     {/* Table Headers */}
                     <div className="grid grid-cols-12 px-6 py-3 border-b border-border/40 text-[10px] font-bold text-muted-foreground/85 tracking-wider uppercase bg-muted/10 select-none">
                         <div className="col-span-6 md:col-span-5 flex items-center">
@@ -640,6 +658,8 @@ export default function PresentationsTab() {
                             </motion.div>
                         ))}
                 </div>
+            )}
+            </>
             )}
 
             <Dialog

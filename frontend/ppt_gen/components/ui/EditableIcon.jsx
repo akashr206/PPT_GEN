@@ -130,7 +130,21 @@ export function EditableIcon({
             )}
 
             <div
-                className={`flex items-center justify-center relative transition-all rounded-[0.4cqw] p-[0.3cqw] ${iconClassName} ${!readOnly ? "group-hover/icon:outline group-hover/icon:outline-[0.15cqw] group-hover/icon:outline-blue-500/80 group-hover/icon:outline-offset-[0.2cqw] group-data-[menu-open=true]/item:!outline-none" : ""}`}
+                onClick={(e) => {
+                    if (readOnly) return;
+                    e.stopPropagation();
+                    const event = new CustomEvent(
+                        "trigger-open-library",
+                        {
+                            detail: {
+                                tab: "icons",
+                                onSelectIcon: onChange,
+                            },
+                        },
+                    );
+                    window.dispatchEvent(event);
+                }}
+                className={`cursor-pointer flex items-center justify-center relative transition-all rounded-[0.4cqw] p-[0.3cqw] ${iconClassName} ${!readOnly ? "group-hover/icon:outline group-hover/icon:outline-[0.15cqw] group-hover/icon:outline-blue-500/80 group-hover/icon:outline-offset-[0.2cqw] group-data-[menu-open=true]/item:!outline-none" : ""}`}
             >
                 {isCustomSvg ? (
                     <div 

@@ -76,197 +76,64 @@
             "description": "Sophisticated obsidian black theme with elegant gold, bronze details and serif typography."
         }
     ],
+    "slideTypes": [
+        {
+            "id": "normal",
+            "name": "Standard Slide",
+            "description": "Standard slide where blocks stack vertically."
+        },
+        {
+            "id": "split-left-image",
+            "name": "Split Left Image",
+            "description": "Left image, right content area. Requires 'image' string and 'imageSize' number (percentage 25-75)."
+        },
+        {
+            "id": "split-right-image",
+            "name": "Split Right Image",
+            "description": "Right image, left content area. Requires 'image' string and 'imageSize' number (percentage 25-75)."
+        },
+        {
+            "id": "top-image-banner",
+            "name": "Top Image Banner",
+            "description": "Top image banner. Requires 'image' string and 'imageSize' number (height percentage 25-75)."
+        },
+        {
+            "id": "full-image",
+            "name": "Full Image",
+            "description": "Full bleed background image. NO blocks allowed in this slide type."
+        },
+        {
+            "id": "title",
+            "name": "Title Slide",
+            "description": "Dedicated title slide format."
+        },
+        {
+            "id": "agenda",
+            "name": "Agenda Slide",
+            "description": "Dedicated agenda format."
+        },
+        {
+            "id": "closing",
+            "name": "Closing Slide",
+            "description": "Dedicated closing format."
+        }
+    ],
     "layoutCategories": {
-        "title": {
-            "name": "Title Layouts",
-            "description": "Layouts designed for opening slides, section breaks, and presentations headers.",
-            "fields": [
-                "title",
-                "subtitle",
-                "presenter",
-                "image",
-                "imageDescription"
-            ],
-            "types": [
-                {
-                    "id": "asymmetric",
-                    "name": "Asymmetric Focus",
-                    "description": "An offset layout designed for title slides, featuring left-aligned content and a geometric pattern focus card. Best for formal presentations, pitch decks, and corporate portfolios that want to convey a modern, structured, and professional look."
-                },
-                {
-                    "id": "split",
-                    "name": "Split Title",
-                    "description": "Split column/row layout designed for title slides. Best for visual-heavy opening slides, portfolio introductions, and keynote presentations where you want to balance bold typography with key introductory info."
-                },
-                {
-                    "id": "image",
-                    "name": "Image Title",
-                    "description": "An image-centric layout for title slides, featuring a prominent visual frame, outline borders, and decorative tech SVG corners. Best for highly creative keynote titles, launch presentations, and media decks that require a strong visual header."
-                }
-            ]
-        },
-        "agenda": {
-            "name": "Agenda & Table of Contents",
-            "description": "Layouts designed for outlining the sections or topics of a presentation.",
+        "text": {
+            "name": "Plain Text",
+            "description": "Standard unstructured text block without heavy styling or bullets.",
             "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description"],
+            "itemFields": ["description"],
             "types": [
                 {
-                    "id": "split",
-                    "name": "Split Agenda",
-                    "description": "A split layout featuring a prominent left-side title block and a vertical list of numbered topics on the right. Best for structuring presentation roadmaps."
-                },
-                {
-                    "id": "list",
-                    "name": "Agenda Timeline List",
-                    "description": "An elegant vertical timeline list with a connecting line and large chapter badges. Best for chronological outlines."
+                    "id": "plain",
+                    "name": "Plain Text",
+                    "description": "A clean, simple text paragraph layout for long-form descriptions or quotes."
                 }
             ],
             "constraints": {
-                "maxItems": 8,
-                "recommendedItems": "3 to 6"
-            }
-        },
-        "icons": {
-            "name": "Icon Layouts",
-            "description": "Visual layouts featuring prominent icons to represent concepts.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description", "iconKeywords"],
-            "types": [
-                {
-                    "id": "grid",
-                    "name": "Icons Grid",
-                    "description": "A structured grid of items prominently featuring a large icon for each. Best for visualizing abstract features, key service pillars, or high-level business capabilities using thematic visual metaphors."
-                }
-            ],
-            "constraints": {
-                "maxItems": 8,
-                "recommendedItems": "3 to 6",
-                "other": "iconKeywords field is an array of strings for icon search or generation (3 - 4) keywords"
-            }
-        },
-        "images": {
-            "name": "Image Layouts",
-            "description": "Visual layouts incorporating prominent images as central elements.",
-            "fields": ["title", "subtitle", "image", "items"],
-            "itemFields": ["header", "description", "imageDescription"],
-            "types": [
-                {
-                    "id": "split",
-                    "name": "Image Split",
-                    "description": "A customizable 50/50 split section layout with toggleable left/right image alignment and multiple listing styles (Cards, Plain, Accent, Bullet, Numbered). Best for product spotlight slides, company story introductions, or matching an illustrative image with a list of points."
-                },
-                {
-                    "id": "grid",
-                    "name": "Image Grid",
-                    "description": "A grid of cards where each item features its own image. Best for team bio slides, product gallery showcasing, case study grids, or visual portfolios where every item requires its own visual representation."
-                }
-            ],
-            "constraints": {
-                "maxItems": 6,
-                "recommendedItems": "2 to 4",
-                "other": "imageDescription field is a string for image search or generation"
-            }
-        },
-        "stats": {
-            "name": "Key Metrics & Statistics",
-            "description": "Large text indicators highlighting critical figures or metrics.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description"],
-            "types": [
-                {
-                    "id": "grid",
-                    "name": "Stats Grid",
-                    "description": "Grid display of big numbers and their descriptions. Automatically switches layout configurations depending on item count. Best for dashboard summaries, quarterly reports, and showing multiple performance KPIs at once."
-                },
-                {
-                    "id": "callout",
-                    "name": "Large Stat Callout",
-                    "description": "Emphasizes a single massive key metric with a detailed text callout description. Best for highlighting a single monumental breakthrough metric, such as total sales revenue, user milestones, or key survey percentages."
-                }
-            ],
-            "constraints": {
-                "maxItems": 6,
-                "recommendedItems": "2 to 6"
-            }
-        },
-        "table": {
-            "name": "Tables & Comparisons",
-            "description": "Layouts designed for showing structured comparison or data tables with flexible columns and rows.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description", "cells"],
-            "types": [
-                {
-                    "id": "striped",
-                    "name": "Striped Rows",
-                    "description": "A table layout with alternating colored row backgrounds, a solid primary accent header row, and flexible columns. The first row in items represents the column headers (e.g., items[0].cells). Subsequent items are table body rows. Each cell is an element in the item's cells array. Best for feature comparison matrices, pricing plans, and data logs."
-                },
-                {
-                    "id": "bordered",
-                    "name": "Bordered Grid",
-                    "description": "A table layout with clean borders around every cell and a card-colored header row. The first row in items represents the column headers (e.g., items[0].cells). Subsequent items are table body rows. Each cell is an element in the item's cells array. Best for structured checklists, specification grids, and tabular metrics."
-                }
-            ],
-            "constraints": {
-                "maxItems": 8,
-                "recommendedItems": "3 to 6",
-                "other": "Each row is represented by an item in the items array. The columns/cells for that row are stored in the item's 'cells' array of strings. The first item in the items array (items[0]) represents the table headers. When generating, ensure all items in the items array contain the same number of elements in their cells array (e.g., cells.length matches column count)."
-            }
-        },
-
-        "timelines": {
-            "name": "Timelines",
-            "description": "Display events, steps, or progression sequences chronologically.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description", "iconKeywords"],
-            "types": [
-                {
-                    "id": "horizontal",
-                    "name": "Horizontal Curved Timeline",
-                    "description": "Steps placed horizontally on a curve line, scaling from 2 to 6 items. Best for detailing chronological project roadmaps, historical progression steps, and multi-phase release plans. (odd number of items is preffered)"
-                },
-                {
-                    "id": "chevron",
-                    "name": "Horizontal Chevron Timeline",
-                    "description": "A horizontal timeline using chevron boxes and alternating top/bottom circle icons and description boxes."
-                }
-            ],
-            "constraints": {
-                "maxItems": 10,
-                "recommendedItems": "3 to 6",
-                "other": "iconKeywords field is an array of strings for icon search or generation (3 - 4 keywords) and is only required for the chevron timeline layout."
-            }
-        },
-        "cards": {
-            "name": "Card Layouts",
-            "description": "Grid or block cards to visually separate and present group data.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description"],
-            "types": [
-                {
-                    "id": "simple",
-                    "name": "Simple Cards",
-                    "description": "Clean border-based card grid for showcasing features or items. Best for cataloging product categories, highlighting main service lines, or presenting standard sets of information side-by-side cleanly."
-                },
-                {
-                    "id": "leftAccent",
-                    "name": "Left Accent Cards",
-                    "description": "Cards with colored left-border accent indicators. Best for highlighting categorizations, priority tasks, or warning details where specific colored border hints draw the eye to individual card states."
-                },
-                {
-                    "id": "numbered",
-                    "name": "Numbered Cards",
-                    "description": "Cards displaying an auto-incrementing index number on the left. Best for illustrating sequential processes, milestone achievements, or prioritized lists that benefit from card structures with clear numeric flow."
-                },
-                {
-                    "id": "filled",
-                    "name": "Filled Cards",
-                    "description": "Cards styled with a light alternative theme background. Best for emphasizing featured articles, premium plans, or a group of related high-priority highlights that need to pop out from the slide base theme."
-                }
-            ],
-            "constraints": {
-                "maxItems": 6,
-                "recommendedItems": "2 to 6"
+                "maxItems": 4,
+                "recommendedItems": "1 to 2"
             }
         },
         "bullets": {
@@ -276,24 +143,14 @@
             "itemFields": ["header", "description"],
             "types": [
                 {
-                    "id": "standard",
-                    "name": "Standard List",
-                    "description": "A classic vertical list of items, splitting into a 2-column layout when there are more than 4 items. Best for general text outlines, comprehensive summaries, and lists of detailed takeaways that require structured hierarchy without visual clutter."
-                },
-                {
-                    "id": "big",
-                    "name": "Big Bullets",
-                    "description": "Bold text bullets with larger typography for emphasizing key points. Best for high-impact key takeaways, core values, or brief statements where each item needs to stand out individually and grab immediate attention."
+                    "id": "simple",
+                    "name": "Simple List",
+                    "description": "A classic vertical list of items, splitting into a 2-column layout when there are more than 4 items. Best for general text outlines and comprehensive summaries."
                 },
                 {
                     "id": "grid",
                     "name": "Bullets Grid",
-                    "description": "A structured grid of bullet items with headers and descriptions. Best for comparisons, product feature breakdowns, or scanning multiple parallel points at a glance without reading sequentially."
-                },
-                {
-                    "id": "numbered",
-                    "name": "Numbered List",
-                    "description": "A vertical list of items with giant index numbers and a primary accent bar. Best for step-by-step guides, procedural instructions, rankings, and linear sequences where the order of items is critical."
+                    "description": "A structured grid of bullet items with headers and descriptions. Best for comparisons or scanning multiple parallel points at a glance."
                 }
             ],
             "constraints": {
@@ -301,31 +158,70 @@
                 "recommendedItems": "3 to 6"
             }
         },
-        "closing": {
-            "name": "Closing Slides",
-            "description": "Layouts designed for closing presentations, including Q&A, Contact, Call-to-Action, and Thank You slides.",
-            "fields": ["title", "subtitle", "presenter", "items"],
+        "cards": {
+            "name": "Card Layouts",
+            "description": "Grid or block cards to visually separate and present group data.",
+            "fields": ["title", "subtitle", "items"],
             "itemFields": ["header", "description"],
             "types": [
                 {
-                    "id": "thankyou",
-                    "name": "Thank You",
-                    "description": "A classic outro slide layout saying thank you with presenter details. Best for concluding any formal slide deck, leaving a polite thank you note, and displaying the presenter's signature or credentials."
+                    "id": "basic",
+                    "name": "Basic Cards",
+                    "description": "Clean border-based card grid for showcasing features or items side-by-side cleanly."
                 },
                 {
-                    "id": "qa",
-                    "name": "Q&A Outro",
-                    "description": "A clean layout with visual focus on 'Questions?' or Q&A session. Best for ending presentations on an interactive note, inviting the audience to speak, and keeping the screen focused during open discussion."
-                },
-                {
-                    "id": "contact",
-                    "name": "Contact Info",
-                    "description": "Displays social handles, emails, and phone numbers in a structured layout. Best for sales pitches, portfolio decks, and networking sessions where the primary goal is to share contact details and social media channels."
+                    "id": "image",
+                    "name": "Image Cards",
+                    "description": "Cards with a top placeholder area. Best for highlighting categorizations that need visual representation."
                 }
             ],
             "constraints": {
                 "maxItems": 6,
-                "recommendedItems": "3 to 4"
+                "recommendedItems": "2 to 4"
+            }
+        },
+        "icons": {
+            "name": "Icon Layouts",
+            "description": "Visual layouts featuring prominent icons to represent concepts.",
+            "fields": ["title", "subtitle", "items"],
+            "itemFields": ["header", "description", "iconKeywords"],
+            "types": [
+                {
+                    "id": "list",
+                    "name": "Icons List",
+                    "description": "A vertical list of items prominently featuring an icon on the left. Best for detailing specific features or steps."
+                },
+                {
+                    "id": "grid",
+                    "name": "Icons Grid",
+                    "description": "A structured grid of items prominently featuring a large icon for each. Best for visualizing abstract features or high-level business capabilities."
+                }
+            ],
+            "constraints": {
+                "maxItems": 8,
+                "recommendedItems": "3 to 6"
+            }
+        },
+        "stats": {
+            "name": "Key Metrics & Statistics",
+            "description": "Large text indicators highlighting critical figures or metrics.",
+            "fields": ["title", "subtitle", "items"],
+            "itemFields": ["header", "description"],
+            "types": [
+                {
+                    "id": "highlight",
+                    "name": "Stat Highlight",
+                    "description": "Emphasizes a single massive key metric with a detailed text callout description. Best for highlighting a single monumental breakthrough metric."
+                },
+                {
+                    "id": "grid",
+                    "name": "Stats Grid",
+                    "description": "Grid display of big numbers and their descriptions. Best for dashboard summaries and showing multiple performance KPIs at once."
+                }
+            ],
+            "constraints": {
+                "maxItems": 6,
+                "recommendedItems": "2 to 6"
             }
         }
     }

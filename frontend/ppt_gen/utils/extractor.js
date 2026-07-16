@@ -428,14 +428,17 @@ export async function extractSlideData(slideWrapper, slideIndex = 0) {
 
     const borderRadius = style.borderRadius;
     const hasBorderRadius = borderRadius && borderRadius !== '0px' && borderRadius !== '0';
+    const objectFit = style.objectFit;
+    const isBgCover = style.backgroundSize === 'cover';
+    const shouldCrop = (tagName === 'img' && src && objectFit === 'cover') || (bgImage && isBgCover);
 
-    if (hasBorderRadius) {
+    if (hasBorderRadius || shouldCrop) {
       if (tagName === 'img' && src) {
-        finalSrc = await applyBorderRadiusToImage(src, width, height, borderRadius);
+        finalSrc = await applyImageFormatting(src, width, height, borderRadius, objectFit);
       } else if (bgImage) {
-        finalBgImage = await applyBorderRadiusToImage(bgImage, width, height, borderRadius);
+        finalBgImage = await applyImageFormatting(bgImage, width, height, borderRadius, isBgCover ? 'cover' : 'fill');
       } else if (isSvg && rasterizedBase64) {
-        finalRasterizedBase64 = await applyBorderRadiusToImage(rasterizedBase64, width, height, borderRadius);
+        finalRasterizedBase64 = await applyImageFormatting(rasterizedBase64, width, height, borderRadius, 'fill');
       }
     }
 
@@ -516,11 +519,14 @@ function getCumulativeOpacity(el, slideWrapper) {
 }
 
 /**
- * Applies border radius clipping to an image and returns a base64 PNG data URL.
+ * Applies border radius clipping and object-fit: cover cropping to an image.
  */
-async function applyBorderRadiusToImage(src, width, height, borderRadiusStyle) {
+async function applyImageFormatting(src, width, height, borderRadiusStyle, objectFit) {
   return new Promise((resolve) => {
-    if (!borderRadiusStyle || borderRadiusStyle === '0px' || borderRadiusStyle === '0') {
+    const hasBorderRadius = borderRadiusStyle && borderRadiusStyle !== '0px' && borderRadiusStyle !== '0';
+    const needsCrop = objectFit === 'cover';
+    
+    if (!hasBorderRadius && !needsCrop) {
       return resolve(src);
     }
 
@@ -539,36 +545,49 @@ async function applyBorderRadiusToImage(src, width, height, borderRadiusStyle) {
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        // Parse border radius
-        let radius = 0;
-        const cleanRadius = borderRadiusStyle.trim().toLowerCase();
-        if (cleanRadius.endsWith('%')) {
-          const pct = parseFloat(cleanRadius) / 100;
-          radius = Math.min(canvasW, canvasH) * pct;
-        } else {
-          const pxVal = parseFloat(cleanRadius) || 0;
-          radius = pxVal * scale;
+        // Apply border radius clip path
+        if (hasBorderRadius) {
+          let radius = 0;
+          const cleanRadius = borderRadiusStyle.trim().toLowerCase();
+          if (cleanRadius.endsWith('%')) {
+            const pct = parseFloat(cleanRadius) / 100;
+            radius = Math.min(canvasW, canvasH) * pct;
+          } else {
+            const pxVal = parseFloat(cleanRadius) || 0;
+            radius = pxVal * scale;
+          }
+          radius = Math.min(radius, Math.min(canvasW, canvasH) / 2);
+
+          ctx.beginPath();
+          ctx.moveTo(radius, 0);
+          ctx.lineTo(canvasW - radius, 0);
+          ctx.quadraticCurveTo(canvasW, 0, canvasW, radius);
+          ctx.lineTo(canvasW, canvasH - radius);
+          ctx.quadraticCurveTo(canvasW, canvasH, canvasW - radius, canvasH);
+          ctx.lineTo(radius, canvasH);
+          ctx.quadraticCurveTo(0, canvasH, 0, canvasH - radius);
+          ctx.lineTo(0, radius);
+          ctx.quadraticCurveTo(0, 0, radius, 0);
+          ctx.closePath();
+          ctx.clip();
         }
 
-        // Limit radius to half of shorter side
-        radius = Math.min(radius, Math.min(canvasW, canvasH) / 2);
-
-        // Draw rounded rectangle clip path
-        ctx.beginPath();
-        ctx.moveTo(radius, 0);
-        ctx.lineTo(canvasW - radius, 0);
-        ctx.quadraticCurveTo(canvasW, 0, canvasW, radius);
-        ctx.lineTo(canvasW, canvasH - radius);
-        ctx.quadraticCurveTo(canvasW, canvasH, canvasW - radius, canvasH);
-        ctx.lineTo(radius, canvasH);
-        ctx.quadraticCurveTo(0, canvasH, 0, canvasH - radius);
-        ctx.lineTo(0, radius);
-        ctx.quadraticCurveTo(0, 0, radius, 0);
-        ctx.closePath();
-        ctx.clip();
-
-        // Draw the image scaled to the canvas
-        ctx.drawImage(img, 0, 0, canvasW, canvasH);
+        // Draw the image
+        if (needsCrop) {
+          const imgW = img.width;
+          const imgH = img.height;
+          const ratio = Math.max(canvasW / imgW, canvasH / imgH);
+          
+          const newImgW = imgW * ratio;
+          const newImgH = imgH * ratio;
+          
+          const sx = (canvasW - newImgW) / 2;
+          const sy = (canvasH - newImgH) / 2;
+          
+          ctx.drawImage(img, sx, sy, newImgW, newImgH);
+        } else {
+          ctx.drawImage(img, 0, 0, canvasW, canvasH);
+        }
 
         const pngBase64 = canvas.toDataURL('image/png');
         resolve(pngBase64);

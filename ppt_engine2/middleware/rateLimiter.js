@@ -1,14 +1,19 @@
 import rateLimit from 'express-rate-limit';
 import { sendError } from '../utils/response.js';
 
+const isDev = process.env.NODE_ENV === 'development';
+
+// In development, use a pass-through middleware so rate limits never fire.
+const noopLimiter = (req, res, next) => next();
+
 const keyGenerator = (req) => {
     return req.user?.id || req['ip'];
 };
 
 // Strict rate limiter for expensive AI generation endpoints
-export const generateLimiter = rateLimit({
+export const generateLimiter = isDev ? noopLimiter : rateLimit({
     windowMs: 5 * 60 * 1000, // 5 minutes
-    max: 10, // limit each user/IP to 10 generation requests per 15 minutes
+    max: 10, // limit each user/IP to 10 generation requests per 5 minutes
     keyGenerator: keyGenerator,
     handler: (req, res, next, options) => {
         const resetTime = req.rateLimit.resetTime;
@@ -19,16 +24,16 @@ export const generateLimiter = rateLimit({
             const secs = Math.ceil((remainingMs % 60000) / 1000);
             timeString = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
         }
-        return sendError(res, `Too many requests. Please try again in ${timeString}.`,null, 429);
+        return sendError(res, `Too many requests. Please try again in ${timeString}.`, null, 429);
     },
-    standardHeaders: true, 
+    standardHeaders: true,
     legacyHeaders: false,
     validate: false
 });
 
 // General rate limiter for standard API endpoints
-export const apiLimiter = rateLimit({
-    windowMs: 3 * 60 * 1000, 
+export const apiLimiter = isDev ? noopLimiter : rateLimit({
+    windowMs: 3 * 60 * 1000,
     max: 300,
     keyGenerator: keyGenerator,
     handler: (req, res, next, options) => {
@@ -40,7 +45,7 @@ export const apiLimiter = rateLimit({
             const secs = Math.ceil((remainingMs % 60000) / 1000);
             timeString = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
         }
-        return sendError(res, `Too many requests. Please try again in ${timeString}.`,null, 429);
+        return sendError(res, `Too many requests. Please try again in ${timeString}.`, null, 429);
     },
     standardHeaders: true,
     legacyHeaders: false,
