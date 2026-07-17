@@ -8,7 +8,7 @@ const BulletsSimple = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnl
     const useTwoColumns = items.length > 4;
 
     return (
-        <div className={`w-full flex ${useTwoColumns ? "flex-row flex-wrap gap-x-[4cqw] gap-y-[0cqw]" : "flex-col gap-[0cqw]"}`}>
+        <div className={`w-full flex ${useTwoColumns ? "flex-row flex-wrap gap-x-[4cqw] gap-y-0" : "flex-col gap-[0cqw]"}`}>
             {/* Add before first item when empty */}
             {!readOnly && onAddItem && items.length === 0 && (
                 <button

@@ -21,14 +21,15 @@ CONTENT RULES
 5. Always return an even number of items only unless a specific count is requested by the user or a parity requirement is defined in the metadata.
 
 SLIDE ARCHITECTURE & MACRO TYPES (CRITICAL)
-1. Each slide must specify a "type" representing its macro layout (e.g., normal, split-left-image, full-image).
-2. For slide types with images (like split-left-image, split-right-image, top-image-banner, full-image), you MUST include an "image" string (search query) and an "imageSize" integer (between 25 and 75, typically 50).
-3. The content of each slide (except full-image) is composed of a "blocks" array.
-4. A slide can have a MAXIMUM of 3 "content" blocks, and optionally 1 "header" block.
-5. A "header" block has "type": "header", "title": "...", "subtitle": "...", and an "align" string ("left", "center", "right").
-6. A "content" block has "type": "content", an "align" string, a "layout" object containing "category" and "type" from the metadata layoutCategories, and an "items" array.
-7. The vertical order of the blocks is determined by their sequence in the "blocks" array. Place the header block wherever it fits best visually.
-8. The "full-image" slide type must NOT contain a "blocks" array or any text.
+1. Each slide must specify a "type" representing its macro layout (e.g., normal, split-left-image, top-image-banner, full-image).
+2. For the FIRST slide (the Title Slide), use any of the standard layouts (e.g., normal, split-left-image, top-image-banner) and available layouts suitable in the title slide.
+3. For slide types with images (like split-left-image, split-right-image, top-image-banner, full-image), you MUST include an "image" string (search query) and an "imageSize" integer (between 25 and 75, typically 50).
+4. The content of each slide (except full-image) is composed of a "blocks" array.
+5. Every slide (except 'full-image') MUST have exactly 1 "header" block (functioning as the slide title/header) and a MAXIMUM of 4 "content" blocks.
+6. A "header" block has "type": "header", "title": "...", "subtitle": "...", and an "align" string ("left", "center", "right").
+7. A "content" block has "type": "content", an "align" string, a "layout" object containing "category" and "type" from the metadata layoutCategories, and an "items" array.
+8. The spatial layout of the blocks is determined by an automatic Binary Space Partitioning (BSP) engine. The sequence of blocks in the array determines their grid placement.
+9. The "full-image" slide type must NOT contain a "blocks" array or any text.
 
 THEME & LAYOUT SELECTION RULES
 1. Match the Vibe: Select themes and layouts that perfectly match the emotional tone and subject matter. Do NOT default to the first item.
@@ -51,23 +52,24 @@ Example Structure:
     {
       "type": "split-left-image",
       "image": "office building",
-      "imageSize": 50,
+      "imageSize": 40,
       "blocks": [
         {
           "id": "b1",
           "type": "header",
           "title": "Q2 Business Performance",
+          "titleFontSize": 4.0,
           "subtitle": "Key metrics and strategic initiatives overview.",
+          "subtitleFontSize": 2.4,
           "align": "left"
         },
         {
           "id": "b2", 
           "type": "content",
           "align": "left",
-          "layout": { "category": "bullets", "type": "simple" },
+          "layout": { "category": "text", "type": "large" },
           "items": [
-             { "header": "Growth", "description": "20% YoY" },
-             { "header": "Revenue", "description": "$1.2M" }
+             { "header": "Strong Growth in Q2", "headerFontSize": 3.5, "description": "Our revenue increased by 20% year-over-year, hitting $1.2M.", "descriptionFontSize": 1.8 }
           ]
         }
       ]
@@ -91,7 +93,7 @@ RULES:
 1. Ensure the output is a single valid JSON object representing the slide.
 2. ADAPT THE LAYOUT CATEGORY AND TYPE: If the user request implies a different layout style (e.g. statistics, timeline, cards, list, icons, tables, etc.), you MUST change the "layout.category" and "layout.type" inside the target content block to match that style.
 3. ADAPT SLIDE TYPE: You may change the macro "type" of the slide (e.g., from normal to split-left-image) if the user asks for an image layout. Remember to add "image" and "imageSize" (25-75).
-4. MAX BLOCKS: Maximum 3 content blocks + 1 header block.
+4. MAX BLOCKS: Maximum 4 content blocks + 1 header block. Every slide (except 'full-image') MUST have exactly 1 "header" block to serve as the slide title.
 5. OUTLINE CONTEXT WARNING: You are provided with the list of other slide titles in the deck. This outline is strictly for context.
 6. Output ONLY valid JSON, no explanations, no markdown block wraps (no \`\`\`json).
 `;

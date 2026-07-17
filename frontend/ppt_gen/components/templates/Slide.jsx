@@ -1,11 +1,50 @@
 import React from "react";
 import HeaderBlock from "./HeaderBlock";
 import ContentBlock from "./ContentBlock";
+import SlideLayout from "./layouts/SlideLayout";
 import BlockResizer from "./BlockResizer";
 import MacroImage from "./MacroImage";
 import { Plus } from "lucide-react";
+import Image from "next/image";
 import "./global-slide.css";
 import "./themes.css";
+
+const BSPRenderer = ({ node, ...props }) => {
+    const [localRatio, setLocalRatio] = React.useState(null);
+    if (!node) return null;
+
+    if (node.type === "leaf" || node.type === "content") {
+        return <ContentBlock block={node} blockId={node.id} {...props} />;
+    }
+
+    if (node.type === "split") {
+        const activeRatio = localRatio !== null ? localRatio : (node.splitRatio || 50);
+        const isHorizontal = node.direction === "horizontal";
+        
+        return (
+            <div className={`flex w-full h-full flex-1 min-h-0 min-w-0 ${isHorizontal ? "flex-row" : "flex-col"}`}>
+                <div style={{ flexBasis: `${activeRatio}%` }} className="relative flex min-h-0 min-w-0">
+                    <BSPRenderer node={node.first} {...props} />
+                </div>
+                {!props.readOnly && (
+                    <BlockResizer
+                        direction={node.direction}
+                        initialSplitRatio={activeRatio}
+                        onResize={(newRatio) => setLocalRatio(newRatio)}
+                        onResizeEnd={(newRatio) => {
+                            if (props.onUpdateBlock) props.onUpdateBlock(node.id, 'splitRatio', newRatio);
+                            setLocalRatio(null);
+                        }}
+                    />
+                )}
+                <div style={{ flexBasis: `${100 - activeRatio}%` }} className="relative flex min-h-0 min-w-0">
+                    <BSPRenderer node={node.second} {...props} />
+                </div>
+            </div>
+        );
+    }
+    return null;
+};
 
 const Slide = ({
     slide_content,
@@ -18,6 +57,7 @@ const Slide = ({
     onAddItem,
     theme,
     onEditImage,
+    onSplitBlock,
     slideIndex,
 }) => {
     const macroType = slide_content.type || "normal";
@@ -45,139 +85,36 @@ const Slide = ({
 
     // Helper to render blocks
     const renderBlocks = () => {
+        if (!slide_content) return null;
         if (macroType === "full-image") return null;
 
-        const contentBlocksCount = blocks.filter(
-            (b) => b.type === "content",
-        ).length;
-
         return (
-            <div className="flex flex-col gap-[3cqw] w-full h-full p-[4cqw] relative">
-                {blocks.map((block, idx) => {
-                    if (block.type === "header") {
-                        return (
-                            <HeaderBlock
-                                key={block.id || `header-${idx}`}
-                                block={block}
-                                onUpdateBlock={
-                                    onUpdateBlock
-                                        ? (f, v) => onUpdateBlock(idx, f, v)
-                                        : undefined
-                                }
-                                onDeleteBlock={
-                                    onDeleteBlock
-                                        ? () => onDeleteBlock(idx)
-                                        : undefined
-                                }
-                                readOnly={!onUpdateSlide}
-                            />
-                        );
-                    }
-                    return null;
-                })}
-
-                <div className="flex flex-row w-full flex-1 min-h-0 relative items-stretch">
-                    {blocks.map((block, idx) => {
-                        if (block.type !== "content") return null;
-
-                        let nextIdx = -1;
-                        for (let i = idx + 1; i < blocks.length; i++) {
-                            if (blocks[i].type === "content") {
-                                nextIdx = i;
-                                break;
-                            }
-                        }
-
-                        const implicitWidth = 100 / (contentBlocksCount || 1);
-                        // Force 100% width if it is the only block, otherwise respect saved width
-                        const baseWidth = block.width || implicitWidth;
-                        const blockWidth =
-                            contentBlocksCount === 1
-                                ? 100
-                                : localBlockWidths[idx] !== undefined
-                                  ? localBlockWidths[idx]
-                                  : baseWidth;
-
-                        return (
-                            <React.Fragment key={block.id || `content-${idx}`}>
-                                <ContentBlock
-                                    block={{ ...block, width: blockWidth }}
-                                    blockIndex={idx}
-                                    onUpdateBlock={onUpdateBlock}
-                                    onDeleteBlock={onDeleteBlock}
-                                    onUpdateItem={onUpdateItem}
-                                    onDeleteItem={onDeleteItem}
-                                    onAddItem={onAddItem}
-                                    theme={theme || slide_content.theme}
-                                    onEditImage={onEditImage}
-                                    readOnly={!onUpdateSlide}
-                                />
-                                {nextIdx !== -1 && !!onUpdateSlide && (
-                                    <BlockResizer
-                                        leftBlockIndex={idx}
-                                        rightBlockIndex={nextIdx}
-                                        initialLeftWidth={blockWidth}
-                                        initialRightWidth={
-                                            localBlockWidths[nextIdx] !==
-                                            undefined
-                                                ? localBlockWidths[nextIdx]
-                                                : blocks[nextIdx].width ||
-                                                  implicitWidth
-                                        }
-                                        onResize={(lIdx, lW, rIdx, rW) => {
-                                            // Update locally for smooth 60fps drag
-                                            setLocalBlockWidths((prev) => ({
-                                                ...prev,
-                                                [lIdx]: lW,
-                                                [rIdx]: rW,
-                                            }));
-                                        }}
-                                        onResizeEnd={(lIdx, lW, rIdx, rW) => {
-                                            // Save to global state once drag is complete
-                                            if (onUpdateBlock) {
-                                                // We must call them in a way that doesn't cause stale closures if possible.
-                                                // Actually, if we call them sequentially, page.jsx still has the stale closure bug!
-                                                // Let's pass a batch update if supported, or rely on the user to fix page.jsx next.
-                                                // For now, page.jsx doesn't have handleUpdateBlocks, so we will use a small timeout to bypass React batching, or just call them.
-                                                setTimeout(
-                                                    () =>
-                                                        onUpdateBlock(
-                                                            lIdx,
-                                                            "width",
-                                                            lW,
-                                                        ),
-                                                    0,
-                                                );
-                                                setTimeout(
-                                                    () =>
-                                                        onUpdateBlock(
-                                                            rIdx,
-                                                            "width",
-                                                            rW,
-                                                        ),
-                                                    50,
-                                                );
-                                            }
-                                        }}
-                                    />
-                                )}
-                            </React.Fragment>
-                        );
-                    })}
-                </div>
-                {!!onUpdateSlide && onAddBlock && blocks.length < 6 && (
-                    <div className="w-full mt-[1cqw] p-[1cqw]">
-                        <button
-                            onClick={() => onAddBlock()}
-                            className="w-full flex items-center justify-center gap-[1cqw] py-[2.5cqw] rounded-[1cqw] border-2 border-dashed border-border/40 text-muted-foreground/50 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer group/addblock"
-                        >
-                            <div className="p-[0.8cqw] rounded-full bg-muted/50 group-hover/addblock:bg-primary/10 transition-colors">
-                                <Plus className="w-[1.5cqw] h-[1.5cqw]" />
-                            </div>
-                            <span className="text-[1.3cqw] font-medium tracking-wide">Add New Block</span>
-                        </button>
-                    </div>
+            <div className="flex flex-col gap-[2cqw] w-full h-full p-[3cqw] relative">
+                {slide_content.header && (
+                    <HeaderBlock
+                        key={slide_content.header.id || 'header'}
+                        block={slide_content.header}
+                        onUpdateBlock={onUpdateBlock ? (f, v) => onUpdateBlock(slide_content.header.id, f, v) : undefined}
+                        onDeleteBlock={onDeleteBlock ? () => onDeleteBlock(slide_content.header.id) : undefined}
+                        readOnly={!onUpdateSlide}
+                    />
                 )}
+                
+                <div className="flex flex-row w-full flex-1 min-h-0 relative items-stretch">
+                    <BSPRenderer
+                        node={slide_content.contentTree}
+                        onUpdateBlock={onUpdateBlock}
+                        onDeleteBlock={onDeleteBlock}
+                        onAddBlock={onAddBlock}
+                        onSplitBlock={onSplitBlock}
+                        onUpdateItem={onUpdateItem}
+                        onDeleteItem={onDeleteItem}
+                        onAddItem={onAddItem}
+                        theme={theme || slide_content.theme}
+                        onEditImage={onEditImage}
+                        readOnly={!onUpdateSlide}
+                    />
+                </div>
             </div>
         );
     };
@@ -201,7 +138,7 @@ const Slide = ({
             return (
                 <div className="flex w-full h-full">
                     <div
-                        style={{ width: `calc(${imageSize}% - 0.5cqw)` }}
+                        style={{ width: `${imageSize}%` }}
                         className="relative shrink-0 border-r border-border/10"
                     >
                         <MacroImage
@@ -213,17 +150,16 @@ const Slide = ({
                     </div>
                     {!!onUpdateSlide && (
                         <BlockResizer
-                            initialLeftWidth={imageSize}
-                            initialRightWidth={100 - imageSize}
-                            onResize={(lIdx, lW) => setLocalImageSize(lW)}
-                            onResizeEnd={(lIdx, lW) =>
-                                onUpdateSlide && onUpdateSlide("imageSize", lW)
+                            direction="horizontal"
+                            initialSplitRatio={imageSize}
+                            onResize={(newRatio) => setLocalImageSize(newRatio)}
+                            onResizeEnd={(newRatio) =>
+                                onUpdateSlide && onUpdateSlide("imageSize", newRatio)
                             }
                         />
                     )}
                     <div
-                        style={{ width: `calc(${100 - imageSize}% - 0.5cqw)` }}
-                        className="relative flex flex-col min-w-0 shrink-0"
+                        className="relative flex flex-col min-w-0 flex-1"
                     >
                         {renderBlocks()}
                     </div>
@@ -235,25 +171,22 @@ const Slide = ({
             return (
                 <div className="flex w-full h-full">
                     <div
-                        style={{ width: `calc(${100 - imageSize}% - 0.5cqw)` }}
-                        className="relative flex flex-col min-w-0 shrink-0"
+                        className="relative flex flex-col min-w-0 flex-1"
                     >
                         {renderBlocks()}
                     </div>
                     {!!onUpdateSlide && (
                         <BlockResizer
-                            initialLeftWidth={100 - imageSize}
-                            initialRightWidth={imageSize}
-                            onResize={(lIdx, lW, rIdx, rW) =>
-                                setLocalImageSize(rW)
-                            }
-                            onResizeEnd={(lIdx, lW, rIdx, rW) =>
-                                onUpdateSlide && onUpdateSlide("imageSize", rW)
+                            direction="horizontal"
+                            initialSplitRatio={100 - imageSize}
+                            onResize={(newRatio) => setLocalImageSize(100 - newRatio)}
+                            onResizeEnd={(newRatio) =>
+                                onUpdateSlide && onUpdateSlide("imageSize", 100 - newRatio)
                             }
                         />
                     )}
                     <div
-                        style={{ width: `calc(${imageSize}% - 0.5cqw)` }}
+                        style={{ width: `${imageSize}%` }}
                         className="relative shrink-0 border-l border-border/10"
                     >
                         <MacroImage
@@ -272,7 +205,7 @@ const Slide = ({
             return (
                 <div className="flex flex-col w-full h-full">
                     <div
-                        style={{ height: `calc(${imageSize}% - 0.5cqw)` }}
+                        style={{ height: `${imageSize}%` }}
                         className="relative shrink-0 border-b border-border/10"
                     >
                         <MacroImage
@@ -286,17 +219,15 @@ const Slide = ({
                     {!!onUpdateSlide && (
                         <BlockResizer
                             direction="vertical"
-                            initialLeftWidth={imageSize}
-                            initialRightWidth={100 - imageSize}
-                            onResize={(lIdx, lW) => setLocalImageSize(lW)}
-                            onResizeEnd={(lIdx, lW) =>
-                                onUpdateSlide && onUpdateSlide("imageSize", lW)
+                            initialSplitRatio={imageSize}
+                            onResize={(newRatio) => setLocalImageSize(newRatio)}
+                            onResizeEnd={(newRatio) =>
+                                onUpdateSlide && onUpdateSlide("imageSize", newRatio)
                             }
                         />
                     )}
                     <div
-                        style={{ height: `calc(${100 - imageSize}% - 0.5cqw)` }}
-                        className="relative flex flex-col min-h-0"
+                        className="relative flex flex-col min-h-0 flex-1"
                     >
                         {renderBlocks()}
                     </div>
@@ -304,15 +235,29 @@ const Slide = ({
             );
         }
 
-        // normal, title, agenda, closing - render blocks normally
+
+
+        // normal, agenda, closing - render blocks normally
         return renderBlocks();
     };
 
     return (
         <div
-            className="slide border flex flex-col theme-container group/slide bg-theme-bg text-theme-fg"
+            className="slide flex flex-col theme-container group/slide bg-theme-bg text-theme-fg relative"
             data-theme={theme || slide_content.theme}
         >
+            {!slide_content.header && !!onUpdateSlide && (
+                <div className="absolute top-[1.5cqw] left-[1.5cqw] z-40 transition-opacity opacity-0 group-hover/slide:opacity-100 pointer-events-auto">
+                    <button
+                        onClick={() => onUpdateSlide("header", { id: "header", type: "header", title: "New Title", subtitle: "New Subtitle", align: "left" })}
+                        className="flex items-center gap-[0.5cqw] text-[1.2cqw] bg-background/95 border border-border/50 px-[0.8cqw] py-[0.3cqw] rounded-sm shadow-md text-muted-foreground hover:text-primary hover:bg-muted transition-colors cursor-pointer"
+                        title="Add Header"
+                    >
+                        <Plus className="w-[1.4cqw] h-[1.4cqw]" />
+                        <span>Add Header</span>
+                    </button>
+                </div>
+            )}
             <div className="slide-content">{renderMacroShell()}</div>
         </div>
     );

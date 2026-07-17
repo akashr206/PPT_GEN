@@ -302,7 +302,7 @@
 .theme-menu-button {
     background-color: var(--theme-card-bg);
     border: 1px solid var(--theme-card-border);
-    border-radius: 0.5cqw;
+    border-radius: 2px;
     padding: 0.25cqw;
 }
 

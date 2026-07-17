@@ -2,16 +2,22 @@ import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { Image as ImageIcon } from "lucide-react";
 
-const CardsImage = ({ content, onUpdateItem, readOnly }) => {
+const CardsImage = ({ content, onUpdateItem, onEditImage, readOnly }) => {
     const items = content || [];
     
     return (
         <div className="w-full flex flex-row flex-wrap gap-[2cqw]">
             {items.map((item, i) => (
-                <div key={i} className="flex-1 min-w-[30%] flex flex-col rounded-[1cqw] theme-bg-card border theme-border-card shadow-sm overflow-hidden">
-                    <div className="w-full h-[12cqw] theme-bg-alt flex items-center justify-center shrink-0">
-                        {/* Placeholder for card image */}
-                        <ImageIcon className="w-[3cqw] h-[3cqw] theme-text-muted opacity-30" />
+                <div key={i} className="flex-1 min-w-[18cqw] flex flex-col rounded-[1cqw] theme-bg-card border theme-border-card shadow-sm overflow-hidden">
+                    <div 
+                        className={`w-full h-[12cqw] theme-bg-alt flex items-center justify-center shrink-0 relative ${!readOnly ? "cursor-pointer hover:opacity-90" : ""}`}
+                        onClick={() => !readOnly && onEditImage && onEditImage({ type: "item", itemIndex: i })}
+                    >
+                        {item.image ? (
+                            <img src={item.image} alt={item.header} className="w-full h-full object-cover" />
+                        ) : (
+                            <ImageIcon className="w-[3cqw] h-[3cqw] theme-text-muted opacity-30" />
+                        )}
                     </div>
                     <div className="flex flex-col gap-[1cqw] p-[2cqw]">
                         <EditableElement

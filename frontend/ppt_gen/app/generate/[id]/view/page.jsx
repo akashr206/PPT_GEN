@@ -11,6 +11,7 @@ import { useImageFetcher } from "@/hooks/use-image-fetcher";
 import { useLibrarySidebar } from "@/hooks/use-library-sidebar";
 import { useExport } from "@/hooks/use-export";
 import { useAutosave } from "@/hooks/use-autosave";
+import { useHistoryStore } from "@/contexts/history-context";
 
 import ViewerToolbar from "@/components/generate/ViewerToolbar";
 import SlideSettingsModal from "@/components/generate/SlideSettingsModal";
@@ -93,6 +94,7 @@ export default function PPTSlidesViewerPage({ params }) {
         handleUpdateBlock,
         handleDeleteBlock,
         handleAddBlock,
+        handleSplitBlock,
         handleUpdateSlide,
         handleUpdateItem,
         handleSplitSlide,
@@ -230,10 +232,18 @@ export default function PPTSlidesViewerPage({ params }) {
 
         const handlePDF = () => { if (!isBusy) setIsGeneratingPDF(true); };
         const handlePPT = (e) => { if (!isBusy) handleDownloadAsPPT(e); };
-        const handleTheme = (e) => {
+        const handleTheme = async (e) => {
             if (isBusy) return;
             if (e.detail?.theme) {
-                setPptData((prev) => ({ ...prev, theme: e.detail.theme }));
+                const newTheme = e.detail.theme;
+                setPptData((prev) => ({ ...prev, theme: newTheme }));
+                try {
+                    await api.patch(`/api/ppt/${pptId}`, { theme: newTheme });
+                    useHistoryStore.getState().updateFirstSlide(pptId, undefined, undefined, newTheme);
+                    console.log("[Theme] Saved theme to database:", newTheme);
+                } catch (err) {
+                    console.error("[Theme] Failed to save theme:", err);
+                }
             }
         };
 
@@ -307,6 +317,7 @@ export default function PPTSlidesViewerPage({ params }) {
             onUpdateBlock: isBusy ? undefined : handleUpdateBlock,
             onDeleteBlock: isBusy ? undefined : handleDeleteBlock,
             onAddBlock: isBusy ? undefined : handleAddBlock,
+            onSplitBlock: isBusy ? undefined : handleSplitBlock,
             onUpdateItem: isBusy ? undefined : handleUpdateItem,
             onDeleteItem: isBusy ? undefined : handleDeleteItem,
             onAddItem: isBusy ? undefined : handleAddItemAtIndex,
@@ -316,7 +327,7 @@ export default function PPTSlidesViewerPage({ params }) {
         }),
         [
             isBusy,
-            handleUpdateSlide, handleUpdateBlock, handleDeleteBlock, handleAddBlock,
+            handleUpdateSlide, handleUpdateBlock, handleDeleteBlock, handleAddBlock, handleSplitBlock,
             handleUpdateItem, handleDeleteItem, handleAddItemAtIndex,
             handleEditImageBridged, handleSplitSlide, handleDeleteSlide,
         ],
@@ -360,9 +371,9 @@ export default function PPTSlidesViewerPage({ params }) {
             {/* Main content area */}
             <div className="w-full flex-1 flex flex-row min-h-0 relative overflow-hidden">
                 {/* Left: slide editor + thumbnails */}
-                <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-8 min-h-0 overflow-y-auto">
+                <div className="flex-1 flex flex-col items-center justify-center p-2 min-h-0 overflow-y-auto">
                     <div className="flex-1 flex flex-col items-center justify-between md:justify-center w-full h-full p-2 sm:p-4 pb-4 md:pb-4 relative min-h-0">
-                        <div className="w-full flex-1 md:flex-none flex flex-col items-center justify-center min-h-0 gap-3">
+                        <div className="w-full flex-1 flex flex-col items-center justify-center min-h-0 gap-3">
                             <SlideViewer
                                 editableSlides={editableSlides}
                                 activeSlideIndex={activeSlideIndex}

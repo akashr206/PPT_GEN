@@ -79,6 +79,36 @@ export function useImageFetcher({
                             image: finalImageUrl,
                             imageDescription: query,
                         };
+                    } else if (keyParts.length === 6 && keyParts[2] === "block" && keyParts[4] === "item") {
+                        const blockId = keyParts[3];
+                        const iIndex = parseInt(keyParts[5], 10);
+                        const updateTree = (node) => {
+                            if (!node) return null;
+                            if (node.id === blockId) {
+                                if (node.items && node.items[iIndex]) {
+                                    const newItems = [...node.items];
+                                    newItems[iIndex] = {
+                                        ...newItems[iIndex],
+                                        image: finalImageUrl,
+                                        imageDescription: query
+                                    };
+                                    return { ...node, items: newItems };
+                                }
+                                return node;
+                            }
+                            if (node.type === "split") {
+                                return {
+                                    ...node,
+                                    first: updateTree(node.first),
+                                    second: updateTree(node.second)
+                                };
+                            }
+                            return node;
+                        };
+                        updated[sIndex] = {
+                            ...updated[sIndex],
+                            contentTree: updateTree(updated[sIndex].contentTree)
+                        };
                     } else if (keyParts.length === 4 && keyParts[2] === "item") {
                         const iIndex = parseInt(keyParts[3], 10);
                         if (updated[sIndex].items && updated[sIndex].items[iIndex]) {
@@ -122,34 +152,33 @@ export function useImageFetcher({
             }
 
             // --- Block-layout image slides ---
-            const isImageCategory =
-                slide.layout?.category === "images" ||
-                slide.layout?.category === "image";
-            if (!isImageCategory) return;
+            const traverseTreeForFetch = (node) => {
+                if (!node) return;
+                if (node.type === "leaf" || node.type === "content" || node.blockType === "content") {
+                    const isImageCategory =
+                        node.layout?.category === "images" ||
+                        node.layout?.category === "image" ||
+                        (node.layout?.category === "cards" && node.layout?.type === "image");
+                    if (!isImageCategory) return;
 
-            const lType = slide.layout?.type;
-
-            if (lType === "split" || lType === "overlay") {
-                const sKey = `slide_${sIndex}`;
-                const hasUrl = isRealUrl(slide.image);
-                const query = hasUrl ? null : slide.imageDescription || slide.image;
-                if (query && !fetchQueueRef.current.has(sKey)) {
-                    fetchQueueRef.current.add(sKey);
-                    fetchImage(sKey, query);
+                    if (node.items) {
+                        node.items.forEach((item, iIndex) => {
+                            const itemKey = `slide_${sIndex}_block_${node.id}_item_${iIndex}`;
+                            const hasUrl = isRealUrl(item.image);
+                            const query = hasUrl ? null : item.imageDescription || item.image;
+                            if (query && !fetchQueueRef.current.has(itemKey)) {
+                                fetchQueueRef.current.add(itemKey);
+                                fetchImage(itemKey, query);
+                            }
+                        });
+                    }
+                } else if (node.type === "split") {
+                    traverseTreeForFetch(node.first);
+                    traverseTreeForFetch(node.second);
                 }
-            } else if (lType === "grid") {
-                if (slide.items) {
-                    slide.items.forEach((item, iIndex) => {
-                        const itemKey = `slide_${sIndex}_item_${iIndex}`;
-                        const hasUrl = isRealUrl(item.image);
-                        const query = hasUrl ? null : item.imageDescription || item.image;
-                        if (query && !fetchQueueRef.current.has(itemKey)) {
-                            fetchQueueRef.current.add(itemKey);
-                            fetchImage(itemKey, query);
-                        }
-                    });
-                }
-            }
+            };
+            
+            traverseTreeForFetch(slide.contentTree);
         });
     }, [editableSlides, fetchImage]);
 
@@ -162,6 +191,34 @@ export function useImageFetcher({
 
             if (fetchedImages[sKey]) resolved.image = fetchedImages[sKey];
             if (imageLoading[sKey]) resolved.imageLoading = true;
+
+            const traverseAndResolve = (node) => {
+                if (!node) return null;
+                if (node.type === "leaf" || node.type === "content" || node.blockType === "content") {
+                    const resolvedNode = { ...node };
+                    if (resolvedNode.items) {
+                        resolvedNode.items = resolvedNode.items.map((item, itemIdx) => {
+                            const itemKey = `slide_${index}_block_${node.id}_item_${itemIdx}`;
+                            const newItem = { ...item };
+                            if (fetchedImages[itemKey]) newItem.image = fetchedImages[itemKey];
+                            if (imageLoading[itemKey]) newItem.imageLoading = true;
+                            return newItem;
+                        });
+                    }
+                    return resolvedNode;
+                } else if (node.type === "split") {
+                    return {
+                        ...node,
+                        first: traverseAndResolve(node.first),
+                        second: traverseAndResolve(node.second)
+                    };
+                }
+                return node;
+            };
+
+            if (resolved.contentTree) {
+                resolved.contentTree = traverseAndResolve(resolved.contentTree);
+            }
 
             if (resolved.items) {
                 resolved.items = resolved.items.map((item, itemIdx) => {
@@ -198,7 +255,29 @@ export function useImageFetcher({
                 imageEditContext.itemIndex !== undefined
             ) {
                 const itemIndex = imageEditContext.itemIndex;
-                if (slide.items && slide.items[itemIndex]) {
+                if (imageEditContext.blockId) {
+                    const blockId = imageEditContext.blockId;
+                    const updateTree = (node) => {
+                        if (!node) return null;
+                        if (node.id === blockId) {
+                            if (node.items && node.items[itemIndex]) {
+                                const newItems = [...node.items];
+                                newItems[itemIndex] = {
+                                    ...newItems[itemIndex],
+                                    image: imageUrl,
+                                    imageDescription: queryStr,
+                                };
+                                return { ...node, items: newItems };
+                            }
+                            return node;
+                        }
+                        if (node.type === "split") {
+                            return { ...node, first: updateTree(node.first), second: updateTree(node.second) };
+                        }
+                        return node;
+                    };
+                    slide.contentTree = updateTree(slide.contentTree);
+                } else if (slide.items && slide.items[itemIndex]) {
                     slide.items = [...slide.items];
                     slide.items[itemIndex] = {
                         ...slide.items[itemIndex],
@@ -213,6 +292,8 @@ export function useImageFetcher({
             const cacheKey =
                 imageEditContext.type === "slide"
                     ? `slide_${activeSlideIndex}`
+                    : imageEditContext.blockId
+                    ? `slide_${activeSlideIndex}_block_${imageEditContext.blockId}_item_${imageEditContext.itemIndex}`
                     : `slide_${activeSlideIndex}_item_${imageEditContext.itemIndex}`;
 
             setFetchedImages((prev) => ({ ...prev, [cacheKey]: imageUrl }));

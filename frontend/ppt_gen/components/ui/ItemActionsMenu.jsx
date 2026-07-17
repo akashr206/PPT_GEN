@@ -40,18 +40,18 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         variant="outline"
                         className="h-max w-max theme-menu-button rounded-xs! theme-text-primary"
                     >
-                        <MoreHorizontal className="h-3 w-3 md:h-4 md:w-4" />
+                        <MoreHorizontal className="h-3 w-3 md:h-3! md:w-3!" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                    align="end"
-                    className="flex justify-between bg-popover border-border text-popover-foreground rounded-md shadow-2xl z-50 p-1 gap-1"
+                    align="center"
+                    className="flex min-w-22 bg-popover border-border text-popover-foreground rounded-[4px] shadow-2xl z-50 p-[3px] gap-[3px]"
                 >
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <DropdownMenuItem
                                 onClick={onAddBefore}
-                                className="cursor-pointer text-xs flex items-center justify-center p-2 rounded-md hover:bg-accent"
+                                className="cursor-pointer text-xs flex items-center justify-center p-1 rounded-sm hover:bg-accent"
                             >
                                 <ArrowLeftToLine
                                     size={10}
@@ -71,7 +71,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         <TooltipTrigger asChild>
                             <DropdownMenuItem
                                 onClick={onAddAfter}
-                                className="cursor-pointer text-xs flex items-center justify-center p-2 rounded-md hover:bg-accent"
+                                className="cursor-pointer text-xs flex items-center justify-center p-1 rounded-sm hover:bg-accent"
                             >
                                 <ArrowRightToLine
                                     size={10}
@@ -91,7 +91,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         <TooltipTrigger asChild>
                             <DropdownMenuItem
                                 onClick={onDelete}
-                                className="cursor-pointer text-xs flex items-center justify-center p-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-md"
+                                className="cursor-pointer text-xs flex items-center justify-center p-1 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-sm"
                             >
                                 <Trash2 size={10} />
                             </DropdownMenuItem>

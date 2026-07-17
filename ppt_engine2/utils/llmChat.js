@@ -197,6 +197,7 @@ async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "sta
                 try {
                     const parsed = JSON.parse(dataStr);
                     const token = parsed.choices?.[0]?.delta?.content;
+                                        
                     if (token) {
                         onToken(token);
                     }

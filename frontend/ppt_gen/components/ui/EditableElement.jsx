@@ -9,6 +9,7 @@ export function EditableElement({
     as: Component = "div",
     placeholder = "Type here...",
     readOnly = false,
+    style = {},
 }) {
     const contentRef = useRef(null);
     const prevValue = useRef(value);
@@ -32,6 +33,7 @@ export function EditableElement({
                         ? "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50 empty:before:pointer-events-none empty:before:block"
                         : ""
                 } ${className}`}
+                style={style}
                 data-placeholder={placeholder}
             >
                 {value}
@@ -78,6 +80,7 @@ export function EditableElement({
                     ? "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50 empty:before:pointer-events-none empty:before:block"
                     : ""
             } ${className}`}
+            style={style}
             data-placeholder={placeholder}
         >
             {value}

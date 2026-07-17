@@ -102,11 +102,7 @@
             "name": "Full Image",
             "description": "Full bleed background image. NO blocks allowed in this slide type."
         },
-        {
-            "id": "title",
-            "name": "Title Slide",
-            "description": "Dedicated title slide format."
-        },
+
         {
             "id": "agenda",
             "name": "Agenda Slide",
@@ -120,11 +116,16 @@
     ],
     "layoutCategories": {
         "text": {
-            "name": "Plain Text",
-            "description": "Standard unstructured text block without heavy styling or bullets.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["description"],
+            "name": "Text Block",
+            "description": "Clean text block for large titles, quotes, or long-form paragraphs. Supports optional block-level 'verticalAlign' string ('top', 'center', 'bottom').",
+            "fields": ["title", "subtitle", "items", "verticalAlign"],
+            "itemFields": ["header", "description", "align", "headerFontSize", "descriptionFontSize"],
             "types": [
+                {
+                    "id": "large",
+                    "name": "Large Text",
+                    "description": "Large text perfect for main slide titles or big statements."
+                },
                 {
                     "id": "plain",
                     "name": "Plain Text",

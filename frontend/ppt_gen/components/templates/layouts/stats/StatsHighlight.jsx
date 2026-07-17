@@ -17,7 +17,7 @@ const StatsHighlight = ({ content, onUpdateItem, readOnly }) => {
                 readOnly={readOnly}
                 placeholder="99%"
             />
-            <div className="w-[10cqw] h-[0.5cqw] bg-[var(--theme-card-border)] rounded-full" />
+            <div className="w-[10cqw] h-[0.5cqw] bg-[--theme-card-border] rounded-full" />
             <EditableElement
                 as="p"
                 className="text-[2cqw] font-medium leading-relaxed theme-text-muted max-w-[80%]"

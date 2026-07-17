@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
+import { FontSizeControl } from "@/components/ui/FontSizeControl";
 import {
     Trash2,
     AlignLeft,
     AlignCenter,
     AlignRight,
     MoreHorizontal,
+    Type
 } from "lucide-react";
 
 const ALIGNMENTS = [
@@ -18,7 +20,6 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
-    // Close menu when clicking outside
     useEffect(() => {
         if (!menuOpen) return;
         const handleClickOutside = (e) => {
@@ -31,7 +32,6 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
             document.removeEventListener("mousedown", handleClickOutside);
     }, [menuOpen]);
 
-    // block align: "left" | "center" | "right"
     let alignClass = "text-left";
     let itemsAlign = "items-start";
     if (block.align === "center") {
@@ -42,34 +42,39 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
         itemsAlign = "items-end";
     }
 
+    const titleSize = block.titleFontSize || 2.8;
+    const subSize = block.subtitleFontSize || 2.0;
+
     return (
         <div
-            className={`relative flex flex-col gap-[0.5cqw] w-full shrink-0 group/block transition-all ${itemsAlign} ${alignClass} ${menuOpen ? "outline outline-1 outline-gray-400/80" : ""} ${!readOnly ? "hover:outline hover:outline-1 hover:outline-gray-400/80" : ""}`}
+            className={`relative flex flex-col w-full shrink-0 group/block transition-all ${itemsAlign} ${alignClass} ${menuOpen ? "outline outline-1 outline-gray-400/80" : ""} ${!readOnly ? "hover:outline hover:outline-1 hover:outline-gray-400/80" : ""}`}
         >
             <EditableElement
                 as="h1"
-                className="theme-font-heading font-bold leading-tight text-[3.2cqw] w-full text-wrap"
+                className="theme-font-heading font-bold leading-tight w-full text-wrap"
+                style={{ fontSize: `${titleSize}cqw` }}
                 value={block.title}
                 onChange={(val) => onUpdateBlock?.("title", val)}
                 readOnly={readOnly}
                 placeholder="Slide Title"
             />
-            <EditableElement
-                as="p"
-                className="text-[2cqw] text-muted-foreground leading-normal"
-                value={block.subtitle || ""}
-                onChange={(val) => onUpdateBlock?.("subtitle", val)}
-                readOnly={readOnly}
-                placeholder="Add subtitle..."
-            />
+            {block.subtitle !== undefined && (
+                <EditableElement
+                    as="p"
+                    className="text-muted-foreground leading-normal"
+                    style={{ fontSize: `${subSize}cqw` }}
+                    value={block.subtitle || ""}
+                    onChange={(val) => onUpdateBlock?.("subtitle", val)}
+                    readOnly={readOnly}
+                    placeholder="Add subtitle..."
+                />
+            )}
 
-            {/* 3-dots menu — shown on hover when not readOnly */}
             {!readOnly && (
                 <div
                     ref={menuRef}
                     className="absolute top-0 left-1/2 -translate-x-1/2 z-20"
                 >
-                    {/* Trigger button */}
                     <button
                         onMouseDown={(e) => {
                             e.stopPropagation();
@@ -82,26 +87,18 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                         <MoreHorizontal className="w-[1.4cqw] h-[1.4cqw] text-foreground" />
                     </button>
 
-                    {/* Dropdown panel */}
                     {menuOpen && (
                         <div
-                            className="absolute right-0 top-[calc(100%+0.3cqw)] min-w-[10cqw] bg-background border border-border rounded-[0.6cqw] shadow-xl overflow-hidden z-30 flex items-center"
+                            className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.3cqw)] bg-background border border-border rounded-[0.6cqw] shadow-xl overflow-hidden z-30 flex items-center"
                             onMouseDown={(e) => e.stopPropagation()}
                         >
-                            {/* Alignment section */}
                             <div className="px-[0.5cqw] pt-[0.3cqw] pb-[0.3cqw]">
                                 <div className="flex gap-[0.4cqw]">
                                     {ALIGNMENTS.map(
                                         ({ value, icon: Icon, label }) => (
                                             <button
                                                 key={value}
-                                                onClick={() => {
-                                                    onUpdateBlock?.(
-                                                        "align",
-                                                        value,
-                                                    );
-                                                    setMenuOpen(false);
-                                                }}
+                                                onClick={() => onUpdateBlock?.("align", value)}
                                                 title={label}
                                                 className={`flex-1 flex items-center justify-center p-[0.5cqw] rounded-[0.4cqw] transition-colors cursor-pointer
                                                 ${
@@ -118,17 +115,48 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                                     )}
                                 </div>
                             </div>
+                            
+                            <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
+                            
+                            <div className="flex flex-col px-[0.5cqw] py-[0.2cqw] gap-[0.2cqw]">
+                                <FontSizeControl 
+                                    label="Title:" 
+                                    valueCqw={titleSize} 
+                                    onChangeCqw={(v) => onUpdateBlock?.("titleFontSize", v)} 
+                                    min={1} max={8} 
+                                />
+                                {block.subtitle !== undefined && (
+                                    <FontSizeControl 
+                                        label="Sub:" 
+                                        valueCqw={subSize} 
+                                        onChangeCqw={(v) => onUpdateBlock?.("subtitleFontSize", v)} 
+                                        min={0.5} max={5} 
+                                    />
+                                )}
+                            </div>
+
+                            <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
+                            <div className="px-[0.5cqw] py-[0.3cqw]">
+                                <button
+                                    onClick={() => onUpdateBlock?.("subtitle", block.subtitle !== undefined ? undefined : "New Subtitle")}
+                                    className="flex items-center justify-center gap-[0.6cqw] w-full text-[1.1cqw] hover:bg-muted transition-colors cursor-pointer p-[0.5cqw] rounded-[0.4cqw]"
+                                    title={block.subtitle !== undefined ? "Remove Subtitle" : "Add Subtitle"}
+                                >
+                                    <Type className="w-[1.3cqw] h-[1.3cqw]" />
+                                </button>
+                            </div>
 
                             {onDeleteBlock && (
                                 <>
-                                <div className="w-[0.2cqw] h-[2cqw] bg-accent"></div>
+                                <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
                                     <div className="px-[0.5cqw] py-[0.3cqw]">
                                         <button
                                             onClick={() => {
                                                 setMenuOpen(false);
                                                 onDeleteBlock();
                                             }}
-                                            className="flex items-center gap-[0.6cqw] w-full text-[1.1cqw] text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer p-[0.5cqw] rounded-sm"
+                                            className="flex items-center gap-[0.6cqw] w-full text-[1.1cqw] text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer p-[0.5cqw] rounded-[0.4cqw]"
+                                            title="Delete Header"
                                         >
                                             <Trash2 className="w-[1.3cqw] h-[1.3cqw]" />
                                         </button>

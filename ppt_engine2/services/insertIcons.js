@@ -49,11 +49,21 @@ export const insertIconsToContent = async (slidesContent) => {
     const tasks = [];
 
     for (const slide of slides) {
-        if (!slide.items || !Array.isArray(slide.items)) {
-            continue;
+        let allItems = [];
+        if (slide.items && Array.isArray(slide.items)) {
+            allItems = allItems.concat(slide.items);
+        }
+        if (slide.blocks && Array.isArray(slide.blocks)) {
+            for (const block of slide.blocks) {
+                if (block.items && Array.isArray(block.items)) {
+                    allItems = allItems.concat(block.items);
+                }
+            }
         }
 
-        for (const item of slide.items) {
+        if (allItems.length === 0) continue;
+
+        for (const item of allItems) {
             const parsedKeywords = parseIconKeywords(item.iconKeywords);
             if (parsedKeywords.length > 0) {
                 // Ensure keywords are trimmed, lowercase, and unique

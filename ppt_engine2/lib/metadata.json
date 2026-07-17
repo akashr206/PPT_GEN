@@ -101,24 +101,31 @@
             "id": "full-image",
             "name": "Full Image",
             "description": "Full bleed background image. NO blocks allowed in this slide type."
-        },
-        {
-            "id": "title",
-            "name": "Title Slide",
-            "description": "Dedicated title slide format."
-        },
-        {
-            "id": "agenda",
-            "name": "Agenda Slide",
-            "description": "Dedicated agenda format."
-        },
-        {
-            "id": "closing",
-            "name": "Closing Slide",
-            "description": "Dedicated closing format."
         }
     ],
     "layoutCategories": {
+        "text": {
+            "name": "Text Block",
+            "description": "Clean text block for large titles, quotes, or long-form paragraphs. Supports optional block-level 'verticalAlign' string ('top', 'center', 'bottom').",
+            "fields": ["title", "subtitle", "items", "verticalAlign"],
+            "itemFields": ["header", "description", "align", "headerFontSize", "descriptionFontSize"],
+            "types": [
+                {
+                    "id": "large",
+                    "name": "Large Text",
+                    "description": "Large text perfect for main slide titles or big statements."
+                },
+                {
+                    "id": "plain",
+                    "name": "Plain Text",
+                    "description": "Standard paragraph layout for longer descriptions."
+                }
+            ],
+            "constraints": {
+                "maxItems": 2,
+                "recommendedItems": "1"
+            }
+        },
         "bullets": {
             "name": "Bullet Points",
             "description": "Standard lists or grids containing multiple sequential headers and descriptions.",

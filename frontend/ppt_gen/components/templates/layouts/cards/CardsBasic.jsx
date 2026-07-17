@@ -21,9 +21,9 @@ const CardsBasic = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }
             {items.map((item, i) => (
                 <div
                     key={i}
-                    className="group/item relative flex-1 min-w-[30%]"
+                    className="group/item relative flex-1 min-w-[18cqw]"
                 >
-                    <div className="flex flex-col gap-[1.5cqw] p-[3cqw] rounded-[1cqw] theme-bg-card border theme-border-card shadow-sm h-full">
+                    <div className="flex flex-col gap-[1cqw] p-[1cqw] rounded-[1cqw] theme-bg-card border theme-border-card shadow-sm h-full">
                         {/* Item Actions Menu (top right on hover) */}
                         {!readOnly && (onAddItem || onDeleteItem) && (
                             <div className="absolute top-[0.5cqw] right-[0.5cqw] opacity-0 group-hover/item:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity z-10">
