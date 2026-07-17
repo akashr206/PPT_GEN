@@ -364,3 +364,8 @@
     opacity: 1 !important;
 }
 
+
+
+.theme-font-heading {
+    font-family: var(--theme-font-heading);
+}

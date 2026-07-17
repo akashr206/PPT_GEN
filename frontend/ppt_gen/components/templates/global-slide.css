@@ -24,11 +24,16 @@
     transition: outline 0.2s ease, outline-offset 0.2s ease;
 }
 
-.group\/item:hover,
-.group\/item:focus-within {
-    outline: 1.5px dashed color-mix(in srgb, var(--theme-primary) 50%, transparent);
+.group\/item:hover {
+    outline: 1px solid rgba(156, 163, 175, 0.8);
     outline-offset: 4px;
-    border-radius: 0.5cqw;
+    border-radius: 0;
+}
+
+.group\/item:focus-within {
+    outline: 2px solid rgb(249, 115, 22);
+    outline-offset: 4px;
+    border-radius: 0;
 }
 
 /* Show the actions menu when the item has focus-within (e.g. text is clicked/active) */
@@ -81,3 +86,13 @@
     );
     background-size: 200% 100%;
 }
+
+/* Theme color utilities */
+.theme-bg-card { background-color: var(--theme-card-bg); }
+.theme-border-card { border-color: var(--theme-card-border); }
+.theme-bg-primary { background-color: var(--theme-primary); }
+.theme-text-primary { color: var(--theme-fg); } /* Use fg for primary text */
+.theme-text-accent { color: var(--theme-primary); } /* Use primary for accent text */
+.theme-text-muted { color: var(--theme-fg-muted); }
+.theme-bg-alt { background-color: var(--theme-bg-alt); }
+.theme-bullet-bg { background-color: var(--theme-bullet); }

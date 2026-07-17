@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
+import { useThemes } from "@/hooks/use-themes";
+import { useMediaStore } from "@/hooks/use-media-store";
 import { toast } from "sonner";
 import {
     Image as ImageIcon,
@@ -47,15 +49,20 @@ export default function LibrarySidebar({
     const [pexelsQuery, setPexelsQuery] = useState("");
     const [pexelsResults, setPexResults] = useState([]);
     const [isSearchingPexels, setIsSearchingPexels] = useState(false);
+    
+    const searchImagesStore = useMediaStore(state => state.searchImages);
 
-    const [userImages, setUserImages] = useState([]);
+    const userImages = useMediaStore(state => state.userImages);
+    const fetchUserImagesStore = useMediaStore(state => state.fetchUserImages);
+    const userIcons = useMediaStore(state => state.userIcons);
+    const fetchUserIconsStore = useMediaStore(state => state.fetchUserIcons);
+    
     const [isLoadingImages, setIsLoadingImages] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
 
     // Icons States
     const [iconSubTab, setIconSubTab] = useState("uploads"); // "uploads" | "system"
     const [systemIconQuery, setSystemIconQuery] = useState("");
-    const [userIcons, setUserIcons] = useState([]);
     const [isLoadingIcons, setIsLoadingIcons] = useState(false);
     const [isUploadingIcon, setIsUploadingIcon] = useState(false);
     const [pastedSvg, setPastedSvg] = useState("");
@@ -71,38 +78,30 @@ export default function LibrarySidebar({
     }, [isOpen, defaultTab]);
 
     // API Call: Load User Uploaded Images
-    const fetchUserImages = useCallback(async () => {
+    const fetchUserImages = useCallback(async (force = false) => {
         setIsLoadingImages(true);
         try {
-            const res = await api.get("/api/library/images");
-            if (res?.success && res.data) {
-                setUserImages(res.data.images);
-            }
+            await fetchUserImagesStore(force);
         } catch (err) {
             console.error("Failed to load user images:", err);
-            // Fallback empty list if backend route is not created yet
-            setUserImages([]);
+            toast.error("Failed to load your images.");
         } finally {
             setIsLoadingImages(false);
         }
-    }, []);
+    }, [fetchUserImagesStore]);
 
     // API Call: Load User Custom Icons
-    const fetchUserIcons = useCallback(async () => {
+    const fetchUserIcons = useCallback(async (force = false) => {
         setIsLoadingIcons(true);
         try {
-            const res = await api.get("/api/library/icons");
-            if (res?.success && res.data) {
-                setUserIcons(res.data);
-            }
+            await fetchUserIconsStore(force);
         } catch (err) {
             console.error("Failed to load user icons:", err);
-            // Fallback empty list if backend route is not created yet
-            setUserIcons([]);
+            toast.error("Failed to load your icons.");
         } finally {
             setIsLoadingIcons(false);
         }
-    }, []);
+    }, [fetchUserIconsStore]);
 
     // Load data when tab changes or sidebar opens
     useEffect(() => {
@@ -122,14 +121,8 @@ export default function LibrarySidebar({
         }
         setIsSearchingPexels(true);
         try {
-            const res = await api.get(`/api/ppt/images/search`, {
-                params: { q: query },
-            });
-            if (res?.success && res.data) {
-                setPexResults(res.data);
-            } else {
-                setPexResults([]);
-            }
+            const data = await searchImagesStore(query);
+            setPexResults(data);
         } catch (err) {
             console.error("Failed to search Pexels:", err);
             setPexResults([]);
@@ -137,7 +130,7 @@ export default function LibrarySidebar({
         } finally {
             setIsSearchingPexels(false);
         }
-    }, []);
+    }, [searchImagesStore]);
 
     // Auto-search Pexels if query context exists from image edit trigger
     useEffect(() => {

@@ -14,8 +14,6 @@ import api from "@/lib/api";
 
 const HistoryContext = createContext();
 
-const MOCK_HISTORY = []; // Kept empty or unused as we use the real API
-
 export function HistoryProvider({ children }) {
     const { status } = useSession();
     const [history, setHistory] = useState([]);
@@ -54,8 +52,9 @@ export function HistoryProvider({ children }) {
         }
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchHistory();
     }, [status]);
 

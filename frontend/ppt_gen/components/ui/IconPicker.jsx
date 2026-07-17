@@ -64,9 +64,9 @@ export function IconPicker({
     const [selectedWeight, setSelectedWeight] = useState(defaultWeight);
 
     // Sync weight when modal opens
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    React.useEffect(() => {
+    useEffect(() => {
         if (open) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSelectedWeight(defaultWeight);
         }
     }, [open, defaultWeight]);
@@ -118,8 +118,8 @@ export function IconPicker({
         );
     }, [searchQuery, allIconNames]);
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    React.useEffect(() => {
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1);
     }, [searchQuery]);
 
