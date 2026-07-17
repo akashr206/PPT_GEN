@@ -11,10 +11,12 @@ import { useImageFetcher } from "@/hooks/use-image-fetcher";
 import { useLibrarySidebar } from "@/hooks/use-library-sidebar";
 import { useExport } from "@/hooks/use-export";
 import { useAutosave } from "@/hooks/use-autosave";
+import { useHistoryStore } from "@/contexts/history-context";
 
 import ViewerToolbar from "@/components/generate/ViewerToolbar";
 import SlideSettingsModal from "@/components/generate/SlideSettingsModal";
 import EditWithAIModal from "@/components/generate/EditWithAIModal";
+import BlockLayoutSelectorModal from "@/components/generate/BlockLayoutSelectorModal";
 
 import SlideViewer from "./components/SlideViewer";
 import SlideThumbnails from "./components/SlideThumbnails";
@@ -32,10 +34,32 @@ export default function PPTSlidesViewerPage({ params }) {
     const [isEditWithAILoading, setIsEditWithAILoading] = useState(false);
     const [isTouchDevice, setIsTouchDevice] = useState(false);
 
+    const [blockLayoutModalState, setBlockLayoutModalState] = useState({
+        isOpen: false,
+        blockIndex: null,
+        currentCategory: "",
+        currentType: "",
+        onSelect: null,
+    });
+
     // Stable callbacks for opening modals — must be useCallback so they don't
     // create new references on every render (which would break React.memo on children)
     const openSettings = useCallback(() => setIsSlideSettingsOpen(true), []);
     const openEditWithAI = useCallback(() => setIsEditWithAIModalOpen(true), []);
+
+    useEffect(() => {
+        const handleOpenEvent = (e) => {
+            setBlockLayoutModalState({
+                isOpen: true,
+                blockIndex: e.detail.blockIndex,
+                currentCategory: e.detail.currentCategory,
+                currentType: e.detail.currentType,
+                onSelect: e.detail.onSelect,
+            });
+        };
+        window.addEventListener("trigger-open-block-layout-picker", handleOpenEvent);
+        return () => window.removeEventListener("trigger-open-block-layout-picker", handleOpenEvent);
+    }, []);
 
     useEffect(() => {
         
@@ -70,6 +94,7 @@ export default function PPTSlidesViewerPage({ params }) {
         handleUpdateBlock,
         handleDeleteBlock,
         handleAddBlock,
+        handleSplitBlock,
         handleUpdateSlide,
         handleUpdateItem,
         handleSplitSlide,
@@ -207,10 +232,18 @@ export default function PPTSlidesViewerPage({ params }) {
 
         const handlePDF = () => { if (!isBusy) setIsGeneratingPDF(true); };
         const handlePPT = (e) => { if (!isBusy) handleDownloadAsPPT(e); };
-        const handleTheme = (e) => {
+        const handleTheme = async (e) => {
             if (isBusy) return;
             if (e.detail?.theme) {
-                setPptData((prev) => ({ ...prev, theme: e.detail.theme }));
+                const newTheme = e.detail.theme;
+                setPptData((prev) => ({ ...prev, theme: newTheme }));
+                try {
+                    await api.patch(`/api/ppt/${pptId}`, { theme: newTheme });
+                    useHistoryStore.getState().updateFirstSlide(pptId, undefined, undefined, newTheme);
+                    console.log("[Theme] Saved theme to database:", newTheme);
+                } catch (err) {
+                    console.error("[Theme] Failed to save theme:", err);
+                }
             }
         };
 
@@ -284,6 +317,7 @@ export default function PPTSlidesViewerPage({ params }) {
             onUpdateBlock: isBusy ? undefined : handleUpdateBlock,
             onDeleteBlock: isBusy ? undefined : handleDeleteBlock,
             onAddBlock: isBusy ? undefined : handleAddBlock,
+            onSplitBlock: isBusy ? undefined : handleSplitBlock,
             onUpdateItem: isBusy ? undefined : handleUpdateItem,
             onDeleteItem: isBusy ? undefined : handleDeleteItem,
             onAddItem: isBusy ? undefined : handleAddItemAtIndex,
@@ -293,7 +327,7 @@ export default function PPTSlidesViewerPage({ params }) {
         }),
         [
             isBusy,
-            handleUpdateSlide, handleUpdateBlock, handleDeleteBlock, handleAddBlock,
+            handleUpdateSlide, handleUpdateBlock, handleDeleteBlock, handleAddBlock, handleSplitBlock,
             handleUpdateItem, handleDeleteItem, handleAddItemAtIndex,
             handleEditImageBridged, handleSplitSlide, handleDeleteSlide,
         ],
@@ -337,9 +371,9 @@ export default function PPTSlidesViewerPage({ params }) {
             {/* Main content area */}
             <div className="w-full flex-1 flex flex-row min-h-0 relative overflow-hidden">
                 {/* Left: slide editor + thumbnails */}
-                <div className="flex-1 flex flex-col items-center justify-center p-2 md:p-8 min-h-0 overflow-y-auto">
+                <div className="flex-1 flex flex-col items-center justify-center p-2 min-h-0 overflow-y-auto">
                     <div className="flex-1 flex flex-col items-center justify-between md:justify-center w-full h-full p-2 sm:p-4 pb-4 md:pb-4 relative min-h-0">
-                        <div className="w-full flex-1 md:flex-none flex flex-col items-center justify-center min-h-0 gap-3">
+                        <div className="w-full flex-1 flex flex-col items-center justify-center min-h-0 gap-3">
                             <SlideViewer
                                 editableSlides={editableSlides}
                                 activeSlideIndex={activeSlideIndex}
@@ -397,6 +431,16 @@ export default function PPTSlidesViewerPage({ params }) {
                 setPrompt={setEditWithAIPrompt}
                 isLoading={isEditWithAILoading}
                 onApply={handleEditSlideWithAI}
+            />
+
+            <BlockLayoutSelectorModal
+                isOpen={blockLayoutModalState.isOpen}
+                onClose={() =>
+                    setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }))
+                }
+                currentCategory={blockLayoutModalState.currentCategory}
+                currentType={blockLayoutModalState.currentType}
+                onSelect={blockLayoutModalState.onSelect}
             />
 
             {/* Off-screen export frames (only mounted during export) */}

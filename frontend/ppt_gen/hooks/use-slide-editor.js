@@ -1,5 +1,162 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { toast } from "sonner";
+import { useHistoryStore } from "@/contexts/history-context";
+
+// --- BSP Helper Functions ---
+
+const createSplit = (direction, first, second) => ({
+    id: `split_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    type: "split",
+    direction,
+    splitRatio: 50,
+    first,
+    second
+});
+
+export const buildAutoBSP = (contentBlocks) => {
+    if (!contentBlocks || contentBlocks.length === 0) return { type: "leaf", id: `block_${Date.now()}`, blockType: "content", items: [] };
+    if (contentBlocks.length === 1) return { ...contentBlocks[0], type: "leaf" };
+    if (contentBlocks.length === 2) return createSplit("horizontal", 
+        { ...contentBlocks[0], type: "leaf" }, 
+        { ...contentBlocks[1], type: "leaf" }
+    );
+    if (contentBlocks.length === 3) return createSplit("horizontal",
+        { ...contentBlocks[0], type: "leaf" },
+        createSplit("vertical", { ...contentBlocks[1], type: "leaf" }, { ...contentBlocks[2], type: "leaf" })
+    );
+    return createSplit("horizontal",
+        createSplit("vertical", { ...contentBlocks[0], type: "leaf" }, { ...contentBlocks[2], type: "leaf" }),
+        createSplit("vertical", { ...contentBlocks[1], type: "leaf" }, { ...contentBlocks[3], type: "leaf" })
+    );
+};
+
+const fixTreeTypes = (node) => {
+    if (!node) return null;
+    if (node.type === "split") {
+        return {
+            ...node,
+            first: fixTreeTypes(node.first),
+            second: fixTreeTypes(node.second)
+        };
+    }
+    if (node.type !== "leaf") {
+        return { ...node, type: "leaf", blockType: node.type };
+    }
+    return node;
+};
+
+const createNewBlock = () => ({
+    id: `block_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    type: "leaf",
+    blockType: "content",
+    align: "left",
+    layout: { category: "bullets", type: "simple" },
+    items: [
+        { header: "New Point", description: "Details here" }
+    ]
+});
+
+export const normalizeSlides = (slides) => {
+    return slides.map(slide => {
+        if (slide.contentTree) {
+            return { ...slide, contentTree: fixTreeTypes(slide.contentTree) };
+        }
+
+        const blocks = slide.blocks || [];
+        const headerBlock = blocks.find(b => b.type === "header") || null;
+        const contentBlocks = blocks.filter(b => b.type === "content");
+        
+        const contentTree = buildAutoBSP(contentBlocks);
+
+        const newSlide = { ...slide, header: headerBlock, contentTree };
+        delete newSlide.blocks;
+        return newSlide;
+    });
+};
+
+export const updateNode = (node, targetId, updater) => {
+    if (!node) return node;
+    if (node.id === targetId || (node.type === "header" && node.id === targetId)) {
+        return updater(node);
+    }
+    if (node.type === "leaf" || node.type === "content") return node;
+    
+    const newFirst = updateNode(node.first, targetId, updater);
+    const newSecond = updateNode(node.second, targetId, updater);
+    if (newFirst === node.first && newSecond === node.second) return node;
+    return { ...node, first: newFirst, second: newSecond };
+};
+
+export const deleteNode = (node, targetId) => {
+    if (!node) return null;
+    if (node.id === targetId) return null;
+    if (node.type === "leaf" || node.type === "content") return node;
+    
+    const newFirst = deleteNode(node.first, targetId);
+    const newSecond = deleteNode(node.second, targetId);
+
+    if (!newFirst && !newSecond) return null;
+    if (!newFirst) return newSecond;
+    if (!newSecond) return newFirst;
+
+    if (newFirst === node.first && newSecond === node.second) return node;
+    return { ...node, first: newFirst, second: newSecond };
+};
+
+export const countLeaves = (node) => {
+    if (!node) return 0;
+    if (node.type === "leaf" || node.type === "content") return 1;
+    return countLeaves(node.first) + countLeaves(node.second);
+};
+
+export const splitLargestLeaf = (node, newLeaf) => {
+    const queue = [{ n: node, path: [] }];
+    let targetPath = null;
+    while (queue.length > 0) {
+        const { n, path } = queue.shift();
+        if (n.type === "leaf" || n.type === "content") {
+            targetPath = path;
+            break;
+        }
+        if (n.first) queue.push({ n: n.first, path: [...path, 'first'] });
+        if (n.second) queue.push({ n: n.second, path: [...path, 'second'] });
+    }
+
+    if (!targetPath) return node;
+
+    const splitAtPath = (currentNode, pathIndex, currentPath) => {
+        if (pathIndex === currentPath.length) {
+            const direction = currentPath.length % 2 === 0 ? "horizontal" : "vertical";
+            return createSplit(direction, currentNode, newLeaf);
+        }
+        const dir = currentPath[pathIndex];
+        return {
+            ...currentNode,
+            [dir]: splitAtPath(currentNode[dir], pathIndex + 1, currentPath)
+        };
+    };
+
+    return splitAtPath(node, 0, targetPath);
+};
+
+export const splitSpecificLeaf = (node, targetId, direction, newLeaf) => {
+    if (!node) return node;
+    if (node.type === "leaf" || node.type === "content") {
+        if (node.id === targetId) {
+            const splitDirection = (direction === 'top' || direction === 'bottom') ? 'vertical' : 'horizontal';
+            const isFirst = (direction === 'top' || direction === 'left');
+            return createSplit(splitDirection, isFirst ? newLeaf : node, isFirst ? node : newLeaf);
+        }
+        return node;
+    }
+    const newFirst = splitSpecificLeaf(node.first, targetId, direction, newLeaf);
+    const newSecond = splitSpecificLeaf(node.second, targetId, direction, newLeaf);
+    if (newFirst === node.first && newSecond === node.second) return node;
+    return { ...node, first: newFirst, second: newSecond };
+};
+
+
+// --- Hook ---
 
 export function useSlideEditor(initialPptData, isBusy) {
     const [pptData, setPptData] = useState(initialPptData || null);
@@ -38,7 +195,7 @@ export function useSlideEditor(initialPptData, isBusy) {
 
     useEffect(() => {
         if (pptData?.slides && isFirstLoadRef.current) {
-            setEditableSlides(JSON.parse(JSON.stringify(pptData.slides)));
+            setEditableSlides(normalizeSlides(JSON.parse(JSON.stringify(pptData.slides))));
             isFirstLoadRef.current = false;
         }
     }, [pptData]);
@@ -50,10 +207,19 @@ export function useSlideEditor(initialPptData, isBusy) {
         ]);
         setFuture([]);
         setEditableSlides(newSlides);
-        setPptData((prev) => ({
-            ...prev,
-            slides: newSlides,
-        }));
+        setPptData((prev) => {
+            if (!prev) return prev;
+            const updated = {
+                ...prev,
+                slides: newSlides,
+            };
+            // Instantly update the first slide preview, title, and theme in the history store
+            const firstSlide = newSlides[0];
+            const title = firstSlide?.header?.title || prev.title;
+            const theme = prev.theme;
+            useHistoryStore.getState().updateFirstSlide(prev.id, firstSlide, title, theme);
+            return updated;
+        });
     }, []);
 
     const handleUndo = useCallback(() => {
@@ -63,7 +229,6 @@ export function useSlideEditor(initialPptData, isBusy) {
 
         const previous = currentPast[currentPast.length - 1];
 
-        // Find modified slide index to set as active
         const currentSlides = editableSlidesRef.current;
         let diffIndex = -1;
         if (currentSlides && previous) {
@@ -116,7 +281,6 @@ export function useSlideEditor(initialPptData, isBusy) {
 
         const next = currentFuture[0];
 
-        // Find modified slide index to set as active
         const currentSlides = editableSlidesRef.current;
         let diffIndex = -1;
         if (currentSlides && next) {
@@ -179,44 +343,57 @@ export function useSlideEditor(initialPptData, isBusy) {
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
 
-    const handleUpdateBlock = useCallback((blockIndex, field, value) => {
+    const handleUpdateBlock = useCallback((blockId, field, value) => {
         if (isBusy) return;
         const slides = editableSlidesRef.current;
         if (!slides || !slides[activeSlideIndexRef.current]) return;
         const updatedSlides = [...slides];
         const slide = updatedSlides[activeSlideIndexRef.current];
-        if (!slide.blocks) return;
 
-        const updatedBlocks = [...slide.blocks];
-        updatedBlocks[blockIndex] = {
-            ...updatedBlocks[blockIndex],
-            [field]: value,
-        };
-
-        updatedSlides[activeSlideIndexRef.current] = { ...slide, blocks: updatedBlocks };
-        updateSlidesState(updatedSlides);
-    }, [isBusy, updateSlidesState]);
-
-    const handleDeleteBlock = useCallback((blockIndex) => {
-        if (isBusy) return;
-        const slides = editableSlidesRef.current;
-        if (!slides || !slides[activeSlideIndexRef.current]) return;
-        const updatedSlides = [...slides];
-        const slide = updatedSlides[activeSlideIndexRef.current];
-        if (!slide.blocks) return;
-
-        const updatedBlocks = slide.blocks.filter((_, idx) => idx !== blockIndex);
+        // Check if it's the header block
+        if (slide.header && slide.header.id === blockId) {
+            updatedSlides[activeSlideIndexRef.current] = { 
+                ...slide, 
+                header: { ...slide.header, [field]: value }
+            };
+        } else if (slide.contentTree) {
+            // Otherwise traverse BSP tree
+            const updatedTree = updateNode(slide.contentTree, blockId, (node) => ({
+                ...node,
+                [field]: value
+            }));
+            updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
+        }
         
-        // Space recovery: strip custom 'width' from all remaining blocks
-        const recoveredBlocks = updatedBlocks.map((b) => {
-            const newBlock = { ...b };
-            delete newBlock.width;
-            return newBlock;
-        });
-
-        updatedSlides[activeSlideIndexRef.current] = { ...slide, blocks: recoveredBlocks };
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
+
+    const handleDeleteBlock = useCallback((blockId) => {
+        if (isBusy) return;
+        const slides = editableSlidesRef.current;
+        if (!slides || !slides[activeSlideIndexRef.current]) return;
+        const updatedSlides = [...slides];
+        const slide = updatedSlides[activeSlideIndexRef.current];
+
+        if (slide.header && slide.header.id === blockId) {
+            updatedSlides[activeSlideIndexRef.current] = { ...slide, header: null };
+        } else if (slide.contentTree) {
+            const updatedTree = deleteNode(slide.contentTree, blockId);
+            updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
+        }
+        updateSlidesState(updatedSlides);
+    }, [isBusy, updateSlidesState]);
+
+    const createNewBlock = () => ({
+        id: `block_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        type: "leaf",
+        blockType: "content", // explicitly differentiate from header/split
+        align: "left",
+        layout: { category: "bullets", type: "simple" },
+        items: [
+            { header: "New Point", description: "Details about this point" }
+        ]
+    });
 
     const handleAddBlock = useCallback(() => {
         if (isBusy) return;
@@ -224,27 +401,117 @@ export function useSlideEditor(initialPptData, isBusy) {
         if (!slides || !slides[activeSlideIndexRef.current]) return;
         const updatedSlides = [...slides];
         const slide = updatedSlides[activeSlideIndexRef.current];
-        const currentBlocks = slide.blocks || [];
 
-        if (currentBlocks.length >= 4) {
+        if (countLeaves(slide.contentTree) >= 4) {
             toast.error("Maximum 4 blocks allowed per slide");
             return;
         }
 
-        const newBlock = {
-            id: `block_${Date.now()}`,
-            type: "content",
-            align: "left",
-            layout: { category: "bullets", type: "standard" },
-            items: [
-                { header: "New Point", description: "Details about this point" }
-            ]
-        };
+        const newBlock = createNewBlock();
+        let updatedTree = slide.contentTree;
 
-        updatedSlides[activeSlideIndexRef.current] = { 
-            ...slide, 
-            blocks: [...currentBlocks, newBlock] 
-        };
+        if (!updatedTree) {
+            updatedTree = newBlock;
+        } else {
+            updatedTree = splitLargestLeaf(updatedTree, newBlock);
+        }
+
+        updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
+        updateSlidesState(updatedSlides);
+    }, [isBusy, updateSlidesState]);
+
+    const handleSplitBlock = useCallback((blockId, direction) => {
+        if (isBusy) return;
+        const slides = editableSlidesRef.current;
+        if (!slides || !slides[activeSlideIndexRef.current]) return;
+        const updatedSlides = [...slides];
+        const slide = updatedSlides[activeSlideIndexRef.current];
+
+        if (countLeaves(slide.contentTree) >= 4) {
+            toast.error("Maximum 4 blocks allowed per slide");
+            return;
+        }
+
+        const newBlock = createNewBlock();
+        const updatedTree = splitSpecificLeaf(slide.contentTree, blockId, direction, newBlock);
+
+        updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
+        updateSlidesState(updatedSlides);
+    }, [isBusy, updateSlidesState]);
+
+    const handleUpdateItem = useCallback((blockId, itemIndex, field, value) => {
+        if (isBusy) return;
+        const slides = editableSlidesRef.current;
+        if (!slides || !slides[activeSlideIndexRef.current]) return;
+        const updatedSlides = [...slides];
+        const slide = updatedSlides[activeSlideIndexRef.current];
+        if (!slide.contentTree) return;
+
+        const updatedTree = updateNode(slide.contentTree, blockId, (node) => {
+            const updatedItems = [...(node.items || [])];
+            updatedItems[itemIndex] = {
+                ...updatedItems[itemIndex],
+                [field]: value,
+            };
+            return { ...node, items: updatedItems };
+        });
+
+        updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
+        updateSlidesState(updatedSlides);
+    }, [isBusy, updateSlidesState]);
+
+    // Omit handleSplitSlide for now as it's complex for BSP. We could flatten first.
+    const handleSplitSlide = useCallback((slideIndex, splitIndex) => {
+        toast.error("Slide splitting is temporarily disabled in BSP mode.");
+    }, []);
+
+    const handleAddItemAtIndex = useCallback((blockId, itemIndex, direction) => {
+        if (isBusy) return;
+        const slides = editableSlidesRef.current;
+        if (!slides || !slides[activeSlideIndexRef.current]) return;
+        const updatedSlides = [...slides];
+        const slide = updatedSlides[activeSlideIndexRef.current];
+        if (!slide.contentTree) return;
+
+        const updatedTree = updateNode(slide.contentTree, blockId, (node) => {
+            const newItem = { header: "New Item", description: "New Description" };
+            const newItems = [...(node.items || [])];
+            if (direction === 'before') {
+                newItems.splice(itemIndex, 0, newItem);
+            } else {
+                newItems.splice(itemIndex + 1, 0, newItem);
+            }
+            return { ...node, items: newItems };
+        });
+
+        updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
+        updateSlidesState(updatedSlides);
+    }, [isBusy, updateSlidesState]);
+
+    const handleDeleteItem = useCallback((blockId, itemIndex) => {
+        if (isBusy) return;
+        const slides = editableSlidesRef.current;
+        if (!slides || !slides[activeSlideIndexRef.current]) return;
+        const updatedSlides = [...slides];
+        const slide = updatedSlides[activeSlideIndexRef.current];
+        if (!slide.contentTree) return;
+
+        let shouldDeleteBlock = false;
+        let updatedTree = updateNode(slide.contentTree, blockId, (node) => {
+            const items = node.items || [];
+            if (items.length <= 1) {
+                shouldDeleteBlock = true;
+                return node; // don't change, we will delete the whole block
+            }
+            const newItems = items.filter((_, idx) => idx !== itemIndex);
+            return { ...node, items: newItems };
+        });
+
+        if (shouldDeleteBlock) {
+            updatedTree = deleteNode(updatedTree, blockId);
+        }
+
+        updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
 
@@ -262,143 +529,28 @@ export function useSlideEditor(initialPptData, isBusy) {
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
 
-    const handleUpdateItem = useCallback((blockIndex, itemIndex, field, value) => {
-        if (isBusy) return;
-        const slides = editableSlidesRef.current;
-        if (!slides || !slides[activeSlideIndexRef.current]) return;
-        const updatedSlides = [...slides];
-        const slide = updatedSlides[activeSlideIndexRef.current];
-        if (!slide.blocks || !slide.blocks[blockIndex]) return;
-
-        const updatedBlocks = [...slide.blocks];
-        const updatedItems = [...(updatedBlocks[blockIndex].items || [])];
-
-        updatedItems[itemIndex] = {
-            ...updatedItems[itemIndex],
-            [field]: value,
-        };
-
-        updatedBlocks[blockIndex] = {
-            ...updatedBlocks[blockIndex],
-            items: updatedItems,
-        };
-
-        updatedSlides[activeSlideIndexRef.current] = { ...slide, blocks: updatedBlocks };
-        updateSlidesState(updatedSlides);
-    }, [isBusy, updateSlidesState]);
-
-    const handleSplitSlide = useCallback((slideIndex, splitIndex) => {
-        if (isBusy) return;
-        const slides = editableSlidesRef.current;
-        if (!slides || !slides[slideIndex]) return;
-
-        const originalSlide = slides[slideIndex];
-        const blocksToSplit = originalSlide.blocks.slice(splitIndex);
-        const remainingBlocks = originalSlide.blocks.slice(0, splitIndex);
-
-        if (blocksToSplit.length === 0) return;
-
-        const newSlide = {
-            ...JSON.parse(JSON.stringify(originalSlide)),
-            id: `slide_${Date.now()}`,
-            blocks: blocksToSplit,
-        };
-
-        const updatedSlides = [...slides];
-        updatedSlides[slideIndex] = {
-            ...originalSlide,
-            blocks: remainingBlocks,
-        };
-
-        updatedSlides.splice(slideIndex + 1, 0, newSlide);
-
-        updateSlidesState(updatedSlides);
-        setActiveSlideIndex(slideIndex + 1);
-        toast.success("Slide split successfully");
-    }, [isBusy, updateSlidesState]);
-
-    const handleAddItemAtIndex = useCallback((blockIndex, itemIndex, direction) => {
-        if (isBusy) return;
-        const slides = editableSlidesRef.current;
-        if (!slides || !slides[activeSlideIndexRef.current]) return;
-        const updatedSlides = [...slides];
-        const slide = updatedSlides[activeSlideIndexRef.current];
-        if (!slide.blocks || !slide.blocks[blockIndex]) return;
-
-        const updatedBlocks = [...slide.blocks];
-        const items = updatedBlocks[blockIndex].items || [];
-
-        const newItem = {
-            header: "New Item",
-            description: "New Description"
-        };
-
-        const newItems = [...items];
-        if (direction === 'before') {
-            newItems.splice(itemIndex, 0, newItem);
-        } else {
-            newItems.splice(itemIndex + 1, 0, newItem);
-        }
-
-        updatedBlocks[blockIndex] = {
-            ...updatedBlocks[blockIndex],
-            items: newItems,
-        };
-
-        updatedSlides[activeSlideIndexRef.current] = { ...slide, blocks: updatedBlocks };
-        updateSlidesState(updatedSlides);
-    }, [isBusy, updateSlidesState]);
-
-    const handleDeleteItem = useCallback((blockIndex, itemIndex) => {
-        if (isBusy) return;
-        const slides = editableSlidesRef.current;
-        if (!slides || !slides[activeSlideIndexRef.current]) return;
-        const updatedSlides = [...slides];
-        const slide = updatedSlides[activeSlideIndexRef.current];
-        if (!slide.blocks || !slide.blocks[blockIndex]) return;
-
-        const updatedBlocks = [...slide.blocks];
-        const items = updatedBlocks[blockIndex].items || [];
-
-        if (items.length <= 1) {
-            handleDeleteBlock(blockIndex);
-            return;
-        }
-
-        const newItems = items.filter((_, idx) => idx !== itemIndex);
-
-        updatedBlocks[blockIndex] = {
-            ...updatedBlocks[blockIndex],
-            items: newItems,
-        };
-
-        updatedSlides[activeSlideIndexRef.current] = { ...slide, blocks: updatedBlocks };
-        updateSlidesState(updatedSlides);
-    }, [isBusy, updateSlidesState, handleDeleteBlock]);
-
     const handleAddSlide = useCallback((index) => {
         if (isBusy) return;
         const newSlide = {
             type: "normal",
-            blocks: [
-                {
-                    id: "h1",
-                    type: "header",
-                    title: "New Slide",
-                    subtitle: "Add description...",
-                    align: "left"
-                },
-                {
-                    id: "c1",
-                    type: "content",
-                    align: "left",
-                    layout: { category: "bullets", type: "standard" },
-                    items: [
-                        { header: "Point 1", description: "Details about this point" },
-                        { header: "Point 2", description: "Details about this point" },
-                    ]
-                }
-            ]
+            header: {
+                id: "h1",
+                type: "header",
+                title: "New Slide",
+                subtitle: "Add description...",
+                align: "left"
+            },
+            contentTree: {
+                id: `block_${Date.now()}`,
+                type: "leaf",
+                blockType: "content",
+                align: "left",
+                layout: { category: "bullets", type: "standard" },
+                items: [
+                    { header: "Point 1", description: "Details about this point" },
+                    { header: "Point 2", description: "Details about this point" },
+                ]
+            }
         };
         const updatedSlides = [...editableSlidesRef.current];
         const insertIndex = typeof index === "number" ? index : activeSlideIndexRef.current + 1;
@@ -464,6 +616,7 @@ export function useSlideEditor(initialPptData, isBusy) {
         handleUpdateBlock,
         handleDeleteBlock,
         handleAddBlock,
+        handleSplitBlock,
         handleUpdateSlide,
         handleUpdateItem,
         handleSplitSlide,
@@ -472,7 +625,6 @@ export function useSlideEditor(initialPptData, isBusy) {
         handleAddSlide,
         handleDeleteSlide,
         handleMoveSlide,
-        // Expose refs for stale-closure-safe access in external hooks
         editableSlidesRef,
         activeSlideIndexRef,
     };

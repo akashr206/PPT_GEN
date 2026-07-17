@@ -1,25 +1,42 @@
 import React, { useState } from "react";
 import SlideLayout from "./layouts/SlideLayout";
-import { MoreHorizontal, LayoutTemplate, Trash2, Plus } from "lucide-react";
+import {
+    LayoutTemplate,
+    PanelLeft,
+    PanelRight,
+    PanelTop,
+    PanelBottom,
+    MoreHorizontal,
+    Trash2,
+    AlignVerticalJustifyStart,
+    AlignVerticalJustifyCenter,
+    AlignVerticalJustifyEnd
+} from "lucide-react";
+
+const VERTICAL_ALIGNMENTS = [
+    { value: "top", icon: AlignVerticalJustifyStart, label: "Align Top" },
+    { value: "center", icon: AlignVerticalJustifyCenter, label: "Align Center" },
+    { value: "bottom", icon: AlignVerticalJustifyEnd, label: "Align Bottom" }
+];
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { layout_map } from "./layouts/layout_map";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import "./themes.css"
 
 const ContentBlock = ({
     block,
-    blockIndex,
+    blockId,
     onUpdateBlock,
     onDeleteBlock,
+    onSplitBlock,
     onUpdateItem,
     onDeleteItem,
     onAddItem,
@@ -29,112 +46,224 @@ const ContentBlock = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
+
     let alignClass = "items-start";
     if (block.align === "center") alignClass = "items-center";
     if (block.align === "right") alignClass = "items-end";
 
-    // Build nested layout options based on layout_map
-    const categories = Object.keys(layout_map || {});
+    let justifyClass = "justify-start";
+    if (block.verticalAlign === "center") justifyClass = "justify-center";
+    else if (block.verticalAlign === "bottom") justifyClass = "justify-end";
 
-    // For horizontal flex/width sizing
-    const flexBasis = block.width === 100 ? "100%" : block.width ? `calc(${block.width}% - 0.5cqw)` : "100%";
+    // For BSP, we don't rely on block.width, it's flexBasis controlled by parent.
+    // We just take full width/height of our container.
+    const flexBasis = "100%";
+
+    const handleLayoutSelect = (cat, type) => {
+        if (onUpdateBlock) {
+            onUpdateBlock(blockId, "layout", { category: cat, type });
+        }
+    };
+
+    const handleOpenLayoutPicker = () => {
+        setIsOpen(false);
+        window.dispatchEvent(
+            new CustomEvent("trigger-open-block-layout-picker", {
+                detail: {
+                    blockId,
+                    currentCategory: block.layout?.category,
+                    currentType: block.layout?.type,
+                    onSelect: handleLayoutSelect,
+                },
+            })
+        );
+    };
+
+
 
     return (
         <div
-            style={{ width: flexBasis }}
-            className={`relative flex flex-col min-h-0 ${alignClass} group/block transition-colors p-[1cqw] ${
-                !readOnly ? (isOpen ? "outline outline-1 outline-gray-400/80 bg-gray-500/5" : "hover:outline hover:outline-1 hover:outline-gray-400/80 hover:bg-gray-500/5") : ""
+            style={{ width: "100%", minHeight: "100%", height: "fit-content" }}
+            className={`relative flex flex-col ${justifyClass} ${alignClass} group/block transition-colors p-[1cqw] ${
+                !readOnly
+                    ? isOpen
+                        ? "outline outline-gray-400/80 bg-gray-500/5"
+                        : "hover:outline  hover:outline-gray-400/80 hover:bg-gray-500/5"
+                    : ""
             }`}
         >
             <SlideLayout
                 layoutCategory={block.layout?.category}
                 layoutType={block.layout?.type}
                 content={block.items || []}
-                onUpdateItem={onUpdateItem ? (i, f, v) => onUpdateItem(blockIndex, i, f, v) : undefined}
-                onDeleteItem={onDeleteItem ? (i) => onDeleteItem(blockIndex, i) : undefined}
-                onAddItem={onAddItem ? (i, d) => onAddItem(blockIndex, i, d) : undefined}
-                onEditImage={onEditImage}
+                onUpdateItem={
+                    onUpdateItem
+                        ? (i, f, v) => onUpdateItem(blockId, i, f, v)
+                        : undefined
+                }
+                onDeleteItem={
+                    onDeleteItem ? (i) => onDeleteItem(blockId, i) : undefined
+                }
+                onAddItem={
+                    onAddItem ? (i, d) => onAddItem(blockId, i, d) : undefined
+                }
+                onEditImage={
+                    onEditImage
+                        ? (ctx) => onEditImage({ ...ctx, blockId })
+                        : undefined
+                }
                 theme={theme}
                 readOnly={readOnly}
             />
 
             {!readOnly && (
-                <>
-                    {/* Top Center 3-Dots Menu */}
-                    <div className={`absolute -top-[1.5cqw] left-1/2 -translate-x-1/2 transition-opacity z-30 ${isOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}>
-                        <DropdownMenu onOpenChange={setIsOpen}>
+                <TooltipProvider>
+                    <div
+                        className={`absolute -top-3 left-1/2 -translate-x-1/2 transition-opacity z-40 ${isOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}
+                    >
+                        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                             <DropdownMenuTrigger asChild>
                                 <button
-                                    className="p-[0.3cqw] bg-background text-foreground border border-border rounded-md shadow-sm hover:bg-muted"
-                                    title="Block Options"
+                                    className="p-[0.2cqw] rounded-xs transition-colors cursor-pointer flex items-center justify-center theme-menu-button"
                                 >
-                                    <MoreHorizontal className="w-[1.2cqw] h-[1.2cqw]" />
+                                    <MoreHorizontal className="w-[1.2cqw] h-[1.2cqw] max-sm:w-4 max-sm:h-4" />
                                 </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="center" className="w-56 z-50">
-                                <DropdownMenuSub>
-                                    <DropdownMenuSubTrigger>
-                                        <LayoutTemplate className="mr-2 h-4 w-4" />
-                                        <span>Change Layout</span>
-                                    </DropdownMenuSubTrigger>
-                                    <DropdownMenuSubContent className="w-48 max-h-[60vh] overflow-y-auto">
-                                        {categories.map((cat) => (
-                                            <DropdownMenuSub key={cat}>
-                                                <DropdownMenuSubTrigger className="capitalize">
-                                                    {cat}
-                                                </DropdownMenuSubTrigger>
-                                                <DropdownMenuSubContent>
-                                                    <DropdownMenuRadioGroup
-                                                        value={
-                                                            block.layout?.category === cat
-                                                                ? block.layout?.type
-                                                                : ""
+
+                            <DropdownMenuContent
+                                align="center"
+                                className="flex items-center w-max gap-[0.3cqw] p-[0.2cqw] rounded-[4px] bg-card z-50 overflow-hidden"
+                                sideOffset={6}
+                            >
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            onClick={handleOpenLayoutPicker}
+                                            className="p-[0.2cqw] hover:bg-muted text-muted-foreground hover:text-foreground rounded transition-colors cursor-pointer flex items-center gap-1"
+                                        >
+                                            <LayoutTemplate className="w-[1cqw] h-[1cqw] max-sm:w-4 max-sm:h-4" />
+                                            <span className="text-[0.8cqw] text-muted-foreground max-sm:hidden">
+                                                {block.layout?.type || "Layout"}
+                                            </span>
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Change Layout: {block.layout?.type || "—"}</TooltipContent>
+                                </Tooltip>
+
+                                {onSplitBlock && (
+                                    <>
+                                        <div className="w-px h-[1.2cqw] bg-border mx-[0.1cqw]" />
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        onSplitBlock(blockId, "left");
+                                                    }}
+                                                    className="p-[0.2cqw] hover:bg-muted text-muted-foreground hover:text-foreground rounded transition-colors cursor-pointer"
+                                                >
+                                                    <PanelLeft className="w-[1cqw] h-[1cqw] max-sm:w-4 max-sm:h-4" />
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Split Left</TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        onSplitBlock(blockId, "right");
+                                                    }}
+                                                    className="p-[0.2cqw] hover:bg-muted text-muted-foreground hover:text-foreground rounded transition-colors cursor-pointer"
+                                                >
+                                                    <PanelRight className="w-[1cqw] h-[1cqw] max-sm:w-4 max-sm:h-4" />
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Split Right</TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        onSplitBlock(blockId, "top");
+                                                    }}
+                                                    className="p-[0.2cqw] hover:bg-muted text-muted-foreground hover:text-foreground rounded transition-colors cursor-pointer"
+                                                >
+                                                    <PanelTop className="w-[1cqw] h-[1cqw] max-sm:w-4 max-sm:h-4" />
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Split Top</TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        onSplitBlock(blockId, "bottom");
+                                                    }}
+                                                    className="p-[0.2cqw] hover:bg-muted text-muted-foreground hover:text-foreground rounded transition-colors cursor-pointer"
+                                                >
+                                                    <PanelBottom className="w-[1cqw] h-[1cqw] max-sm:w-4 max-sm:h-4" />
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Split Bottom</TooltipContent>
+                                        </Tooltip>
+                                    </>
+                                )}
+
+                                <>
+                                    <div className="w-px h-[1.2cqw] bg-border mx-[0.1cqw]" />
+                                    {VERTICAL_ALIGNMENTS.map(({ value, icon: Icon, label }) => (
+                                        <Tooltip key={value}>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    onClick={() => {
+                                                        if (onUpdateBlock) {
+                                                            onUpdateBlock(blockId, "verticalAlign", value);
                                                         }
-                                                        onValueChange={(val) => {
-                                                            if (onUpdateBlock) {
-                                                                onUpdateBlock(blockIndex, "layout", {
-                                                                    category: cat,
-                                                                    type: val,
-                                                                });
-                                                            }
-                                                        }}
-                                                    >
-                                                        {Object.keys(layout_map[cat]).map((type) => (
-                                                            <DropdownMenuRadioItem key={type} value={type} className="capitalize">
-                                                                {type}
-                                                            </DropdownMenuRadioItem>
-                                                        ))}
-                                                    </DropdownMenuRadioGroup>
-                                                </DropdownMenuSubContent>
-                                            </DropdownMenuSub>
-                                        ))}
-                                    </DropdownMenuSubContent>
-                                </DropdownMenuSub>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                                    onClick={() => onDeleteBlock && onDeleteBlock(blockIndex)}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    <span>Delete Block</span>
-                                </DropdownMenuItem>
+                                                    }}
+                                                    className={`p-[0.2cqw] rounded transition-colors cursor-pointer
+                                                        ${
+                                                            (block.verticalAlign === value || (!block.verticalAlign && value === "top"))
+                                                                ? "bg-primary/15 text-primary"
+                                                                : "hover:bg-muted text-muted-foreground"
+                                                        }`}
+                                                >
+                                                    <Icon className="w-[1cqw] h-[1cqw] max-sm:w-4 max-sm:h-4" />
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>{label}</TooltipContent>
+                                        </Tooltip>
+                                    ))}
+                                </>
+
+                                {onDeleteBlock && (
+                                    <>
+                                        <div className="w-px h-[1.2cqw] bg-border mx-[0.1cqw]" />
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    onClick={() => {
+                                                        setIsOpen(false);
+                                                        onDeleteBlock(blockId);
+                                                    }}
+                                                    className="p-[0.2cqw] hover:bg-destructive/20 text-destructive rounded transition-colors cursor-pointer"
+                                                >
+                                                    <Trash2 className="w-[1cqw] h-[1cqw] max-sm:w-4 max-sm:h-4" />
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Delete Block</TooltipContent>
+                                        </Tooltip>
+                                    </>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
-
-                    {/* Bottom Center Add Item Button */}
-                    {onAddItem && (
-                        <div className="absolute -bottom-[1.5cqw] left-1/2 -translate-x-1/2 opacity-0 group-hover/block:opacity-100 transition-opacity z-20">
-                            <button
-                                onClick={() => onAddItem(blockIndex, (block.items || []).length - 1, "after")}
-                                className="p-[0.5cqw] bg-primary/10 text-primary rounded-full hover:bg-primary/20 backdrop-blur-sm shadow-sm cursor-pointer"
-                                title="Add Item"
-                            >
-                                <Plus className="w-[1.2cqw] h-[1.2cqw]" />
-                            </button>
-                        </div>
-                    )}
-                </>
+                </TooltipProvider>
             )}
         </div>
     );

@@ -1,12 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
 import { GripVertical, GripHorizontal } from "lucide-react";
 
-const BlockResizer = ({ leftBlockIndex, rightBlockIndex, onResize, onResizeEnd, initialLeftWidth, initialRightWidth, direction = "horizontal" }) => {
+const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction = "horizontal" }) => {
     const [isDragging, setIsDragging] = useState(false);
     const resizerRef = useRef(null);
     const startPosRef = useRef(0);
-    const startLeftWidthRef = useRef(0);
-    const startRightWidthRef = useRef(0);
+    const startRatioRef = useRef(0);
     const containerSizeRef = useRef(0);
 
     const isVertical = direction === "vertical";
@@ -17,13 +16,9 @@ const BlockResizer = ({ leftBlockIndex, rightBlockIndex, onResize, onResizeEnd, 
             const delta = isVertical ? (e.clientY - startPosRef.current) : (e.clientX - startPosRef.current);
             const deltaPercent = (delta / containerSizeRef.current) * 100;
 
-            const newLeftWidth = Math.max(15, Math.min(85, startLeftWidthRef.current + deltaPercent));
-            const newRightWidth = Math.max(15, startRightWidthRef.current - (newLeftWidth - startLeftWidthRef.current));
+            const newRatio = Math.max(10, Math.min(90, startRatioRef.current + deltaPercent));
 
-            if (onResize) {
-                // Adjust both adjacent blocks
-                onResize(leftBlockIndex, newLeftWidth, rightBlockIndex, newRightWidth);
-            }
+            if (onResize) onResize(newRatio);
         };
 
         const handleMouseUp = (e) => {
@@ -31,13 +26,11 @@ const BlockResizer = ({ leftBlockIndex, rightBlockIndex, onResize, onResizeEnd, 
             document.body.style.cursor = "default";
             
             if (onResizeEnd) {
-                // Calculate final values before unmounting/ending drag
                 const delta = isVertical ? (e.clientY - startPosRef.current) : (e.clientX - startPosRef.current);
                 const deltaPercent = (delta / containerSizeRef.current) * 100;
-                const newLeftWidth = Math.max(15, Math.min(85, startLeftWidthRef.current + deltaPercent));
-                const newRightWidth = Math.max(15, startRightWidthRef.current - (newLeftWidth - startLeftWidthRef.current));
+                const newRatio = Math.max(10, Math.min(90, startRatioRef.current + deltaPercent));
                 
-                onResizeEnd(leftBlockIndex, newLeftWidth, rightBlockIndex, newRightWidth);
+                onResizeEnd(newRatio);
             }
         };
 
@@ -51,21 +44,19 @@ const BlockResizer = ({ leftBlockIndex, rightBlockIndex, onResize, onResizeEnd, 
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [isDragging, leftBlockIndex, rightBlockIndex, onResize, onResizeEnd, isVertical]);
+    }, [isDragging, onResize, onResizeEnd, isVertical]);
 
     const handleMouseDown = (e) => {
         e.preventDefault();
         setIsDragging(true);
         startPosRef.current = isVertical ? e.clientY : e.clientX;
-        startLeftWidthRef.current = initialLeftWidth || 50;
-        startRightWidthRef.current = initialRightWidth || 50;
+        startRatioRef.current = initialSplitRatio;
         
-        // Use the parent flex container size
         if (resizerRef.current && resizerRef.current.parentElement) {
             const rect = resizerRef.current.parentElement.getBoundingClientRect();
             containerSizeRef.current = isVertical ? rect.height : rect.width;
         } else {
-            containerSizeRef.current = isVertical ? window.innerHeight : window.innerWidth; // Fallback
+            containerSizeRef.current = isVertical ? window.innerHeight : window.innerWidth;
         }
     };
 
@@ -73,11 +64,13 @@ const BlockResizer = ({ leftBlockIndex, rightBlockIndex, onResize, onResizeEnd, 
         return (
             <div
                 ref={resizerRef}
-                className={`h-[1cqw] group/resizer flex justify-center items-center cursor-row-resize shrink-0 z-40 transition-colors ${isDragging ? 'bg-primary/20' : 'hover:bg-muted'}`}
+                className={`h-[0.5cqw] group/resizer flex justify-center items-center cursor-row-resize shrink-0 z-40 transition-colors ${isDragging ? "bg-blue-500/20" : ""}`}
                 onMouseDown={handleMouseDown}
             >
-                <div className={`w-[4cqw] h-[0.4cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-primary/50 group-hover/resizer:text-primary'}`}>
-                    <GripHorizontal className="w-[1cqw] h-[1cqw] opacity-0 group-hover/resizer:opacity-100" />
+                <div
+                    className={`w-[4cqw] h-[0.2cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? "bg-primary text-primary-foreground" : "bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-primary/50 group-hover/resizer:text-primary"}`}
+                >
+                    <GripHorizontal className="w-[0.5cqw] h-[0.5cqw] opacity-0 group-hover/resizer:opacity-100" />
                 </div>
             </div>
         );
@@ -85,12 +78,12 @@ const BlockResizer = ({ leftBlockIndex, rightBlockIndex, onResize, onResizeEnd, 
 
     return (
         <div
-            ref={resizerRef}
-            className={`w-[1cqw] group/resizer flex justify-center items-center cursor-col-resize shrink-0 z-40 transition-colors ${isDragging ? 'bg-primary/20' : 'hover:bg-muted'}`}
+            ref={resizerRef}  
+            className={`w-[0.5cqw] group/resizer flex justify-center items-center cursor-col-resize shrink-0 z-40 transition-colors ${isDragging ? 'bg-blue-500/20' : ''}`}
             onMouseDown={handleMouseDown}
         >
-            <div className={`h-[4cqw] w-[0.4cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-primary/50 group-hover/resizer:text-primary'}`}>
-                 <GripVertical className="w-[1cqw] h-[1cqw] opacity-0 group-hover/resizer:opacity-100" />
+            <div className={`h-[4cqw] w-[0.2cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-blue-500/50 group-hover/resizer:text-primary'}`}>
+                 <GripVertical className="w-[0.5cqw] h-[0.5cqw] opacity-0 group-hover/resizer:opacity-100" />
             </div>
         </div>
     );

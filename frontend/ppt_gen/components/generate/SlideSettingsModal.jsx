@@ -22,16 +22,25 @@ const SlideSettingsModal = React.memo(({ isOpen, onOpenChange, activeSlideType, 
                     <div className="flex flex-col gap-3">
                         <label className="text-sm font-medium">Slide Type</label>
                         <div className="grid grid-cols-4 gap-3">
-                            {[
-                                { id: "normal", label: "Standard", icon: Layout },
-                                { id: "split-left-image", label: "Split Left", icon: PanelLeft },
-                                { id: "split-right-image", label: "Split Right", icon: PanelRight },
-                                { id: "top-image-banner", label: "Top Banner", icon: PanelTop },
-                                { id: "full-image", label: "Full Image", icon: ImageIcon },
-                                { id: "title", label: "Title", icon: Type },
-                                { id: "agenda", label: "Agenda", icon: List },
-                                { id: "closing", label: "Closing", icon: CheckSquare },
-                            ].map((type) => {
+                            {(() => {
+                                const isTitleType = activeSlideType && activeSlideType.startsWith("title");
+                                const titleTypes = [
+                                    { id: "title-bg-image", label: "Title Bg", icon: ImageIcon },
+                                    { id: "title-top-image", label: "Title Top", icon: PanelTop },
+                                    { id: "title-simple", label: "Title Simple", icon: Type },
+                                ];
+                                const normalTypes = [
+                                    { id: "normal", label: "Standard", icon: Layout },
+                                    { id: "split-left-image", label: "Split Left", icon: PanelLeft },
+                                    { id: "split-right-image", label: "Split Right", icon: PanelRight },
+                                    { id: "top-image-banner", label: "Top Banner", icon: PanelTop },
+                                    { id: "full-image", label: "Full Image", icon: ImageIcon },
+                                    { id: "agenda", label: "Agenda", icon: List },
+                                    { id: "closing", label: "Closing", icon: CheckSquare },
+                                ];
+                                const typesToShow = isTitleType ? titleTypes : normalTypes;
+                                return typesToShow;
+                            })().map((type) => {
                                 const Icon = type.icon;
                                 const isActive = activeSlideType === type.id;
                                 return (

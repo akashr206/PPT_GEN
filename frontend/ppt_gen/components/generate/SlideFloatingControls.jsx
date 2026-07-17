@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Trash2 } from "lucide-react";
+import { Sparkles, Trash2, Plus } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
@@ -13,7 +13,8 @@ const SlideFloatingControls = React.memo(({
     isBusy, 
     onEditWithAI, 
     onDeleteSlide, 
-    canDelete 
+    canDelete,
+    onAddBlock
 }) => {
     return (
         <div
@@ -24,6 +25,24 @@ const SlideFloatingControls = React.memo(({
             }`}
         >
             <TooltipProvider>
+                {onAddBlock && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onAddBlock}
+                                className="h-4 w-4 p-1 cursor-pointer"
+                                disabled={isBusy}
+                            >
+                                <Plus size={8} />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Add block to slide</p>
+                        </TooltipContent>
+                    </Tooltip>
+                )}
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button

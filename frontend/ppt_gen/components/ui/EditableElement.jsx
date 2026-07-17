@@ -9,6 +9,7 @@ export function EditableElement({
     as: Component = "div",
     placeholder = "Type here...",
     readOnly = false,
+    style = {},
 }) {
     const contentRef = useRef(null);
     const prevValue = useRef(value);
@@ -32,6 +33,7 @@ export function EditableElement({
                         ? "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50 empty:before:pointer-events-none empty:before:block"
                         : ""
                 } ${className}`}
+                style={style}
                 data-placeholder={placeholder}
             >
                 {value}
@@ -74,12 +76,11 @@ export function EditableElement({
             onPaste={handlePaste}
             onKeyDown={handleKeyDown}
             className={` outline-none transition-all ${
-                !readOnly ? "cursor-text hover:outline hover:outline-[1px] hover:outline-gray-400/80 focus:outline focus:outline-2 focus:outline-orange-500 focus:bg-orange-500/5 rounded-none" : ""
-            } ${
                 !value
                     ? "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50 empty:before:pointer-events-none empty:before:block"
                     : ""
             } ${className}`}
+            style={style}
             data-placeholder={placeholder}
         >
             {value}

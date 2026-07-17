@@ -30,6 +30,7 @@ const SlideViewer = React.memo(function SlideViewer({
     onUpdateBlock,
     onDeleteBlock,
     onAddBlock,
+    onSplitBlock,
     onUpdateItem,
     onDeleteItem,
     onAddItem,
@@ -75,7 +76,7 @@ const SlideViewer = React.memo(function SlideViewer({
                     ? undefined
                     : {
                           maxWidth:
-                              "min(1000px, 100%, calc(1.778 * (100vh - 240px)))",
+                              "min(1024px, 100%, calc(1.778 * (100vh - 240px)))",
                       }
             }
         >
@@ -108,6 +109,7 @@ const SlideViewer = React.memo(function SlideViewer({
                         onUpdateBlock={onUpdateBlock}
                         onDeleteBlock={onDeleteBlock}
                         onAddBlock={onAddBlock}
+                        onSplitBlock={onSplitBlock}
                         onUpdateItem={onUpdateItem}
                         onDeleteItem={onDeleteItem}
                         onAddItem={onAddItem}
@@ -143,6 +145,7 @@ const SlideViewer = React.memo(function SlideViewer({
                     canDelete={slideCount > 1}
                     onEditWithAI={onEditWithAI}
                     onDeleteSlide={() => onDeleteSlide(activeSlideIndex)}
+                    onAddBlock={onAddBlock}
                 />
             )}
 

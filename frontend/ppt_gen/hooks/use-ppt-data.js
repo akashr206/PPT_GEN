@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { normalizeSlides } from "./use-slide-editor";
+import { useHistoryStore } from "@/contexts/history-context";
 
 /**
  * Manages PPT data fetching from the API and the SSE streaming connection
@@ -95,6 +97,7 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
                     const presentation = res.data[0];
                     setPptData(presentation);
                     initialDataRef.current = JSON.stringify(presentation);
+                    useHistoryStore.getState().addOrUpdatePresentation(presentation);
                 } else {
                     toast.error("Presentation not found");
                 }
@@ -139,8 +142,10 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
                     if (res?.data && res.data.length > 0) {
                         const presentation = res.data[0];
                         setPptData(presentation);
-                        setEditableSlides(presentation.slides || []);
+                        const normalized = normalizeSlides(presentation.slides || []);
+                        setEditableSlides(normalized);
                         initialDataRef.current = JSON.stringify(presentation);
+                        useHistoryStore.getState().addOrUpdatePresentation(presentation);
                     }
                 } catch (err) {
                     console.error("[Stream] Failed refetching on complete:", err);
@@ -210,10 +215,11 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
                             try {
                                 const data = JSON.parse(cleanLine.slice(6));
                                 if (data.slides && Array.isArray(data.slides)) {
-                                    setEditableSlides(data.slides);
-                                    setPptData((prev) => ({ ...prev, slides: data.slides }));
-                                    if (data.slides.length > 0) {
-                                        setActiveSlideIndex(data.slides.length - 1);
+                                    const normalized = normalizeSlides(data.slides);
+                                    setEditableSlides(normalized);
+                                    setPptData((prev) => ({ ...prev, slides: normalized }));
+                                    if (normalized.length > 0) {
+                                        setActiveSlideIndex(normalized.length - 1);
                                     }
                                 }
                             } catch (e) {
