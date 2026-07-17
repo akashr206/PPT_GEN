@@ -23,7 +23,7 @@ const BSPRenderer = ({ node, ...props }) => {
         
         return (
             <div className={`flex w-full h-full flex-1 min-h-0 min-w-0 ${isHorizontal ? "flex-row" : "flex-col"}`}>
-                <div style={{ flexBasis: `${activeRatio}%` }} className="relative flex min-h-0 min-w-0">
+                <div style={{ flexBasis: `${activeRatio}%` }} className="relative flex shrink min-h-0 min-w-0 ">
                     <BSPRenderer node={node.first} {...props} />
                 </div>
                 {!props.readOnly && (
@@ -37,7 +37,7 @@ const BSPRenderer = ({ node, ...props }) => {
                         }}
                     />
                 )}
-                <div style={{ flexBasis: `${100 - activeRatio}%` }} className="relative flex min-h-0 min-w-0">
+                <div style={{ flexBasis: `${100 - activeRatio}%` }} className="relative flex shrink min-h-0 min-w-0">
                     <BSPRenderer node={node.second} {...props} />
                 </div>
             </div>
@@ -129,6 +129,8 @@ const Slide = ({
                         imageLoading={slide_content.imageLoading}
                         onEditImage={onEditImage}
                         readOnly={!onUpdateSlide}
+                        focusPoint={slide_content.imageFocus}
+                        onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
                     />
                 </div>
             );
@@ -146,6 +148,8 @@ const Slide = ({
                             imageLoading={slide_content.imageLoading}
                             onEditImage={onEditImage}
                             readOnly={!onUpdateSlide}
+                            focusPoint={slide_content.imageFocus}
+                            onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
                         />
                     </div>
                     {!!onUpdateSlide && (
@@ -195,6 +199,8 @@ const Slide = ({
                             imageLoading={slide_content.imageLoading}
                             onEditImage={onEditImage}
                             readOnly={!onUpdateSlide}
+                            focusPoint={slide_content.imageFocus}
+                            onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
                         />
                     </div>
                 </div>
@@ -214,6 +220,8 @@ const Slide = ({
                             imageLoading={slide_content.imageLoading}
                             onEditImage={onEditImage}
                             readOnly={!onUpdateSlide}
+                            focusPoint={slide_content.imageFocus}
+                            onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
                         />
                     </div>
                     {!!onUpdateSlide && (

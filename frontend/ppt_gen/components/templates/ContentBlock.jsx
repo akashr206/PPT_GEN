@@ -119,7 +119,7 @@ const ContentBlock = ({
             {!readOnly && (
                 <TooltipProvider>
                     <div
-                        className={`absolute -top-3 left-1/2 -translate-x-1/2 transition-opacity z-40 ${isOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}
+                        className={`absolute -top-3 left-1/2 -translate-x-1/2 transition-opacity z-50 ${isOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}
                     >
                         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                             <DropdownMenuTrigger asChild>

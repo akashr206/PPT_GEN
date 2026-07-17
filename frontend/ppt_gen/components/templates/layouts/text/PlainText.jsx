@@ -1,6 +1,7 @@
 import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { TextItemActionMenu } from "@/components/ui/TextItemActionMenu";
+import AnimatedItem from "../../AnimatedItem";
 
 const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
     const items = content || [];
@@ -13,7 +14,7 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                 else if (item.align === "right") alignClass = "text-right ml-auto";
 
                 return (
-                    <div key={i} className={`relative group/item flex w-full ${alignClass}`}>
+                    <AnimatedItem key={i} index={i} className={`relative group/item flex w-full ${alignClass}`}>
                         <EditableElement
                             as="p"
                             className="text-[1.5cqw] leading-relaxed theme-text-muted w-full"
@@ -34,7 +35,7 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                                 onDelete={onDeleteItem ? () => onDeleteItem(i) : undefined}
                             />
                         )}
-                    </div>
+                    </AnimatedItem>
                 );
             })}
         </div>

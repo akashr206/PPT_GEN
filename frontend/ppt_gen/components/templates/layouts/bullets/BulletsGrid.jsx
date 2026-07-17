@@ -2,6 +2,7 @@ import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { Plus } from "lucide-react";
 import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
+import AnimatedItem from "../../AnimatedItem";
 
 const BulletsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
     const items = content || [];
@@ -19,8 +20,9 @@ const BulletsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly 
             )}
 
             {items.map((item, i) => (
-                <div
+                <AnimatedItem
                     key={i}
+                    index={i}
                     className="group/item relative w-[calc(50%-2cqw)]"
                 >
                     {/* Item Actions Menu */}
@@ -55,7 +57,7 @@ const BulletsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly 
                             />
                         </div>
                     </div>
-                </div>
+                </AnimatedItem>
             ))}
         </div>
     );
