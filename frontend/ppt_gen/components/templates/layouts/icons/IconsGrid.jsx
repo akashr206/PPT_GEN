@@ -1,6 +1,7 @@
 import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { EditableIcon } from "@/components/ui/EditableIcon";
+import AnimatedItem from "../../AnimatedItem";
 
 const IconsGrid = ({ content, onUpdateItem, readOnly }) => {
     const items = content || [];
@@ -8,7 +9,7 @@ const IconsGrid = ({ content, onUpdateItem, readOnly }) => {
     return (
         <div className="w-full flex flex-row flex-wrap gap-[3cqw]">
             {items.map((item, i) => (
-                <div key={i} className="flex-1 min-w-[30%] flex flex-col items-center gap-[1cqw] p-[2cqw] text-center">
+                <AnimatedItem key={i} index={i} className="flex-1 min-w-[30%] flex flex-col items-center gap-[1cqw] p-[2cqw] text-center">
                     <EditableIcon
                         iconName={item.icon}
                         onChange={(val) => onUpdateItem(i, "icon", val)}
@@ -33,7 +34,7 @@ const IconsGrid = ({ content, onUpdateItem, readOnly }) => {
                         readOnly={readOnly}
                         placeholder="Feature details and description."
                     />
-                </div>
+                </AnimatedItem>
             ))}
         </div>
     );

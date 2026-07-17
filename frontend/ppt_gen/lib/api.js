@@ -12,30 +12,6 @@ export class APIError extends Error {
 }
 
 
-let sessionPromise = null;
-let cachedSession = null;
-let lastSessionFetchTime = 0;
-const SESSION_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
-
-async function getClientSessionCached() {
-    const now = Date.now();
-    if (cachedSession && (now - lastSessionFetchTime < SESSION_CACHE_DURATION)) {
-        return cachedSession;
-    }
-    if (!sessionPromise) {
-        sessionPromise = getSession().then(session => {
-            cachedSession = session;
-            lastSessionFetchTime = Date.now();
-            sessionPromise = null; // Clear promise so next fetch gets a fresh one if cache expires
-            return session;
-        }).catch(err => {
-            sessionPromise = null;
-            throw err;
-        });
-    }
-    return sessionPromise;
-}
-
 async function apiCall(endpoint, options = {}) {
   let url = endpoint.startsWith("http") 
     ? endpoint 
@@ -58,7 +34,7 @@ async function apiCall(endpoint, options = {}) {
   
   let session = null;
   if (typeof window !== "undefined") {
-    session = await getClientSessionCached();
+    session = await getSession();
   } else {
     try {
       session = await auth();

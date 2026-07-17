@@ -17,6 +17,7 @@ import {
     Bolt,
     Image,
     Layout,
+    Sparkles,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/generate/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -40,10 +41,12 @@ import {
 import metadata from "@/components/templates/metadata.json";
 import UserMenu from "../user-menu";
 import { useThemes } from "@/hooks/use-themes";
+import { useSettingsStore } from "@/hooks/use-settings-store";
 
 export function Navbar() {
     const { data: session } = useSession();
     const { customThemes } = useThemes();
+    const { animationsEnabled, toggleAnimations } = useSettingsStore();
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -210,21 +213,33 @@ export function Navbar() {
                                         </DropdownMenuContent>
                                     </DropdownMenu>
 
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handlePresentClick}
-                                        disabled={pptInfo.isBusy}
-                                        className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Play
-                                            size={13}
-                                            className="fill-current text-primary"
-                                        />
-                                        <span className="hidden sm:inline">
-                                            Present
-                                        </span>
-                                    </Button>
+                                    <div className="flex items-center border border-border/70 rounded-md overflow-hidden bg-background h-8">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handlePresentClick}
+                                            disabled={pptInfo.isBusy}
+                                            className="text-foreground hover:bg-accent hover:text-accent-foreground h-full gap-1.5 flex items-center px-3 rounded-none text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-r border-border/70"
+                                        >
+                                            <Play
+                                                size={13}
+                                                className="fill-current text-primary"
+                                            />
+                                            <span className="hidden sm:inline">
+                                                Present
+                                            </span>
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => toggleAnimations()}
+                                            disabled={pptInfo.isBusy}
+                                            className={`text-foreground hover:bg-accent hover:text-accent-foreground h-full w-8 p-0 flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${animationsEnabled ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'text-muted-foreground'}`}
+                                            title={animationsEnabled ? "Disable presentation animations" : "Enable presentation animations"}
+                                        >
+                                            <Sparkles size={13} className={animationsEnabled ? "text-primary fill-primary/25" : "text-muted-foreground"} />
+                                        </Button>
+                                    </div>
 
                                     <div className="h-4 w-[1px] bg-black/10 dark:bg-white/10" />
                                 </div>
@@ -365,22 +380,34 @@ export function Navbar() {
                                         </Button>
 
                                         {/* Present */}
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                handlePresentClick();
-                                                setIsMobileMenuOpen(false);
-                                            }}
-                                            disabled={pptInfo.isBusy}
-                                            className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground h-9 gap-2 px-3 rounded-md text-xs font-medium cursor-pointer"
-                                        >
-                                            <Play
-                                                size={14}
-                                                className="fill-current text-primary"
-                                            />
-                                            <span>Present</span>
-                                        </Button>
+                                        <div className="flex items-center w-full border border-border rounded-md overflow-hidden bg-background h-9">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                    handlePresentClick();
+                                                    setIsMobileMenuOpen(false);
+                                                }}
+                                                disabled={pptInfo.isBusy}
+                                                className="flex-1 justify-start h-full gap-2 px-3 rounded-none text-xs font-medium cursor-pointer border-r border-border"
+                                            >
+                                                <Play
+                                                    size={14}
+                                                    className="fill-current text-primary"
+                                                />
+                                                <span>Present</span>
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => toggleAnimations()}
+                                                disabled={pptInfo.isBusy}
+                                                className={`w-10 h-full p-0 flex items-center justify-center cursor-pointer ${animationsEnabled ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'text-muted-foreground'}`}
+                                                title={animationsEnabled ? "Disable presentation animations" : "Enable presentation animations"}
+                                            >
+                                                <Sparkles size={14} className={animationsEnabled ? "text-primary fill-primary/25" : "text-muted-foreground"} />
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
 

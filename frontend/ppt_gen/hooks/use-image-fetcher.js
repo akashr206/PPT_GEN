@@ -155,17 +155,19 @@ export function useImageFetcher({
             const traverseTreeForFetch = (node) => {
                 if (!node) return;
                 if (node.type === "leaf" || node.type === "content" || node.blockType === "content") {
+                    const cat = node.layout?.category?.toLowerCase();
+                    const type = node.layout?.type?.toLowerCase();
                     const isImageCategory =
-                        node.layout?.category === "images" ||
-                        node.layout?.category === "image" ||
-                        (node.layout?.category === "cards" && node.layout?.type === "image");
+                        cat === "images" ||
+                        cat === "image" ||
+                        ((cat === "cards" || cat === "card") && type === "image");
                     if (!isImageCategory) return;
 
                     if (node.items) {
                         node.items.forEach((item, iIndex) => {
                             const itemKey = `slide_${sIndex}_block_${node.id}_item_${iIndex}`;
                             const hasUrl = isRealUrl(item.image);
-                            const query = hasUrl ? null : item.imageDescription || item.image;
+                            const query = hasUrl ? null : item.imageDescription || item.image || item.header;
                             if (query && !fetchQueueRef.current.has(itemKey)) {
                                 fetchQueueRef.current.add(itemKey);
                                 fetchImage(itemKey, query);

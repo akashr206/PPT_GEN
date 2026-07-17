@@ -1,14 +1,23 @@
 import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { Plus } from "lucide-react";
+import AnimatedItem from "../../AnimatedItem";
 import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
-const BulletsSimple = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
+const BulletsSimple = ({
+    content,
+    onUpdateItem,
+    onDeleteItem,
+    onAddItem,
+    readOnly,
+}) => {
     const items = content || [];
     const useTwoColumns = items.length > 4;
 
     return (
-        <div className={`w-full flex ${useTwoColumns ? "flex-row flex-wrap gap-x-[4cqw] gap-y-0" : "flex-col gap-[0cqw]"}`}>
+        <div
+            className={`w-full flex ${useTwoColumns ? "flex-row flex-wrap gap-x-[4cqw] gap-y-0" : "flex-col gap-[0cqw]"}`}
+        >
             {/* Add before first item when empty */}
             {!readOnly && onAddItem && items.length === 0 && (
                 <button
@@ -21,43 +30,55 @@ const BulletsSimple = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnl
             )}
 
             {items.map((item, i) => (
-                <div
+                <AnimatedItem
                     key={i}
-                    className={`group/item relative ${useTwoColumns ? "w-[calc(50%-2cqw)]" : "w-full"}`}
+                    index={i}
+                    className={`flex gap-[1cqw] group/item relative pl-[1cqw] ${useTwoColumns ? "w-[calc(50%-2cqw)]" : "w-full"}`}
                 >
-                    {/* Item Actions Menu (top right on hover) */}
+                    {/* Add/Delete controls */}
                     {!readOnly && (onAddItem || onDeleteItem) && (
                         <div className="absolute top-[0.5cqw] right-[0.5cqw] opacity-0 group-hover/item:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity z-10">
                             <ItemActionsMenu
-                                onAddBefore={onAddItem ? () => onAddItem(i, "before") : undefined}
-                                onAddAfter={onAddItem ? () => onAddItem(i, "after") : undefined}
-                                onDelete={onDeleteItem ? () => onDeleteItem(i) : undefined}
+                                onAddBefore={
+                                    onAddItem
+                                        ? () => onAddItem(i, "before")
+                                        : undefined
+                                }
+                                onAddAfter={
+                                    onAddItem
+                                        ? () => onAddItem(i, "after")
+                                        : undefined
+                                }
+                                onDelete={
+                                    onDeleteItem
+                                        ? () => onDeleteItem(i)
+                                        : undefined
+                                }
                             />
                         </div>
                     )}
-
-                    <div className="flex flex-row items-start gap-[1.5cqw] py-[1cqw] px-[0.5cqw] rounded-[0.5cqw] hover:bg-white/5 transition-colors">
-                        <div className="w-[1cqw] h-[1cqw] rounded-full theme-bullet-bg mt-[0.8cqw] shrink-0" />
-                        <div className="flex flex-col gap-[0.5cqw] flex-1 min-w-0 pr-[2cqw]">
-                            <EditableElement
-                                as="h3"
-                                className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary"
-                                value={item.header}
-                                onChange={(val) => onUpdateItem(i, "header", val)}
-                                readOnly={readOnly}
-                                placeholder="Bullet header"
-                            />
-                            <EditableElement
-                                as="p"
-                                className="text-[1.3cqw] leading-relaxed theme-text-muted"
-                                value={item.description}
-                                onChange={(val) => onUpdateItem(i, "description", val)}
-                                readOnly={readOnly}
-                                placeholder="Bullet description details"
-                            />
-                        </div>
+                    <div className="w-[1cqw] h-[1cqw] rounded-full theme-bg-primary shrink-0 mt-[0.5cqw]" />
+                    <div className="flex flex-col min-w-0 pb-[1cqw]">
+                        <EditableElement
+                            as="h3"
+                            className="theme-font-heading font-semibold text-[1.4cqw] leading-snug theme-text-primary"
+                            value={item.header}
+                            onChange={(val) => onUpdateItem(i, "header", val)}
+                            readOnly={readOnly}
+                            placeholder="Bullet Point Title"
+                        />
+                        <EditableElement
+                            as="p"
+                            className="text-[1.2cqw] leading-relaxed theme-text-muted mt-[0.5cqw]"
+                            value={item.description}
+                            onChange={(val) =>
+                                onUpdateItem(i, "description", val)
+                            }
+                            readOnly={readOnly}
+                            placeholder="Detailed description for this bullet point goes here."
+                        />
                     </div>
-                </div>
+                </AnimatedItem>
             ))}
         </div>
     );

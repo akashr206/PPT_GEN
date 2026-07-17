@@ -2,6 +2,7 @@ import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { Plus } from "lucide-react";
 import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
+import AnimatedItem from "../../AnimatedItem";
 
 const CardsBasic = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
     const items = content || [];
@@ -19,8 +20,9 @@ const CardsBasic = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }
             )}
 
             {items.map((item, i) => (
-                <div
+                <AnimatedItem
                     key={i}
+                    index={i}
                     className="group/item relative flex-1 min-w-[18cqw]"
                 >
                     <div className="flex flex-col gap-[1cqw] p-[1cqw] rounded-[1cqw] theme-bg-card border theme-border-card shadow-sm h-full">
@@ -52,7 +54,7 @@ const CardsBasic = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }
                             placeholder="Card description text"
                         />
                     </div>
-                </div>
+                </AnimatedItem>
             ))}
         </div>
     );
