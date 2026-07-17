@@ -55,22 +55,23 @@ export const generatePPT = async (req, res) => {
     }
 };
 
-const getPartialSlides = (accumulatedText) => {
+const getPartialData = (accumulatedText) => {
     const start = accumulatedText.indexOf("{");
-    if (start === -1) return [];
+    if (start === -1) return { slides: [], theme: null };
 
     let jsonStr = accumulatedText.slice(start);
     jsonStr = jsonStr.replace(/```json\s*$/g, "").replace(/```\s*$/g, "").trim();
 
     try {
         const parsed = partialJsonParser(jsonStr);
-        if (parsed && parsed.slides && Array.isArray(parsed.slides)) {
-            return parsed.slides;
-        }
+        return {
+            slides: (parsed && parsed.slides && Array.isArray(parsed.slides)) ? parsed.slides : [],
+            theme: parsed?.theme || null
+        };
     } catch (err) {
         // Ignore parsing errors on incomplete JSON fragments
     }
-    return [];
+    return { slides: [], theme: null };
 };
 
 const activeGenerations = new Map();
@@ -120,8 +121,8 @@ export const streamPPT = async (req, res) => {
         // Pass the abort signal and thinking config to chatStream
         await chatStream(newSysPrompt, fullPrompt, (token) => {
             accumulatedText += token;
-            const partialSlides = getPartialSlides(accumulatedText);
-            res.write(`data: ${JSON.stringify({ slides: partialSlides })}\n\n`);
+            const partialData = getPartialData(accumulatedText);
+            res.write(`data: ${JSON.stringify({ slides: partialData.slides, theme: partialData.theme })}\n\n`);
         }, abortController.signal, thinking);
 
         const completedResponse = parseLLMJson(accumulatedText);
