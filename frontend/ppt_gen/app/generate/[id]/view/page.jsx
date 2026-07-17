@@ -15,6 +15,7 @@ import { useAutosave } from "@/hooks/use-autosave";
 import ViewerToolbar from "@/components/generate/ViewerToolbar";
 import SlideSettingsModal from "@/components/generate/SlideSettingsModal";
 import EditWithAIModal from "@/components/generate/EditWithAIModal";
+import BlockLayoutSelectorModal from "@/components/generate/BlockLayoutSelectorModal";
 
 import SlideViewer from "./components/SlideViewer";
 import SlideThumbnails from "./components/SlideThumbnails";
@@ -32,10 +33,32 @@ export default function PPTSlidesViewerPage({ params }) {
     const [isEditWithAILoading, setIsEditWithAILoading] = useState(false);
     const [isTouchDevice, setIsTouchDevice] = useState(false);
 
+    const [blockLayoutModalState, setBlockLayoutModalState] = useState({
+        isOpen: false,
+        blockIndex: null,
+        currentCategory: "",
+        currentType: "",
+        onSelect: null,
+    });
+
     // Stable callbacks for opening modals — must be useCallback so they don't
     // create new references on every render (which would break React.memo on children)
     const openSettings = useCallback(() => setIsSlideSettingsOpen(true), []);
     const openEditWithAI = useCallback(() => setIsEditWithAIModalOpen(true), []);
+
+    useEffect(() => {
+        const handleOpenEvent = (e) => {
+            setBlockLayoutModalState({
+                isOpen: true,
+                blockIndex: e.detail.blockIndex,
+                currentCategory: e.detail.currentCategory,
+                currentType: e.detail.currentType,
+                onSelect: e.detail.onSelect,
+            });
+        };
+        window.addEventListener("trigger-open-block-layout-picker", handleOpenEvent);
+        return () => window.removeEventListener("trigger-open-block-layout-picker", handleOpenEvent);
+    }, []);
 
     useEffect(() => {
         
@@ -397,6 +420,16 @@ export default function PPTSlidesViewerPage({ params }) {
                 setPrompt={setEditWithAIPrompt}
                 isLoading={isEditWithAILoading}
                 onApply={handleEditSlideWithAI}
+            />
+
+            <BlockLayoutSelectorModal
+                isOpen={blockLayoutModalState.isOpen}
+                onClose={() =>
+                    setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }))
+                }
+                currentCategory={blockLayoutModalState.currentCategory}
+                currentType={blockLayoutModalState.currentType}
+                onSelect={blockLayoutModalState.onSelect}
             />
 
             {/* Off-screen export frames (only mounted during export) */}

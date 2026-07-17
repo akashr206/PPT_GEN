@@ -206,7 +206,7 @@
     --theme-fg-muted: #d8dee9;
     --theme-primary: #88c0d0;
     --theme-secondary: #3b4252;
-    --theme-accent: #81a1c1;
+    --theme-accent: #81a1c1; 
     --theme-card-bg: #242933;
     --theme-card-border: #434c5e;
     --theme-bullet: #88c0d0;
@@ -353,8 +353,6 @@
 /* Item highlight when actions menu is open */
 [data-menu-open="true"] {
     outline: 2px solid var(--theme-primary);
-    outline-offset: 4px;
-    border-radius: 0.4cqw;
     transition: outline 0.15s ease;
 }
 

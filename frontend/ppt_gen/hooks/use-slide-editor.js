@@ -218,7 +218,7 @@ export function useSlideEditor(initialPptData, isBusy) {
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
 
-    const handleAddBlock = useCallback(() => {
+    const handleAddBlock = useCallback((insertIndex) => {
         if (isBusy) return;
         const slides = editableSlidesRef.current;
         if (!slides || !slides[activeSlideIndexRef.current]) return;
@@ -226,8 +226,8 @@ export function useSlideEditor(initialPptData, isBusy) {
         const slide = updatedSlides[activeSlideIndexRef.current];
         const currentBlocks = slide.blocks || [];
 
-        if (currentBlocks.length >= 4) {
-            toast.error("Maximum 4 blocks allowed per slide");
+        if (currentBlocks.length >= 6) {
+            toast.error("Maximum 6 blocks allowed per slide");
             return;
         }
 
@@ -235,15 +235,22 @@ export function useSlideEditor(initialPptData, isBusy) {
             id: `block_${Date.now()}`,
             type: "content",
             align: "left",
-            layout: { category: "bullets", type: "standard" },
+            layout: { category: "bullets", type: "simple" },
             items: [
                 { header: "New Point", description: "Details about this point" }
             ]
         };
 
+        let newBlocks = [...currentBlocks];
+        if (typeof insertIndex === 'number' && insertIndex >= 0 && insertIndex <= currentBlocks.length) {
+            newBlocks.splice(insertIndex, 0, newBlock);
+        } else {
+            newBlocks.push(newBlock);
+        }
+
         updatedSlides[activeSlideIndexRef.current] = { 
             ...slide, 
-            blocks: [...currentBlocks, newBlock] 
+            blocks: newBlocks 
         };
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);

@@ -165,15 +165,16 @@ const Slide = ({
                         );
                     })}
                 </div>
-
                 {!!onUpdateSlide && onAddBlock && blocks.length < 6 && (
-                    <div className="absolute bottom-[2cqw] left-1/2 -translate-x-1/2 opacity-0 group-hover/slide:opacity-100 transition-opacity z-40">
+                    <div className="w-full mt-[1cqw] p-[1cqw]">
                         <button
-                            onClick={onAddBlock}
-                            className="flex items-center gap-1 text-[1.2cqw] px-[1cqw] py-[0.5cqw] bg-secondary text-secondary-foreground rounded-full hover:bg-secondary/80 backdrop-blur-sm shadow-md cursor-pointer border border-border"
+                            onClick={() => onAddBlock()}
+                            className="w-full flex items-center justify-center gap-[1cqw] py-[2.5cqw] rounded-[1cqw] border-2 border-dashed border-border/40 text-muted-foreground/50 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer group/addblock"
                         >
-                            <Plus className="w-[1.2cqw] h-[1.2cqw]" />
-                            Add Block
+                            <div className="p-[0.8cqw] rounded-full bg-muted/50 group-hover/addblock:bg-primary/10 transition-colors">
+                                <Plus className="w-[1.5cqw] h-[1.5cqw]" />
+                            </div>
+                            <span className="text-[1.3cqw] font-medium tracking-wide">Add New Block</span>
                         </button>
                     </div>
                 )}

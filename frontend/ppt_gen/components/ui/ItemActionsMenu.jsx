@@ -38,7 +38,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                         ref={triggerRef}
                         type="button"
                         variant="outline"
-                        className="h-max w-max theme-menu-button theme-text-primary"
+                        className="h-max w-max theme-menu-button rounded-xs! theme-text-primary"
                     >
                         <MoreHorizontal className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
@@ -54,7 +54,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                                 className="cursor-pointer text-xs flex items-center justify-center p-2 rounded-md hover:bg-accent"
                             >
                                 <ArrowLeftToLine
-                                    size={14}
+                                    size={10}
                                     className="text-primary"
                                 />
                             </DropdownMenuItem>
@@ -74,7 +74,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                                 className="cursor-pointer text-xs flex items-center justify-center p-2 rounded-md hover:bg-accent"
                             >
                                 <ArrowRightToLine
-                                    size={14}
+                                    size={10}
                                     className="text-primary"
                                 />
                             </DropdownMenuItem>
@@ -93,7 +93,7 @@ export function ItemActionsMenu({ onAddBefore, onAddAfter, onDelete }) {
                                 onClick={onDelete}
                                 className="cursor-pointer text-xs flex items-center justify-center p-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-md"
                             >
-                                <Trash2 size={14} />
+                                <Trash2 size={10} />
                             </DropdownMenuItem>
                         </TooltipTrigger>
                         <TooltipContent

@@ -26,14 +26,12 @@
 
 .group\/item:hover {
     outline: 1px solid rgba(156, 163, 175, 0.8);
-    outline-offset: 4px;
+    outline-offset: 0px;
     border-radius: 0;
 }
 
 .group\/item:focus-within {
-    outline: 2px solid rgb(249, 115, 22);
-    outline-offset: 4px;
-    border-radius: 0;
+    outline: 2px solid var(--theme-primary);
 }
 
 /* Show the actions menu when the item has focus-within (e.g. text is clicked/active) */

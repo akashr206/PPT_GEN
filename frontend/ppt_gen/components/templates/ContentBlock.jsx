@@ -1,19 +1,15 @@
 import React, { useState } from "react";
 import SlideLayout from "./layouts/SlideLayout";
-import { MoreHorizontal, LayoutTemplate, Trash2, Plus } from "lucide-react";
+import {
+    MoreHorizontal,
+    Trash2,
+    LayoutTemplate,
+} from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import { layout_map } from "./layouts/layout_map";
 
 const ContentBlock = ({
     block,
@@ -33,17 +29,42 @@ const ContentBlock = ({
     if (block.align === "center") alignClass = "items-center";
     if (block.align === "right") alignClass = "items-end";
 
-    // Build nested layout options based on layout_map
-    const categories = Object.keys(layout_map || {});
+    const flexBasis =
+        block.width === 100
+            ? "100%"
+            : block.width
+              ? `calc(${block.width}% - 0.5cqw)`
+              : "100%";
 
-    // For horizontal flex/width sizing
-    const flexBasis = block.width === 100 ? "100%" : block.width ? `calc(${block.width}% - 0.5cqw)` : "100%";
+    const handleLayoutSelect = (cat, type) => {
+        if (onUpdateBlock) {
+            onUpdateBlock(blockIndex, "layout", { category: cat, type });
+        }
+    };
+
+    const handleOpenLayoutPicker = () => {
+        setIsOpen(false);
+        window.dispatchEvent(
+            new CustomEvent("trigger-open-block-layout-picker", {
+                detail: {
+                    blockIndex,
+                    currentCategory: block.layout?.category,
+                    currentType: block.layout?.type,
+                    onSelect: handleLayoutSelect,
+                },
+            })
+        );
+    };
 
     return (
         <div
             style={{ width: flexBasis }}
-            className={`relative flex flex-col min-h-0 ${alignClass} group/block transition-colors p-[1cqw] ${
-                !readOnly ? (isOpen ? "outline outline-1 outline-gray-400/80 bg-gray-500/5" : "hover:outline hover:outline-1 hover:outline-gray-400/80 hover:bg-gray-500/5") : ""
+            className={`relative flex flex-col h-fit ${alignClass} group/block transition-colors p-[1cqw] ${
+                !readOnly
+                    ? isOpen
+                        ? "outline outline-1 outline-gray-400/80 bg-gray-500/5"
+                        : "hover:outline hover:outline-1 hover:outline-gray-400/80 hover:bg-gray-500/5"
+                    : ""
             }`}
         >
             <SlideLayout
@@ -59,82 +80,44 @@ const ContentBlock = ({
             />
 
             {!readOnly && (
-                <>
-                    {/* Top Center 3-Dots Menu */}
-                    <div className={`absolute -top-[1.5cqw] left-1/2 -translate-x-1/2 transition-opacity z-30 ${isOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}>
-                        <DropdownMenu onOpenChange={setIsOpen}>
-                            <DropdownMenuTrigger asChild>
-                                <button
-                                    className="p-[0.3cqw] bg-background text-foreground border border-border rounded-md shadow-sm hover:bg-muted"
-                                    title="Block Options"
-                                >
-                                    <MoreHorizontal className="w-[1.2cqw] h-[1.2cqw]" />
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="center" className="w-56 z-50">
-                                <DropdownMenuSub>
-                                    <DropdownMenuSubTrigger>
-                                        <LayoutTemplate className="mr-2 h-4 w-4" />
-                                        <span>Change Layout</span>
-                                    </DropdownMenuSubTrigger>
-                                    <DropdownMenuSubContent className="w-48 max-h-[60vh] overflow-y-auto">
-                                        {categories.map((cat) => (
-                                            <DropdownMenuSub key={cat}>
-                                                <DropdownMenuSubTrigger className="capitalize">
-                                                    {cat}
-                                                </DropdownMenuSubTrigger>
-                                                <DropdownMenuSubContent>
-                                                    <DropdownMenuRadioGroup
-                                                        value={
-                                                            block.layout?.category === cat
-                                                                ? block.layout?.type
-                                                                : ""
-                                                        }
-                                                        onValueChange={(val) => {
-                                                            if (onUpdateBlock) {
-                                                                onUpdateBlock(blockIndex, "layout", {
-                                                                    category: cat,
-                                                                    type: val,
-                                                                });
-                                                            }
-                                                        }}
-                                                    >
-                                                        {Object.keys(layout_map[cat]).map((type) => (
-                                                            <DropdownMenuRadioItem key={type} value={type} className="capitalize">
-                                                                {type}
-                                                            </DropdownMenuRadioItem>
-                                                        ))}
-                                                    </DropdownMenuRadioGroup>
-                                                </DropdownMenuSubContent>
-                                            </DropdownMenuSub>
-                                        ))}
-                                    </DropdownMenuSubContent>
-                                </DropdownMenuSub>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                                    onClick={() => onDeleteBlock && onDeleteBlock(blockIndex)}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    <span>Delete Block</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-
-                    {/* Bottom Center Add Item Button */}
-                    {onAddItem && (
-                        <div className="absolute -bottom-[1.5cqw] left-1/2 -translate-x-1/2 opacity-0 group-hover/block:opacity-100 transition-opacity z-20">
+                <div className={`absolute left-1/2 -translate-x-1/2 transition-opacity z-30 ${isOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}>
+                    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+                        <DropdownMenuTrigger asChild>
                             <button
-                                onClick={() => onAddItem(blockIndex, (block.items || []).length - 1, "after")}
-                                className="p-[0.5cqw] bg-primary/10 text-primary rounded-full hover:bg-primary/20 backdrop-blur-sm shadow-sm cursor-pointer"
-                                title="Add Item"
+                                className="p-[0.3cqw] bg-background text-foreground border border-border rounded-xs shadow-sm hover:bg-muted cursor-pointer"
+                                title="Block Options"
                             >
-                                <Plus className="w-[1.2cqw] h-[1.2cqw]" />
+                                <MoreHorizontal className="w-[1.4cqw] h-[1.4cqw]" />
                             </button>
-                        </div>
-                    )}
-                </>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="center" className="py-1 min-w-[160px] z-50 overflow-hidden" sideOffset={6}>
+                            <button
+                                onClick={handleOpenLayoutPicker}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-muted transition-colors cursor-pointer"
+                            >
+                                <LayoutTemplate className="w-4 h-4 text-muted-foreground" />
+                                Change Layout
+                                <span className="ml-auto text-xs text-muted-foreground capitalize">
+                                    {block.layout?.type || "—"}
+                                </span>
+                            </button>
+
+                            <div className="h-px bg-border mx-2 my-1" />
+
+                            <button
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    onDeleteBlock && onDeleteBlock(blockIndex);
+                                }}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Delete Block
+                            </button>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             )}
         </div>
     );
