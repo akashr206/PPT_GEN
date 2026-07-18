@@ -4,8 +4,9 @@ import { Plus } from "lucide-react";
 import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 import AnimatedItem from "../../AnimatedItem";
 
-const StatsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
+const StatsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
     const items = content || [];
+    const actualCols = Math.min(columns || 2, Math.max(1, items.length));
     
     return (
         <div className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-[4cqw]">
@@ -20,7 +21,12 @@ const StatsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
             )}
 
             {items.map((item, i) => (
-                <AnimatedItem key={i} index={i} className="group/item relative flex-1 min-w-[40%] flex flex-col gap-[0.5cqw] p-[1cqw] rounded-[1cqw] hover:bg-white/5 transition-colors">
+                <AnimatedItem 
+                    key={i} 
+                    index={i} 
+                    className="group/item relative flex-1 min-w-[20cqw] flex flex-col gap-[0.5cqw] p-[1cqw] rounded-[1cqw] hover:bg-white/5 transition-colors"
+                    style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
+                >
                     {/* Item Actions Menu */}
                     {!readOnly && (onAddItem || onDeleteItem) && (
                         <div className="absolute top-[0.5cqw] right-[0.5cqw] opacity-0 group-hover/item:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity z-10">

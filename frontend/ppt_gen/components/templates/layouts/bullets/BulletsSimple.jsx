@@ -6,17 +6,21 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
 const BulletsSimple = ({
     content,
+    columns,
     onUpdateItem,
     onDeleteItem,
     onAddItem,
     readOnly,
 }) => {
     const items = content || [];
-    const useTwoColumns = items.length > 4;
+    
+    // Default to 1 column for 1-4 items, 2 columns for 5+ items if columns isn't explicitly set
+    const requestedCols = columns || (items.length > 4 ? 2 : 1);
+    const actualCols = Math.min(requestedCols, Math.max(1, items.length));
 
     return (
         <div
-            className={`w-full flex ${useTwoColumns ? "flex-row flex-wrap gap-x-[4cqw] gap-y-0" : "flex-col gap-[0cqw]"}`}
+            className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-[0cqw]"
         >
             {/* Add before first item when empty */}
             {!readOnly && onAddItem && items.length === 0 && (
@@ -33,7 +37,8 @@ const BulletsSimple = ({
                 <AnimatedItem
                     key={i}
                     index={i}
-                    className={`flex gap-[1cqw] group/item relative pl-[1cqw] ${useTwoColumns ? "w-[calc(50%-2cqw)]" : "w-full"}`}
+                    className="flex gap-[1cqw] group/item relative pl-[1cqw] flex-1 min-w-[20cqw]"
+                    style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
                 >
                     {/* Add/Delete controls */}
                     {!readOnly && (onAddItem || onDeleteItem) && (

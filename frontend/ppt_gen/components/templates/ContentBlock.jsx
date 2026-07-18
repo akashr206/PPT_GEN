@@ -10,8 +10,11 @@ import {
     Trash2,
     AlignVerticalJustifyStart,
     AlignVerticalJustifyCenter,
-    AlignVerticalJustifyEnd
+    AlignVerticalJustifyEnd,
+    Columns
 } from "lucide-react";
+
+import metadata from "./metadata.json";
 
 const VERTICAL_ALIGNMENTS = [
     { value: "top", icon: AlignVerticalJustifyStart, label: "Align Top" },
@@ -45,6 +48,7 @@ const ContentBlock = ({
     readOnly,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [showColsDropdown, setShowColsDropdown] = useState(false);
 
 
     let alignClass = "items-start";
@@ -97,6 +101,7 @@ const ContentBlock = ({
                 layoutCategory={block.layout?.category}
                 layoutType={block.layout?.type}
                 content={block.items || []}
+                columns={block.columns}
                 onUpdateItem={
                     onUpdateItem
                         ? (i, f, v) => onUpdateItem(blockId, i, f, v)
@@ -122,7 +127,7 @@ const ContentBlock = ({
                     <div
                         className={`absolute -top-3 left-1/2 -translate-x-1/2 transition-opacity z-50 ${isOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}
                     >
-                        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+                        <DropdownMenu open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) setShowColsDropdown(false); }}>
                             <DropdownMenuTrigger asChild>
                                 <button
                                     className="p-[0.2cqw] rounded-xs transition-colors cursor-pointer flex items-center justify-center theme-menu-button"
@@ -133,7 +138,7 @@ const ContentBlock = ({
 
                             <DropdownMenuContent
                                 align="center"
-                                className="flex items-center w-max gap-[0.3cqw] p-[0.2cqw] rounded-[4px] bg-card z-50 overflow-hidden"
+                                className="flex items-center w-max gap-[0.3cqw] p-[0.2cqw] rounded-[4px] bg-card z-50 overflow-visible"
                                 sideOffset={6}
                             >
                                 <Tooltip>
@@ -241,6 +246,56 @@ const ContentBlock = ({
                                         </Tooltip>
                                     ))}
                                 </>
+
+                                {(() => {
+                                    const catMeta = metadata.layoutCategories[block.layout?.category];
+                                    const typeMeta = catMeta?.types?.find(t => t.id === block.layout?.type);
+                                    if (typeMeta?.supportsColumns) {
+                                        return (
+                                            <>
+                                                <div className="w-px h-[1.2cqw] bg-border mx-[0.1cqw]" />
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setShowColsDropdown(!showColsDropdown);
+                                                            }}
+                                                            className="p-[0.2cqw] rounded hover:bg-muted text-muted-foreground transition-colors cursor-pointer relative"
+                                                        >
+                                                            <div className="flex items-center gap-[0.2cqw]">
+                                                                <Columns className="w-[1cqw] h-[1cqw] max-sm:w-4 max-sm:h-4" />
+                                                                <span className="text-[0.7cqw] leading-none">{block.columns || 2}</span>
+                                                            </div>
+                                                            {/* Dropdown for Columns */}
+                                                            <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-[0.5cqw] ${showColsDropdown ? "flex" : "hidden"} flex-row gap-1 bg-card border shadow-lg rounded p-1 z-50`}>
+                                                                {[1, 2, 3, 4, 5, 6].map(col => (
+                                                                    <div
+                                                                        key={col}
+                                                                        onClick={(e) => {
+                                                                            e.preventDefault();
+                                                                            e.stopPropagation();
+                                                                            if (onUpdateBlock) onUpdateBlock(blockId, "columns", col);
+                                                                            setShowColsDropdown(false);
+                                                                        }}
+                                                                        className={`px-2 py-1 text-[0.8cqw] text-center hover:bg-muted rounded cursor-pointer ${
+                                                                            (block.columns || 2) === col ? "bg-primary/10 text-primary" : ""
+                                                                        }`}
+                                                                    >
+                                                                        {col}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Columns: {block.columns || 2}</TooltipContent>
+                                                </Tooltip>
+                                            </>
+                                        );
+                                    }
+                                    return null;
+                                })()}
 
                                 {onDeleteBlock && (
                                     <>

@@ -7,6 +7,7 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
 const ImagesGallery = ({
     content,
+    columns,
     onUpdateItem,
     onDeleteItem,
     onAddItem,
@@ -14,6 +15,7 @@ const ImagesGallery = ({
     readOnly,
 }) => {
     const items = content || [];
+    const actualCols = Math.min(columns || 2, Math.max(1, items.length));
     
     return (
         <div className="w-full h-full max-h-[90cqw] flex flex-col relative overflow-hidden">
@@ -33,7 +35,8 @@ const ImagesGallery = ({
                     <AnimatedItem
                         key={i}
                         index={i}
-                        className="group/item relative flex-1 min-w-[18cqw]"
+                        className="group/item relative flex-1 min-w-[15cqw]"
+                        style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 2}cqw) / ${actualCols})` }}
                     >
                         {/* Add/Delete controls */}
                         {!readOnly && (onAddItem || onDeleteItem) && (

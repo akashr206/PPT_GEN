@@ -217,7 +217,11 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
                                 if (data.slides && Array.isArray(data.slides)) {
                                     const normalized = normalizeSlides(data.slides);
                                     setEditableSlides(normalized);
-                                    setPptData((prev) => ({ ...prev, slides: normalized }));
+                                    setPptData((prev) => ({ 
+                                        ...prev, 
+                                        slides: normalized,
+                                        theme: data.theme || prev.theme 
+                                    }));
                                     if (normalized.length > 0) {
                                         setActiveSlideIndex(normalized.length - 1);
                                     }

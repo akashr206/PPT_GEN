@@ -6,12 +6,15 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
 const IconsCard = ({
     content,
+    columns,
     onUpdateItem,
     onDeleteItem,
     onAddItem,
     readOnly,
 }) => {
     const items = content || [];
+    const requestedCols = columns || (items.length > 4 ? 3 : 2);
+    const actualCols = Math.min(requestedCols, Math.max(1, items.length));
 
     return (
         <div className="w-full flex flex-row flex-wrap gap-[1cqw]">
@@ -19,7 +22,8 @@ const IconsCard = ({
                 <AnimatedItem
                     key={i}
                     index={i}
-                    className="group/item relative flex-1 min-w-[30%] flex flex-col items-center gap-[0.8cqw] p-[1.5cqw] text-center theme-card"
+                    className="group/item relative flex-1 min-w-[20cqw] flex flex-col items-center gap-[0.8cqw] p-[1.5cqw] text-center theme-card"
+                    style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 1}cqw) / ${actualCols})` }}
                 >
                     <EditableIcon
                         iconName={item.icon}

@@ -4,13 +4,19 @@ import { Image as ImageIcon } from "lucide-react";
 import ItemImage from "../../ItemImage";
 import AnimatedItem from "../../AnimatedItem";
 
-const CardsImage = ({ content, onUpdateItem, onEditImage, readOnly }) => {
+const CardsImage = ({ content, columns, onUpdateItem, onEditImage, readOnly }) => {
     const items = content || [];
+    const actualCols = Math.min(columns || 2, Math.max(1, items.length));
     
     return (
         <div className="w-full flex flex-row flex-wrap gap-[2cqw]">
             {items.map((item, i) => (
-                <AnimatedItem key={i} index={i} className="flex-1 min-w-[18cqw] flex flex-col rounded-[1cqw] theme-bg-card border theme-border-card shadow-sm overflow-hidden">
+                <AnimatedItem 
+                    key={i} 
+                    index={i} 
+                    className="flex-1 min-w-[15cqw] flex flex-col rounded-[1cqw] theme-bg-card border theme-border-card shadow-sm overflow-hidden"
+                    style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 2}cqw) / ${actualCols})` }}
+                >
                     <div className="w-full h-[12cqw] shrink-0 relative">
                         <ItemImage
                             imageUrl={item.image}

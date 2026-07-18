@@ -27,7 +27,7 @@ SLIDE ARCHITECTURE & MACRO TYPES (CRITICAL)
 4. The content of each slide (except full-image) is composed of a "blocks" array.
 5. Every slide (except 'full-image') MUST have exactly 1 "header" block (functioning as the slide title/header) and a MAXIMUM of 4 "content" blocks.
 6. A "header" block has "type": "header", "title": "...", "subtitle": "...", and an "align" string ("left", "center", "right").
-7. A "content" block has "type": "content", an "align" string, a "layout" object containing "category" and "type" from the metadata layoutCategories, an "items" array, and an optional "verticalAlign" string ("top", "center", "bottom") to control the vertical positioning of block contents.
+7. A "content" block has "type": "content", an "align" string, a "layout" object containing "category" and "type" from the metadata layoutCategories, an "items" array, a "verticalAlign" string ("top", "center", "bottom", default "center") to control the vertical positioning of block contents, and a "columns" integer (between 1 and 6, default 2) for layouts that have "supportsColumns": true in metadata.
 8. The spatial layout of the blocks is determined by an automatic Binary Space Partitioning (BSP) engine. The sequence of blocks in the array determines their grid placement.
 9. The "full-image" slide type must NOT contain a "blocks" array or any text.
 
