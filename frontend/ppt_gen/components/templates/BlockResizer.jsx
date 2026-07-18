@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { GripVertical, GripHorizontal } from "lucide-react";
 
-const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction = "horizontal" }) => {
+const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction = "horizontal", isContentBlock = false }) => {
     const [isDragging, setIsDragging] = useState(false);
     const resizerRef = useRef(null);
     const startPosRef = useRef(0);
@@ -23,7 +23,7 @@ const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction
 
         const handleMouseUp = (e) => {
             setIsDragging(false);
-            document.body.style.cursor = "default";
+            document.body.style.cursor = "";
             
             if (onResizeEnd) {
                 const delta = isVertical ? (e.clientY - startPosRef.current) : (e.clientX - startPosRef.current);
@@ -43,6 +43,7 @@ const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
+            document.body.style.cursor = "";
         };
     }, [isDragging, onResize, onResizeEnd, isVertical]);
 

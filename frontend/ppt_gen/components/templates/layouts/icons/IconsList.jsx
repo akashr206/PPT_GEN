@@ -3,12 +3,14 @@ import { EditableElement } from "@/components/ui/EditableElement";
 import { EditableIcon } from "@/components/ui/EditableIcon";
 import { Plus } from "lucide-react";
 import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
+import AnimatedItem from "../../AnimatedItem";
 
-const IconsList = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
+const IconsList = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
     const items = content || [];
+    const actualCols = Math.min(columns || 1, Math.max(1, items.length));
 
     return (
-        <div className="w-full flex flex-col gap-[0cqw]">
+        <div className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-[0cqw]">
             {items.length === 0 && !readOnly && onAddItem && (
                 <button
                     onClick={() => onAddItem(0, "before")}
@@ -20,7 +22,12 @@ const IconsList = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
             )}
 
             {items.map((item, i) => (
-                <div key={i} className="group/item relative w-full">
+                <AnimatedItem 
+                    key={i} 
+                    index={i} 
+                    className="group/item relative flex-1 min-w-[12cqw]"
+                    style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
+                >
                     <div className="w-full flex flex-row items-center gap-[2.5cqw] py-[1.5cqw] px-[0.5cqw] rounded-[0.5cqw] hover:bg-white/5 transition-colors">
                         <EditableIcon
                             iconName={item.icon}
@@ -60,7 +67,7 @@ const IconsList = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                             />
                         </div>
                     )}
-                </div>
+                </AnimatedItem>
             ))}
         </div>
     );

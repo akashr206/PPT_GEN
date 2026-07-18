@@ -2,9 +2,11 @@ import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { Plus } from "lucide-react";
 import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
+import AnimatedItem from "../../AnimatedItem";
 
-const BulletsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
+const BulletsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
     const items = content || [];
+    const actualCols = Math.min(columns || 2, Math.max(1, items.length));
 
     return (
         <div className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-[0cqw]">
@@ -19,9 +21,11 @@ const BulletsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly 
             )}
 
             {items.map((item, i) => (
-                <div
+                <AnimatedItem
                     key={i}
-                    className="group/item relative w-[calc(50%-2cqw)]"
+                    index={i}
+                    className="group/item relative flex-1 min-w-[12cqw]"
+                    style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
                 >
                     {/* Item Actions Menu */}
                     {!readOnly && (onAddItem || onDeleteItem) && (
@@ -55,7 +59,7 @@ const BulletsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly 
                             />
                         </div>
                     </div>
-                </div>
+                </AnimatedItem>
             ))}
         </div>
     );

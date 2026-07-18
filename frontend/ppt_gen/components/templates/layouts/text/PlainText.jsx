@@ -1,6 +1,7 @@
 import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { TextItemActionMenu } from "@/components/ui/TextItemActionMenu";
+import AnimatedItem from "../../AnimatedItem";
 
 const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
     const items = content || [];
@@ -11,12 +12,13 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                 let alignClass = "text-left";
                 if (item.align === "center") alignClass = "text-center mx-auto";
                 else if (item.align === "right") alignClass = "text-right ml-auto";
+                else if (item.align === "justify") alignClass = "text-justify w-full";
 
                 return (
-                    <div key={i} className={`relative group/item flex w-full ${alignClass}`}>
+                    <AnimatedItem key={i} index={i} className={`relative group/item flex w-full ${alignClass}`}>
                         <EditableElement
                             as="p"
-                            className="text-[1.5cqw] leading-relaxed theme-text-muted w-full"
+                            className="text-[1.3cqw] leading-relaxed theme-text-muted w-full"
                             style={{ fontSize: item.descriptionFontSize ? `${item.descriptionFontSize}cqw` : undefined }}
                             value={item.description || item.header}
                             onChange={(val) => onUpdateItem(i, "description", val)}
@@ -34,7 +36,7 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                                 onDelete={onDeleteItem ? () => onDeleteItem(i) : undefined}
                             />
                         )}
-                    </div>
+                    </AnimatedItem>
                 );
             })}
         </div>

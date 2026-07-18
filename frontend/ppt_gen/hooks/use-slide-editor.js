@@ -50,25 +50,64 @@ const createNewBlock = () => ({
     type: "leaf",
     blockType: "content",
     align: "left",
-    layout: { category: "bullets", type: "simple" },
+    layout: { category: "text", type: "large" },
     items: [
         { header: "New Point", description: "Details here" }
     ]
 });
 
+export const denormalizeSlide = (slide) => {
+    if (!slide) return slide;
+    const blocks = [];
+    if (slide.header) {
+        blocks.push({ ...slide.header, type: "header" });
+    }
+    
+    const extractLeaves = (node) => {
+        if (!node) return;
+        if (node.type === "leaf" || node.type === "content") {
+            const { type, blockType, ...rest } = node;
+            blocks.push({ ...rest, type: "content" });
+        } else if (node.type === "split") {
+            extractLeaves(node.first);
+            extractLeaves(node.second);
+        }
+    };
+    
+    if (slide.contentTree) {
+        if (Array.isArray(slide.contentTree)) {
+             slide.contentTree.forEach(b => blocks.push({ ...b, type: "content" }));
+        } else {
+             extractLeaves(slide.contentTree);
+        }
+    } else if (slide.blocks) {
+        return slide;
+    }
+    
+    const { contentTree, header, ...rest } = slide;
+    return { ...rest, blocks };
+};
+
 export const normalizeSlides = (slides) => {
     return slides.map(slide => {
-        if (slide.contentTree) {
-            return { ...slide, contentTree: fixTreeTypes(slide.contentTree) };
+        let blocks = slide.blocks || [];
+        let currentSlide = { ...slide };
+        
+        if (Array.isArray(currentSlide.contentTree)) {
+            blocks = [...blocks, ...currentSlide.contentTree.map(b => ({ ...b, type: "content" }))];
+            delete currentSlide.contentTree;
         }
 
-        const blocks = slide.blocks || [];
-        const headerBlock = blocks.find(b => b.type === "header") || null;
+        if (currentSlide.contentTree) {
+            return { ...currentSlide, contentTree: fixTreeTypes(currentSlide.contentTree) };
+        }
+
+        const headerBlock = currentSlide.header || blocks.find(b => b.type === "header") || null;
         const contentBlocks = blocks.filter(b => b.type === "content");
         
         const contentTree = buildAutoBSP(contentBlocks);
 
-        const newSlide = { ...slide, header: headerBlock, contentTree };
+        const newSlide = { ...currentSlide, header: headerBlock, contentTree };
         delete newSlide.blocks;
         return newSlide;
     });
@@ -160,7 +199,19 @@ export const splitSpecificLeaf = (node, targetId, direction, newLeaf) => {
 
 export function useSlideEditor(initialPptData, isBusy) {
     const [pptData, setPptData] = useState(initialPptData || null);
-    const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+    const [activeSlideIndex, setActiveSlideIndex] = useState(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const slideParam = params.get("slide");
+            if (slideParam !== null) {
+                const index = parseInt(slideParam, 10);
+                if (!isNaN(index) && index >= 0) {
+                    return index;
+                }
+            }
+        }
+        return 0;
+    });
     const [editableSlides, setEditableSlides] = useState([]);
     const [past, setPast] = useState([]);
     const [future, setFuture] = useState([]);
@@ -384,18 +435,35 @@ export function useSlideEditor(initialPptData, isBusy) {
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
 
+    const handleReplaceBlock = useCallback((blockId, newBlockData) => {
+        if (isBusy) return;
+        const slides = editableSlidesRef.current;
+        if (!slides || !slides[activeSlideIndexRef.current]) return;
+        const updatedSlides = [...slides];
+        const slide = updatedSlides[activeSlideIndexRef.current];
+
+        if (slide.contentTree) {
+            const updatedTree = updateNode(slide.contentTree, blockId, (node) => ({
+                ...newBlockData,
+                id: node.id // preserve the ID
+            }));
+            updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
+            updateSlidesState(updatedSlides);
+        }
+    }, [isBusy, updateSlidesState]);
+
     const createNewBlock = () => ({
         id: `block_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         type: "leaf",
         blockType: "content", // explicitly differentiate from header/split
         align: "left",
-        layout: { category: "bullets", type: "simple" },
+        layout: { category: "text", type: "large" },
         items: [
             { header: "New Point", description: "Details about this point" }
         ]
     });
 
-    const handleAddBlock = useCallback(() => {
+    const handleAddBlock = useCallback((customBlockData = null) => {
         if (isBusy) return;
         const slides = editableSlidesRef.current;
         if (!slides || !slides[activeSlideIndexRef.current]) return;
@@ -403,11 +471,16 @@ export function useSlideEditor(initialPptData, isBusy) {
         const slide = updatedSlides[activeSlideIndexRef.current];
 
         if (countLeaves(slide.contentTree) >= 4) {
-            toast.error("Maximum 4 blocks allowed per slide");
+            import("sonner").then(({ toast }) => toast.error("Maximum 4 blocks allowed per slide"));
             return;
         }
 
-        const newBlock = createNewBlock();
+        let newBlock = customBlockData
+            ? JSON.parse(JSON.stringify(customBlockData))
+            : createNewBlock();
+            
+        newBlock.id = `block_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        
         let updatedTree = slide.contentTree;
 
         if (!updatedTree) {
@@ -420,7 +493,7 @@ export function useSlideEditor(initialPptData, isBusy) {
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
 
-    const handleSplitBlock = useCallback((blockId, direction) => {
+    const handleSplitBlock = useCallback((blockId, direction, customBlockData = null) => {
         if (isBusy) return;
         const slides = editableSlidesRef.current;
         if (!slides || !slides[activeSlideIndexRef.current]) return;
@@ -428,11 +501,16 @@ export function useSlideEditor(initialPptData, isBusy) {
         const slide = updatedSlides[activeSlideIndexRef.current];
 
         if (countLeaves(slide.contentTree) >= 4) {
-            toast.error("Maximum 4 blocks allowed per slide");
+            import("sonner").then(({ toast }) => toast.error("Maximum 4 blocks allowed per slide"));
             return;
         }
 
-        const newBlock = createNewBlock();
+        let newBlock = customBlockData 
+            ? JSON.parse(JSON.stringify(customBlockData)) 
+            : createNewBlock();
+            
+        newBlock.id = `block_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
         const updatedTree = splitSpecificLeaf(slide.contentTree, blockId, direction, newBlock);
 
         updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
@@ -449,9 +527,17 @@ export function useSlideEditor(initialPptData, isBusy) {
 
         const updatedTree = updateNode(slide.contentTree, blockId, (node) => {
             const updatedItems = [...(node.items || [])];
+            const cat = node.layout?.category?.toLowerCase();
+            const isIconBlock = cat === "icons" || cat === "icon";
+            const additionalProps = {};
+            if (field === "header" && isIconBlock) {
+                additionalProps.iconKeywords = value;
+            }
+
             updatedItems[itemIndex] = {
                 ...updatedItems[itemIndex],
                 [field]: value,
+                ...additionalProps
             };
             return { ...node, items: updatedItems };
         });
@@ -625,6 +711,7 @@ export function useSlideEditor(initialPptData, isBusy) {
         handleAddSlide,
         handleDeleteSlide,
         handleMoveSlide,
+        handleReplaceBlock,
         editableSlidesRef,
         activeSlideIndexRef,
     };

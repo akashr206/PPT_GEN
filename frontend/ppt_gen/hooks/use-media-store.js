@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import api from "@/lib/api";
 
+const inflightIcons = {};
+const inflightImages = {};
+
 export const useMediaStore = create((set, get) => ({
     iconCache: {}, // { query: resultsArray }
     imageCache: {}, // { query: resultsArray }
@@ -18,23 +21,32 @@ export const useMediaStore = create((set, get) => ({
         if (iconCache[query]) {
             return iconCache[query];
         }
+        if (inflightIcons[query]) {
+            return inflightIcons[query];
+        }
 
         set({ isLoadingIcons: true });
-        try {
-            const res = await api.get("/api/ppt/icons/search", {
-                params: { keywords: query }
-            });
-            const data = res?.data || res || [];
-            set((state) => ({
-                iconCache: { ...state.iconCache, [query]: data }
-            }));
-            return data;
-        } catch (error) {
-            console.error("Failed to search icons:", error);
-            return [];
-        } finally {
-            set({ isLoadingIcons: false });
-        }
+        
+        inflightIcons[query] = (async () => {
+            try {
+                const res = await api.get("/api/ppt/icons/search", {
+                    params: { keywords: query }
+                });
+                const data = res?.data || res || [];
+                set((state) => ({
+                    iconCache: { ...state.iconCache, [query]: data }
+                }));
+                return data;
+            } catch (error) {
+                console.error("Failed to search icons:", error);
+                return [];
+            } finally {
+                delete inflightIcons[query];
+                set({ isLoadingIcons: Object.keys(inflightIcons).length > 0 });
+            }
+        })();
+        
+        return inflightIcons[query];
     },
 
     searchImages: async (query) => {
@@ -42,23 +54,32 @@ export const useMediaStore = create((set, get) => ({
         if (imageCache[query]) {
             return imageCache[query];
         }
+        if (inflightImages[query]) {
+            return inflightImages[query];
+        }
 
         set({ isLoadingImages: true });
-        try {
-            const res = await api.get("/api/ppt/images/search", {
-                params: { q: query }
-            });
-            const data = res?.data || res || [];
-            set((state) => ({
-                imageCache: { ...state.imageCache, [query]: data }
-            }));
-            return data;
-        } catch (error) {
-            console.error("Failed to search images:", error);
-            return [];
-        } finally {
-            set({ isLoadingImages: false });
-        }
+        
+        inflightImages[query] = (async () => {
+            try {
+                const res = await api.get("/api/ppt/images/search", {
+                    params: { q: query }
+                });
+                const data = res?.data || res || [];
+                set((state) => ({
+                    imageCache: { ...state.imageCache, [query]: data }
+                }));
+                return data;
+            } catch (error) {
+                console.error("Failed to search images:", error);
+                return [];
+            } finally {
+                delete inflightImages[query];
+                set({ isLoadingImages: Object.keys(inflightImages).length > 0 });
+            }
+        })();
+        
+        return inflightImages[query];
     },
 
     fetchUserIcons: async (force = false) => {

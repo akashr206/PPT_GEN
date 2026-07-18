@@ -1,13 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, use, useCallback, useMemo } from "react";
+import React, {
+    useState,
+    useEffect,
+    use,
+    useCallback,
+    useMemo,
+    useRef,
+} from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import api from "@/lib/api";
 
-import { useSlideEditor } from "@/hooks/use-slide-editor";
+import { useSlideEditor, normalizeSlides, denormalizeSlide } from "@/hooks/use-slide-editor";
 import { usePptData } from "@/hooks/use-ppt-data";
 import { useImageFetcher } from "@/hooks/use-image-fetcher";
+import { useMediaStore } from "@/hooks/use-media-store";
 import { useLibrarySidebar } from "@/hooks/use-library-sidebar";
 import { useExport } from "@/hooks/use-export";
 import { useAutosave } from "@/hooks/use-autosave";
@@ -22,60 +30,54 @@ import SlideViewer from "./components/SlideViewer";
 import SlideThumbnails from "./components/SlideThumbnails";
 import LibrarySidebar from "./components/LibrarySidebar";
 import HiddenRenderFrame from "./components/HiddenRenderFrame";
+import { usePathname } from "next/navigation";
 
 export default function PPTSlidesViewerPage({ params }) {
     const unwrappedParams = use(params);
-    const pptId = unwrappedParams?.id;
+    const pptId = unwrappedParams.id;
 
+    // --- Editor States ---
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isSlideSettingsOpen, setIsSlideSettingsOpen] = useState(false);
     const [isEditWithAIModalOpen, setIsEditWithAIModalOpen] = useState(false);
     const [editWithAIPrompt, setEditWithAIPrompt] = useState("");
     const [isEditWithAILoading, setIsEditWithAILoading] = useState(false);
-    const [isTouchDevice, setIsTouchDevice] = useState(false);
+    const [isTouchDevice] = useState(() => {
+        return (
+            typeof window !== "undefined" &&
+            ("ontouchstart" in window || navigator.maxTouchPoints > 0)
+        );
+    });
+    const pathname = usePathname();
 
     const [blockLayoutModalState, setBlockLayoutModalState] = useState({
         isOpen: false,
         blockIndex: null,
         currentCategory: "",
         currentType: "",
+        blockData: null,
         onSelect: null,
     });
 
     // Stable callbacks for opening modals — must be useCallback so they don't
     // create new references on every render (which would break React.memo on children)
     const openSettings = useCallback(() => setIsSlideSettingsOpen(true), []);
-    const openEditWithAI = useCallback(() => setIsEditWithAIModalOpen(true), []);
-
-    useEffect(() => {
-        const handleOpenEvent = (e) => {
-            setBlockLayoutModalState({
-                isOpen: true,
-                blockIndex: e.detail.blockIndex,
-                currentCategory: e.detail.currentCategory,
-                currentType: e.detail.currentType,
-                onSelect: e.detail.onSelect,
-            });
-        };
-        window.addEventListener("trigger-open-block-layout-picker", handleOpenEvent);
-        return () => window.removeEventListener("trigger-open-block-layout-picker", handleOpenEvent);
-    }, []);
-
-    useEffect(() => {
-        
-        setIsTouchDevice(
-            typeof window !== "undefined" &&
-                ("ontouchstart" in window || navigator.maxTouchPoints > 0),
-        );
-    }, []);
+    const openEditWithAI = useCallback(
+        () => setIsEditWithAIModalOpen(true),
+        [],
+    );
 
     useEffect(() => {
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };
         document.addEventListener("fullscreenchange", handleFullscreenChange);
+
         return () =>
-            document.removeEventListener("fullscreenchange", handleFullscreenChange);
+            document.removeEventListener(
+                "fullscreenchange",
+                handleFullscreenChange,
+            );
     }, []);
 
     // --- Slide editor state & handlers ---
@@ -103,6 +105,7 @@ export default function PPTSlidesViewerPage({ params }) {
         handleAddSlide,
         handleDeleteSlide,
         handleMoveSlide,
+        handleReplaceBlock,
         editableSlidesRef,
         activeSlideIndexRef,
     } = useSlideEditor(null, false /* isBusy assigned below */);
@@ -116,11 +119,15 @@ export default function PPTSlidesViewerPage({ params }) {
     });
 
     // --- Export (PDF / PPTX) ---
-    const { isGeneratingPDF, isExtractingPPTX, setIsGeneratingPDF, handleDownloadAsPPT } =
-        useExport({
-            editableSlides,
-            pptData,
-        });
+    const {
+        isGeneratingPDF,
+        isExtractingPPTX,
+        setIsGeneratingPDF,
+        handleDownloadAsPPT,
+    } = useExport({
+        editableSlides,
+        pptData,
+    });
 
     const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX;
 
@@ -149,6 +156,90 @@ export default function PPTSlidesViewerPage({ params }) {
             updateSlidesState,
         });
 
+    // --- Layout selector sidebar toggle & sync ---
+    useEffect(() => {
+        const handleOpenEvent = (e) => {
+            closeLibrary(); // Close library sidebar if layout selector opens
+            setBlockLayoutModalState({
+                isOpen: true,
+                blockIndex: e.detail.blockIndex,
+                currentCategory: e.detail.currentCategory,
+                currentType: e.detail.currentType,
+                blockData: e.detail.blockData,
+                onSelect: e.detail.onSelect,
+            });
+        };
+        window.addEventListener(
+            "trigger-open-block-layout-picker",
+            handleOpenEvent,
+        );
+        return () =>
+            window.removeEventListener(
+                "trigger-open-block-layout-picker",
+                handleOpenEvent,
+            );
+    }, [closeLibrary]);
+
+    // Close layout selector if library sidebar opens
+    useEffect(() => {
+        if (isLibraryOpen) {
+            const timer = setTimeout(() => {
+                setBlockLayoutModalState((prev) => ({
+                    ...prev,
+                    isOpen: false,
+                }));
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+    }, [isLibraryOpen]);
+
+    // One-time initialization guard to restore slide index from URL on load
+    const isSlideInitializedRef = useRef(false);
+
+    useEffect(() => {
+        if (
+            !isSlideInitializedRef.current &&
+            editableSlides &&
+            editableSlides.length > 0
+        ) {
+            const params = new URLSearchParams(window.location.search);
+            const slideParam = params.get("slide");
+            if (slideParam !== null) {
+                const index = parseInt(slideParam, 10);
+                if (
+                    !isNaN(index) &&
+                    index >= 0 &&
+                    index < editableSlides.length
+                ) {
+                    setActiveSlideIndex(index);
+                }
+            }
+            isSlideInitializedRef.current = true;
+        }
+    }, [editableSlides, setActiveSlideIndex]);
+
+    // Update URL parameter when active slide index changes
+    useEffect(() => {
+        if (
+            activeSlideIndex !== null &&
+            editableSlides &&
+            editableSlides.length > 0 &&
+            isSlideInitializedRef.current
+        ) {
+            const params = new URLSearchParams(window.location.search);
+            const currentParam = params.get("slide");
+            const newParam = activeSlideIndex.toString();
+            if (currentParam !== newParam) {
+                params.set("slide", newParam);
+                window.history.replaceState(
+                    null,
+                    "",
+                    `${pathname}?${params.toString()}`,
+                );
+            }
+        }
+    }, [activeSlideIndex, editableSlides, pathname]);
+
     // Bridge: handleEditImage opens the library sidebar
     const handleEditImageBridged = useCallback(
         (context) => {
@@ -169,19 +260,29 @@ export default function PPTSlidesViewerPage({ params }) {
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (isBusy) return;
-            const isUndo = (e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey;
+            const isUndo =
+                (e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey;
             const isRedo =
                 (e.ctrlKey || e.metaKey) &&
                 (e.key === "y" || (e.shiftKey && e.key === "z"));
 
-            if (isUndo) { e.preventDefault(); handleUndo(); return; }
-            if (isRedo) { e.preventDefault(); handleRedo(); return; }
+            if (isUndo) {
+                e.preventDefault();
+                handleUndo();
+                return;
+            }
+            if (isRedo) {
+                e.preventDefault();
+                handleRedo();
+                return;
+            }
 
             if (
                 e.target.tagName === "INPUT" ||
                 e.target.tagName === "TEXTAREA" ||
                 e.target.isContentEditable
-            ) return;
+            )
+                return;
 
             if (e.key === "ArrowRight") {
                 setActiveSlideIndex((prev) =>
@@ -189,11 +290,46 @@ export default function PPTSlidesViewerPage({ params }) {
                 );
             } else if (e.key === "ArrowLeft") {
                 setActiveSlideIndex((prev) => Math.max(prev - 1, 0));
+            } else if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+                if (document.querySelector('.group\\/block.outline')) {
+                    // A block is selected. Let ContentBlock's keydown handler deal with the paste.
+                    return;
+                }
+
+                const copiedData = localStorage.getItem('ppt_copied_block');
+                if (copiedData) {
+                    try {
+                        const parsedBlock = JSON.parse(copiedData);
+                        const currentSlide = editableSlides[activeSlideIndexRef.current];
+                        
+                        // We can only paste on the slide if the slide's root block is empty
+                        const isDefaultItem = currentSlide?.contentTree?.items?.length === 1 && currentSlide.contentTree.items[0]?.header === "New Point";
+                        const isEmpty = currentSlide && currentSlide.contentTree && currentSlide.contentTree.type === 'leaf' && (!currentSlide.contentTree.layout || isDefaultItem || currentSlide.contentTree.items?.length === 0);
+
+                        if (isEmpty) {
+                            e.preventDefault();
+                            handleReplaceBlock(currentSlide.contentTree.id, parsedBlock);
+                            toast.success("Block pasted on slide successfully!");
+                        } else {
+                            e.preventDefault();
+                            handleAddBlock(parsedBlock);
+                            toast.success("Block pasted alongside existing content on the slide!");
+                        }
+                    } catch (error) {
+                        console.error("Failed to parse copied block data", error);
+                    }
+                }
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [editableSlides.length, handleUndo, handleRedo, isBusy]);
+    }, [editableSlides, activeSlideIndexRef, handleUndo, handleRedo, isBusy, handleReplaceBlock]);
+
+    // Clean up copied block on mount/unmount
+    useEffect(() => {
+        localStorage.removeItem('ppt_copied_block');
+        return () => localStorage.removeItem('ppt_copied_block');
+    }, []);
 
     // --- Sync info with header / navbar ---
     useEffect(() => {
@@ -230,8 +366,12 @@ export default function PPTSlidesViewerPage({ params }) {
             }, 0);
         };
 
-        const handlePDF = () => { if (!isBusy) setIsGeneratingPDF(true); };
-        const handlePPT = (e) => { if (!isBusy) handleDownloadAsPPT(e); };
+        const handlePDF = () => {
+            if (!isBusy) setIsGeneratingPDF(true);
+        };
+        const handlePPT = (e) => {
+            if (!isBusy) handleDownloadAsPPT(e);
+        };
         const handleTheme = async (e) => {
             if (isBusy) return;
             if (e.detail?.theme) {
@@ -239,7 +379,14 @@ export default function PPTSlidesViewerPage({ params }) {
                 setPptData((prev) => ({ ...prev, theme: newTheme }));
                 try {
                     await api.patch(`/api/ppt/${pptId}`, { theme: newTheme });
-                    useHistoryStore.getState().updateFirstSlide(pptId, undefined, undefined, newTheme);
+                    useHistoryStore
+                        .getState()
+                        .updateFirstSlide(
+                            pptId,
+                            undefined,
+                            undefined,
+                            newTheme,
+                        );
                     console.log("[Theme] Saved theme to database:", newTheme);
                 } catch (err) {
                     console.error("[Theme] Failed to save theme:", err);
@@ -274,15 +421,80 @@ export default function PPTSlidesViewerPage({ params }) {
         const toastId = toast.loading("AI is editing your slide...");
         try {
             const res = await api.post(`/api/ppt/edit-slide`, {
-                slide: activeSlide,
+                slide: denormalizeSlide(activeSlide),
                 prompt: editWithAIPrompt,
                 presentationTitle: pptData?.title || "Presentation",
-                slideTitles: currentSlides.map((s) => s.title || "Untitled Slide"),
+                slideTitles: currentSlides.map(
+                    (s) => s.title || "Untitled Slide",
+                ),
                 slideIndex: activeIndex,
             });
             if (res?.success && res.data) {
+                let updatedSlide = normalizeSlides([res.data])[0];
+
+                const searchImages = useMediaStore.getState().searchImages;
+                const searchIcons = useMediaStore.getState().searchIcons;
+
+                const isRealUrl = (str) =>
+                    str &&
+                    (str.startsWith("http://") ||
+                        str.startsWith("https://") ||
+                        str.startsWith("data:") ||
+                        str.startsWith("/") ||
+                        str.startsWith("blob:"));
+
+                const resolveNode = async (node) => {
+                    if (!node) return;
+                    if (node.type === "split") {
+                        await Promise.all([resolveNode(node.first), resolveNode(node.second)]);
+                    } else if (node.type === "leaf" || node.type === "content") {
+                        if (node.items) {
+                            for (const item of node.items) {
+                                if (!item.icon && (item.iconKeywords || item.header)) {
+                                    const query = item.iconKeywords || item.header;
+                                    const data = await searchIcons(query);
+                                    if (data && data.length > 0) {
+                                        item.icon = data[0].name;
+                                    } else {
+                                        item.icon = "Star";
+                                    }
+                                }
+                                if (item.image && !isRealUrl(item.image)) {
+                                    const query = item.image || item.imageDescription || item.header;
+                                    const data = await searchImages(query);
+                                    if (data && data.length > 0) {
+                                        item.image = data[0].imageURL;
+                                    }
+                                } else if (!item.image && (node.layout?.category === "images" || node.layout?.category === "image" || node.layout?.type === "image")) {
+                                    const query = item.imageDescription || item.header || "placeholder";
+                                    const data = await searchImages(query);
+                                    if (data && data.length > 0) {
+                                        item.image = data[0].imageURL;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                if (updatedSlide.contentTree) {
+                    await resolveNode(updatedSlide.contentTree);
+                }
+
+                if (['full-image', 'split-left-image', 'split-right-image', 'top-image-banner'].includes(updatedSlide.type)) {
+                    if (!isRealUrl(updatedSlide.image)) {
+                        const query = updatedSlide.imageDescription || updatedSlide.image;
+                        if (query) {
+                            const data = await searchImages(query);
+                            if (data && data.length > 0) {
+                                updatedSlide.image = data[0].imageURL;
+                            }
+                        }
+                    }
+                }
+
                 const updatedSlides = [...currentSlides];
-                updatedSlides[activeIndex] = res.data;
+                updatedSlides[activeIndex] = updatedSlide;
                 updateSlidesState(updatedSlides);
                 toast.success("AI successfully edited the Slide!");
                 setIsEditWithAIModalOpen(false);
@@ -305,7 +517,10 @@ export default function PPTSlidesViewerPage({ params }) {
     // Both useMemo calls MUST live before any early returns (Rules of Hooks).
     // Memoize resolved content so SlideViewer's React.memo bailout works.
     const resolvedContent = useMemo(
-        () => (activeSlide ? resolveSlideContent(activeSlide, activeSlideIndex) : null),
+        () =>
+            activeSlide
+                ? resolveSlideContent(activeSlide, activeSlideIndex)
+                : null,
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [activeSlide, activeSlideIndex, resolveSlideContent],
     );
@@ -315,6 +530,7 @@ export default function PPTSlidesViewerPage({ params }) {
         () => ({
             onUpdateSlide: isBusy ? undefined : handleUpdateSlide,
             onUpdateBlock: isBusy ? undefined : handleUpdateBlock,
+            onReplaceBlock: isBusy ? undefined : handleReplaceBlock,
             onDeleteBlock: isBusy ? undefined : handleDeleteBlock,
             onAddBlock: isBusy ? undefined : handleAddBlock,
             onSplitBlock: isBusy ? undefined : handleSplitBlock,
@@ -327,9 +543,18 @@ export default function PPTSlidesViewerPage({ params }) {
         }),
         [
             isBusy,
-            handleUpdateSlide, handleUpdateBlock, handleDeleteBlock, handleAddBlock, handleSplitBlock,
-            handleUpdateItem, handleDeleteItem, handleAddItemAtIndex,
-            handleEditImageBridged, handleSplitSlide, handleDeleteSlide,
+            handleUpdateSlide,
+            handleUpdateBlock,
+            handleReplaceBlock,
+            handleDeleteBlock,
+            handleAddBlock,
+            handleSplitBlock,
+            handleUpdateItem,
+            handleDeleteItem,
+            handleAddItemAtIndex,
+            handleEditImageBridged,
+            handleSplitSlide,
+            handleDeleteSlide,
         ],
     );
 
@@ -414,13 +639,30 @@ export default function PPTSlidesViewerPage({ params }) {
                     defaultTab={libraryActiveTab}
                     onClose={closeLibrary}
                 />
+
+                <BlockLayoutSelectorModal
+                    isOpen={blockLayoutModalState.isOpen}
+                    onClose={() =>
+                        setBlockLayoutModalState((prev) => ({
+                            ...prev,
+                            isOpen: false,
+                        }))
+                    }
+                    currentCategory={blockLayoutModalState.currentCategory}
+                    currentType={blockLayoutModalState.currentType}
+                    blockData={blockLayoutModalState.blockData}
+                    onSelect={blockLayoutModalState.onSelect}
+                    theme={pptData?.theme || "default"}
+                />
             </div>
 
             {/* Modals */}
             <SlideSettingsModal
                 isOpen={isSlideSettingsOpen}
                 onOpenChange={setIsSlideSettingsOpen}
-                activeSlideType={editableSlides?.[activeSlideIndex]?.type || "normal"}
+                activeSlideType={
+                    editableSlides?.[activeSlideIndex]?.type || "normal"
+                }
                 onUpdateSlide={handleUpdateSlide}
             />
 
@@ -431,16 +673,6 @@ export default function PPTSlidesViewerPage({ params }) {
                 setPrompt={setEditWithAIPrompt}
                 isLoading={isEditWithAILoading}
                 onApply={handleEditSlideWithAI}
-            />
-
-            <BlockLayoutSelectorModal
-                isOpen={blockLayoutModalState.isOpen}
-                onClose={() =>
-                    setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }))
-                }
-                currentCategory={blockLayoutModalState.currentCategory}
-                currentType={blockLayoutModalState.currentType}
-                onSelect={blockLayoutModalState.onSelect}
             />
 
             {/* Off-screen export frames (only mounted during export) */}

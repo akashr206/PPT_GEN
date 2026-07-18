@@ -7,7 +7,7 @@ import { apiLimiter, generateLimiter } from "../middleware/rateLimiter.js";
 const router = Router();
 
 const generateSchema = Joi.object({
-    prompt: Joi.string().max(800).required(),
+    prompt: Joi.string().max(10000).required(),
     tone: Joi.string().max(50).required(),
     slidesCount: Joi.number().min(1).max(15).required(),
     layoutStyle: Joi.string().max(50).optional(),
@@ -16,7 +16,7 @@ const generateSchema = Joi.object({
 
 const streamSchema = Joi.object({
     generating: Joi.string().optional(),
-    prompt: Joi.string().max(800).required(),
+    prompt: Joi.string().max(10000).required(),
     tone: Joi.string().max(50).required(),
     slidesCount: Joi.number().min(1).max(15).required(),
     layoutStyle: Joi.string().max(50).optional(),
@@ -25,7 +25,7 @@ const streamSchema = Joi.object({
 
 const editSlideSchema = Joi.object({
     slide: Joi.object().required(),
-    prompt: Joi.string().max(800).required(),
+    prompt: Joi.string().max(10000).required(),
     presentationTitle: Joi.string().allow('', null).optional(),
     slideTitles: Joi.array().items(Joi.string().allow('', null)).optional(),
     slideIndex: Joi.number().allow(null).optional()

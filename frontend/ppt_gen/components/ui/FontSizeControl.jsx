@@ -14,28 +14,28 @@ export function FontSizeControl({ valueCqw, onChangeCqw, min = 0.5, max = 15, st
     };
 
     return (
-        <div className="flex items-center justify-between gap-[0.5cqw]">
-            {label && <span className="text-[0.9cqw] font-medium text-muted-foreground w-[3cqw]">{label}</span>}
-            <div className="flex items-center bg-muted/50 rounded-[0.3cqw] border border-border/50 overflow-hidden">
+        <div className="flex items-center justify-between gap-1 sm:gap-2">
+            {label && <span className="text-[10px] sm:text-xs font-medium text-muted-foreground w-6 sm:w-8">{label}</span>}
+            <div className="flex items-center bg-muted/50 rounded border border-border/50 overflow-hidden">
                 <button 
                     onClick={handleDecrease} 
-                    className="p-[0.3cqw] hover:bg-muted-foreground/10 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                    className="p-1 sm:p-1.5 hover:bg-muted-foreground/10 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                     title="Decrease font size"
                 >
-                    <Minus className="w-[1.2cqw] h-[1.2cqw]" />
+                    <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
                 <span 
-                    className="text-[0.9cqw] w-[3.5cqw] text-center text-foreground border-x border-border/50 font-mono select-none"
+                    className="text-[10px] sm:text-xs w-8 sm:w-10 text-center text-foreground border-x border-border/50 font-mono select-none"
                     title={`${valueCqw.toFixed(1)}cqw`}
                 >
                     {displayValuePx}px
                 </span>
                 <button 
                     onClick={handleIncrease} 
-                    className="p-[0.3cqw] hover:bg-muted-foreground/10 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                    className="p-1 sm:p-1.5 hover:bg-muted-foreground/10 text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                     title="Increase font size"
                 >
-                    <Plus className="w-[1.2cqw] h-[1.2cqw]" />
+                    <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
             </div>
         </div>

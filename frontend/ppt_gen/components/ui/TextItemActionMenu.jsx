@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import {
     Trash2,
     MoreHorizontal,
     AlignLeft,
     AlignCenter,
     AlignRight,
-    Plus,
+    AlignJustify,
     ArrowUp,
-    ArrowDown
+    ArrowDown,
 } from "lucide-react";
 import { FontSizeControl } from "@/components/ui/FontSizeControl";
 import {
@@ -16,11 +16,17 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ALIGNMENTS = [
     { value: "left", icon: AlignLeft, label: "Left Align" },
     { value: "center", icon: AlignCenter, label: "Center Align" },
     { value: "right", icon: AlignRight, label: "Right Align" },
+    { value: "justify", icon: AlignJustify, label: "Justify" },
 ];
 
 export function TextItemActionMenu({
@@ -35,43 +41,30 @@ export function TextItemActionMenu({
     hasDesc = false,
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
-    const menuRef = useRef(null);
-
-    useEffect(() => {
-        if (!menuOpen) return;
-        const handleClickOutside = (e) => {
-            if (menuRef.current && !menuRef.current.contains(e.target)) {
-                setMenuOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
-    }, [menuOpen]);
 
     return (
         <TooltipProvider>
             <div
-                ref={menuRef}
                 className={`absolute right-0 z-20 transition-opacity ${menuOpen ? "opacity-100" : "opacity-0 group-hover/item:opacity-100"}`}
             >
-                {!menuOpen ? (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setMenuOpen(true);
-                        }}
-                        className="p-[0.3cqw] bg-background/95 border border-border/50 shadow-md backdrop-blur-sm rounded-xs hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer flex items-center justify-center"
-                    >
-                        <MoreHorizontal className="w-[1cqw] h-[1cqw] max-sm:w-3 max-sm:h-3" />
-                    </button>
-                ) : (
-                    <div
+                <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                    <DropdownMenuTrigger asChild>
+                        <button
+                            className="p-1 sm:p-1.5 rounded-xs theme-menu-button cursor-pointer flex items-center justify-center"
+                        >
+                            <MoreHorizontal className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    
+                    <DropdownMenuContent
+                        side="top"
+                        align="end"
+                        sideOffset={6}
                         onMouseDown={(e) => e.stopPropagation()}
-                        className="flex items-center w-max gap-[0.5cqw] p-[0.3cqw] rounded-[0.4cqw] bg-background/95 border border-border/50 shadow-md backdrop-blur-sm pointer-events-auto origin-right"
+                        className="flex items-center w-max gap-1 sm:gap-2 p-1 sm:p-1.5 rounded-md bg-background/95 border border-border/50 shadow-md backdrop-blur-sm pointer-events-auto origin-right z-50"
                     >
                         {/* ALIGNMENT */}
-                        <div className="flex items-center gap-[0.2cqw]">
+                        <div className="flex items-center gap-0.5 sm:gap-1">
                             {ALIGNMENTS.map(({ value, icon: Icon, label }) => (
                                 <Tooltip key={value}>
                                     <TooltipTrigger asChild>
@@ -80,14 +73,14 @@ export function TextItemActionMenu({
                                                 e.stopPropagation();
                                                 onUpdateItem("align", value);
                                             }}
-                                            className={`p-[0.3cqw] rounded transition-colors cursor-pointer
+                                            className={`p-1 sm:p-1.5 rounded transition-colors cursor-pointer
                             ${
                                 align === value || (!align && value === "left")
                                     ? "bg-primary/15 text-primary"
                                     : "hover:bg-muted text-muted-foreground"
                             }`}
                                         >
-                                            <Icon className="w-[1.4cqw] h-[1.4cqw] max-sm:w-3 max-sm:h-3" />
+                                            <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                         </button>
                                     </TooltipTrigger>
                                     <TooltipContent>{label}</TooltipContent>
@@ -98,14 +91,17 @@ export function TextItemActionMenu({
                         {/* FONT SIZES */}
                         {(hasHeader || hasDesc) && (
                             <>
-                                <div className="w-px h-[1.2cqw] bg-border mx-[0.1cqw]" />
-                                <div className="flex items-center gap-[0.4cqw]">
+                                <div className="w-px h-4 sm:h-5 bg-border mx-0.5 sm:mx-1" />
+                                <div className="flex items-center gap-1 sm:gap-2">
                                     {hasHeader && (
                                         <FontSizeControl
                                             label="Head:"
                                             valueCqw={headerSize || 2.2}
                                             onChangeCqw={(v) =>
-                                                onUpdateItem("headerFontSize", v)
+                                                onUpdateItem(
+                                                    "headerFontSize",
+                                                    v,
+                                                )
                                             }
                                             min={1}
                                             max={8}
@@ -131,8 +127,8 @@ export function TextItemActionMenu({
                         {/* ACTIONS */}
                         {(onAddBefore || onAddAfter || onDelete) && (
                             <>
-                                <div className="w-px h-[1.2cqw] bg-border mx-[0.1cqw]" />
-                                <div className="flex items-center gap-[0.2cqw]">
+                                <div className="w-px h-4 sm:h-5 bg-border mx-0.5 sm:mx-1" />
+                                <div className="flex items-center gap-0.5 sm:gap-1">
                                     {onAddBefore && (
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -141,12 +137,14 @@ export function TextItemActionMenu({
                                                         e.stopPropagation();
                                                         onAddBefore();
                                                     }}
-                                                    className="flex items-center gap-[0.1cqw] p-[0.3cqw] text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
+                                                    className="flex items-center gap-0.5 p-1 sm:p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
                                                 >
-                                                    <ArrowUp className="w-[1.2cqw] h-[1.2cqw] max-sm:w-3 max-sm:h-3" />
+                                                    <ArrowUp className="w-3 h-3 sm:w-4 sm:h-4" />
                                                 </button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Add Item Before</TooltipContent>
+                                            <TooltipContent>
+                                                Add Item Before
+                                            </TooltipContent>
                                         </Tooltip>
                                     )}
                                     {onAddAfter && (
@@ -157,12 +155,14 @@ export function TextItemActionMenu({
                                                         e.stopPropagation();
                                                         onAddAfter();
                                                     }}
-                                                    className="flex items-center gap-[0.1cqw] p-[0.3cqw] text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
+                                                    className="flex items-center gap-0.5 p-1 sm:p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors cursor-pointer"
                                                 >
-                                                    <ArrowDown className="w-[1.2cqw] h-[1.2cqw] max-sm:w-3 max-sm:h-3" />
+                                                    <ArrowDown className="w-3 h-3 sm:w-4 sm:h-4" />
                                                 </button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Add Item After</TooltipContent>
+                                            <TooltipContent>
+                                                Add Item After
+                                            </TooltipContent>
                                         </Tooltip>
                                     )}
                                     {onDelete && (
@@ -172,20 +172,23 @@ export function TextItemActionMenu({
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         onDelete();
+                                                        setMenuOpen(false);
                                                     }}
-                                                    className="p-[0.3cqw] hover:bg-destructive/20 text-destructive rounded transition-colors cursor-pointer"
+                                                    className="p-1 sm:p-1.5 hover:bg-destructive/20 text-destructive rounded transition-colors cursor-pointer"
                                                 >
-                                                    <Trash2 className="w-[1.2cqw] h-[1.2cqw] max-sm:w-3 max-sm:h-3" />
+                                                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                                                 </button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Delete Item</TooltipContent>
+                                            <TooltipContent>
+                                                Delete Item
+                                            </TooltipContent>
                                         </Tooltip>
                                     )}
                                 </div>
                             </>
                         )}
-                    </div>
-                )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </TooltipProvider>
     );

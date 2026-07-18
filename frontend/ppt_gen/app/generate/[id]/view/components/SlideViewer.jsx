@@ -4,7 +4,10 @@ import React, { useRef, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Slide from "@/components/templates/Slide";
 import SlideFloatingControls from "@/components/generate/SlideFloatingControls";
-
+import { PresentationContext } from "@/contexts/presentation-context";
+import { useSettingsStore } from "@/hooks/use-settings-store";
+import { motion, AnimatePresence } from "framer-motion";
+import "../../../../../components/templates/themes.css"
 const CURSOR_LEFT = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none'><path d='M19 12H5M12 19l-7-7 7-7' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M19 12H5M12 19l-7-7 7-7' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") 16 16, w-resize`;
 const CURSOR_RIGHT = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none'><path d='M5 12h14M12 5l7 7-7 7' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M5 12h14M12 5l7 7-7 7' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") 16 16, e-resize`;
 
@@ -28,6 +31,7 @@ const SlideViewer = React.memo(function SlideViewer({
     isTouchDevice,
     onUpdateSlide,
     onUpdateBlock,
+    onReplaceBlock,
     onDeleteBlock,
     onAddBlock,
     onSplitBlock,
@@ -67,9 +71,34 @@ const SlideViewer = React.memo(function SlideViewer({
     const slideCount = editableSlides?.length ?? 0;
     const activeSlide = editableSlides?.[activeSlideIndex];
 
+    const { animationsEnabled } = useSettingsStore();
+
+    const prevIndexRef = useRef(activeSlideIndex);
+    const direction = activeSlideIndex >= prevIndexRef.current ? 1 : -1;
+
+    useEffect(() => {
+        prevIndexRef.current = activeSlideIndex;
+    }, [activeSlideIndex]);
+
+    const slideVariants = {
+        enter: (dir) => ({
+            x: isFullscreen && animationsEnabled ? (dir > 0 ? 20 : -20) : 0,
+            opacity: isFullscreen && animationsEnabled ? 0 : 1,
+        }),
+        center: {
+            x: 0,
+            opacity: 1,
+        },
+        exit: (dir) => ({
+            x: isFullscreen && animationsEnabled ? (dir < 0 ? 20 : -20) : 0,
+            opacity: isFullscreen && animationsEnabled ? 0 : 1,
+        }),
+    };
+
     return (
         <div
             ref={presentationRef}
+            data-theme={theme || resolvedSlideContent?.theme}
             className={`w-full relative group flex items-center justify-center ${isFullscreen ? "!max-w-none bg-black w-screen h-screen" : ""}`}
             style={
                 isFullscreen
@@ -96,27 +125,44 @@ const SlideViewer = React.memo(function SlideViewer({
 
             {/* Slide canvas */}
             <div
-                className={`w-full relative overflow-hidden ${
+                data-theme={theme || resolvedSlideContent?.theme}
+                className={`w-full relative overflow-hidden theme-container ${
                     isFullscreen
-                        ? "max-h-screen max-w-[calc(100vh*16/9)] bg-background"
+                        ? "max-h-screen max-w-[calc(100vh*16/9)]"
                         : "shadow-xl rounded-lg max-md:rounded-md overflow-hidden ring-1 ring-border/20"
                 }`}
             >
                 {activeSlide ? (
-                    <Slide
-                        slide_content={{ ...resolvedSlideContent, theme }}
-                        onUpdateSlide={onUpdateSlide}
-                        onUpdateBlock={onUpdateBlock}
-                        onDeleteBlock={onDeleteBlock}
-                        onAddBlock={onAddBlock}
-                        onSplitBlock={onSplitBlock}
-                        onUpdateItem={onUpdateItem}
-                        onDeleteItem={onDeleteItem}
-                        onAddItem={onAddItem}
-                        onEditImage={onEditImage}
-                        onSplitSlide={onSplitSlide}
-                        slideIndex={activeSlideIndex}
-                    />
+                    <PresentationContext.Provider value={{ isPresenting: isFullscreen }}>
+                        <AnimatePresence mode="wait" custom={direction}>
+                            <motion.div
+                                key={activeSlideIndex}
+                                custom={direction}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="w-full h-full"
+                            >
+                                <Slide
+                                    slide_content={{ ...resolvedSlideContent, theme }}
+                                    onUpdateSlide={isFullscreen ? undefined : onUpdateSlide}
+                                    onUpdateBlock={isFullscreen ? undefined : onUpdateBlock}
+                                    onReplaceBlock={isFullscreen ? undefined : onReplaceBlock}
+                                    onDeleteBlock={isFullscreen ? undefined : onDeleteBlock}
+                                    onAddBlock={isFullscreen ? undefined : onAddBlock}
+                                    onSplitBlock={isFullscreen ? undefined : onSplitBlock}
+                                    onUpdateItem={isFullscreen ? undefined : onUpdateItem}
+                                    onDeleteItem={isFullscreen ? undefined : onDeleteItem}
+                                    onAddItem={isFullscreen ? undefined : onAddItem}
+                                    onEditImage={isFullscreen ? undefined : onEditImage}
+                                    onSplitSlide={isFullscreen ? undefined : onSplitSlide}
+                                    slideIndex={activeSlideIndex}
+                                />
+                            </motion.div>
+                        </AnimatePresence>
+                    </PresentationContext.Provider>
                 ) : isStreamGenerating ? (
                     <div className="w-full aspect-video bg-[#0d0d0d] flex flex-col items-center justify-center text-white gap-4 p-8 text-center rounded-md border border-neutral-800">
                         <Loader2 className="animate-spin text-primary w-8 h-8" />

@@ -27,7 +27,7 @@ SLIDE ARCHITECTURE & MACRO TYPES (CRITICAL)
 4. The content of each slide (except full-image) is composed of a "blocks" array.
 5. Every slide (except 'full-image') MUST have exactly 1 "header" block (functioning as the slide title/header) and a MAXIMUM of 4 "content" blocks.
 6. A "header" block has "type": "header", "title": "...", "subtitle": "...", and an "align" string ("left", "center", "right").
-7. A "content" block has "type": "content", an "align" string, a "layout" object containing "category" and "type" from the metadata layoutCategories, and an "items" array.
+7. A "content" block has "type": "content", an "align" string, a "layout" object containing "category" and "type" from the metadata layoutCategories, an "items" array, a "verticalAlign" string ("top", "center", "bottom", default "center") to control the vertical positioning of block contents, and a "columns" integer (between 1 and 6, default 2) for layouts that have "supportsColumns": true in metadata.
 8. The spatial layout of the blocks is determined by an automatic Binary Space Partitioning (BSP) engine. The sequence of blocks in the array determines their grid placement.
 9. The "full-image" slide type must NOT contain a "blocks" array or any text.
 
@@ -55,18 +55,10 @@ Example Structure:
       "imageSize": 40,
       "blocks": [
         {
-          "id": "b1",
-          "type": "header",
-          "title": "Q2 Business Performance",
-          "titleFontSize": 4.0,
-          "subtitle": "Key metrics and strategic initiatives overview.",
-          "subtitleFontSize": 2.4,
-          "align": "left"
-        },
-        {
-          "id": "b2", 
+          "id": "b1", 
           "type": "content",
           "align": "left",
+          "verticalAlign": "center",
           "layout": { "category": "text", "type": "large" },
           "items": [
              { "header": "Strong Growth in Q2", "headerFontSize": 3.5, "description": "Our revenue increased by 20% year-over-year, hitting $1.2M.", "descriptionFontSize": 1.8 }

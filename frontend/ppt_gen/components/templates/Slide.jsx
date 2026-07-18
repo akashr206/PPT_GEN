@@ -23,7 +23,7 @@ const BSPRenderer = ({ node, ...props }) => {
         
         return (
             <div className={`flex w-full h-full flex-1 min-h-0 min-w-0 ${isHorizontal ? "flex-row" : "flex-col"}`}>
-                <div style={{ flexBasis: `${activeRatio}%` }} className="relative flex min-h-0 min-w-0">
+                <div style={{ flexBasis: `${activeRatio}%` }} className="relative flex shrink min-h-0 min-w-0 ">
                     <BSPRenderer node={node.first} {...props} />
                 </div>
                 {!props.readOnly && (
@@ -35,9 +35,10 @@ const BSPRenderer = ({ node, ...props }) => {
                             if (props.onUpdateBlock) props.onUpdateBlock(node.id, 'splitRatio', newRatio);
                             setLocalRatio(null);
                         }}
+                        isContentBlock={true}
                     />
                 )}
-                <div style={{ flexBasis: `${100 - activeRatio}%` }} className="relative flex min-h-0 min-w-0">
+                <div style={{ flexBasis: `${100 - activeRatio}%` }} className="relative flex shrink min-h-0 min-w-0">
                     <BSPRenderer node={node.second} {...props} />
                 </div>
             </div>
@@ -50,6 +51,7 @@ const Slide = ({
     slide_content,
     onUpdateSlide,
     onUpdateBlock,
+    onReplaceBlock,
     onDeleteBlock,
     onAddBlock,
     onUpdateItem,
@@ -89,7 +91,7 @@ const Slide = ({
         if (macroType === "full-image") return null;
 
         return (
-            <div className="flex flex-col gap-[2cqw] w-full h-full p-[3cqw] relative">
+            <div className="flex flex-col gap-[1cqw] w-full h-full p-[3cqw] relative">
                 {slide_content.header && (
                     <HeaderBlock
                         key={slide_content.header.id || 'header'}
@@ -104,6 +106,7 @@ const Slide = ({
                     <BSPRenderer
                         node={slide_content.contentTree}
                         onUpdateBlock={onUpdateBlock}
+                        onReplaceBlock={onReplaceBlock}
                         onDeleteBlock={onDeleteBlock}
                         onAddBlock={onAddBlock}
                         onSplitBlock={onSplitBlock}
@@ -129,6 +132,8 @@ const Slide = ({
                         imageLoading={slide_content.imageLoading}
                         onEditImage={onEditImage}
                         readOnly={!onUpdateSlide}
+                        focusPoint={slide_content.imageFocus}
+                        onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
                     />
                 </div>
             );
@@ -146,6 +151,8 @@ const Slide = ({
                             imageLoading={slide_content.imageLoading}
                             onEditImage={onEditImage}
                             readOnly={!onUpdateSlide}
+                            focusPoint={slide_content.imageFocus}
+                            onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
                         />
                     </div>
                     {!!onUpdateSlide && (
@@ -195,6 +202,8 @@ const Slide = ({
                             imageLoading={slide_content.imageLoading}
                             onEditImage={onEditImage}
                             readOnly={!onUpdateSlide}
+                            focusPoint={slide_content.imageFocus}
+                            onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
                         />
                     </div>
                 </div>
@@ -214,6 +223,8 @@ const Slide = ({
                             imageLoading={slide_content.imageLoading}
                             onEditImage={onEditImage}
                             readOnly={!onUpdateSlide}
+                            focusPoint={slide_content.imageFocus}
+                            onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
                         />
                     </div>
                     {!!onUpdateSlide && (

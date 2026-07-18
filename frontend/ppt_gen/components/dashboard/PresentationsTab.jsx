@@ -273,7 +273,7 @@ export default function PresentationsTab() {
                                                     slide_content={item.first_slide}
                                                 />
                                             </div>
-                                            <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <div className="absolute inset-0 bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                         <div className="min-w-0">
                                             <div className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors leading-tight">
@@ -496,7 +496,7 @@ export default function PresentationsTab() {
                                 }
                                 className="border border-border/60 bg-card hover:bg-card/85 hover:border-primary/30 transition-all rounded-lg flex flex-col cursor-pointer select-none overflow-hidden shadow-xs hover:shadow-md group relative min-h-[220px]"
                             >
-                                <div className="aspect-video relative bg-muted/30 border-b border-border/50 overflow-hidden flex items-center justify-center shrink-0">
+                                <div className="aspect-video relative bg-muted/30 border-b border-border/50 overflow-hidden flex items-center pointer-events-none justify-center shrink-0">
                                     <Slide
                                         theme={item.theme}
                                         slide_content={item.first_slide}
