@@ -435,6 +435,23 @@ export function useSlideEditor(initialPptData, isBusy) {
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
 
+    const handleReplaceBlock = useCallback((blockId, newBlockData) => {
+        if (isBusy) return;
+        const slides = editableSlidesRef.current;
+        if (!slides || !slides[activeSlideIndexRef.current]) return;
+        const updatedSlides = [...slides];
+        const slide = updatedSlides[activeSlideIndexRef.current];
+
+        if (slide.contentTree) {
+            const updatedTree = updateNode(slide.contentTree, blockId, (node) => ({
+                ...newBlockData,
+                id: node.id // preserve the ID
+            }));
+            updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
+            updateSlidesState(updatedSlides);
+        }
+    }, [isBusy, updateSlidesState]);
+
     const createNewBlock = () => ({
         id: `block_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         type: "leaf",
@@ -446,7 +463,7 @@ export function useSlideEditor(initialPptData, isBusy) {
         ]
     });
 
-    const handleAddBlock = useCallback(() => {
+    const handleAddBlock = useCallback((customBlockData = null) => {
         if (isBusy) return;
         const slides = editableSlidesRef.current;
         if (!slides || !slides[activeSlideIndexRef.current]) return;
@@ -454,11 +471,16 @@ export function useSlideEditor(initialPptData, isBusy) {
         const slide = updatedSlides[activeSlideIndexRef.current];
 
         if (countLeaves(slide.contentTree) >= 4) {
-            toast.error("Maximum 4 blocks allowed per slide");
+            import("sonner").then(({ toast }) => toast.error("Maximum 4 blocks allowed per slide"));
             return;
         }
 
-        const newBlock = createNewBlock();
+        let newBlock = customBlockData
+            ? JSON.parse(JSON.stringify(customBlockData))
+            : createNewBlock();
+            
+        newBlock.id = `block_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        
         let updatedTree = slide.contentTree;
 
         if (!updatedTree) {
@@ -471,7 +493,7 @@ export function useSlideEditor(initialPptData, isBusy) {
         updateSlidesState(updatedSlides);
     }, [isBusy, updateSlidesState]);
 
-    const handleSplitBlock = useCallback((blockId, direction) => {
+    const handleSplitBlock = useCallback((blockId, direction, customBlockData = null) => {
         if (isBusy) return;
         const slides = editableSlidesRef.current;
         if (!slides || !slides[activeSlideIndexRef.current]) return;
@@ -479,11 +501,16 @@ export function useSlideEditor(initialPptData, isBusy) {
         const slide = updatedSlides[activeSlideIndexRef.current];
 
         if (countLeaves(slide.contentTree) >= 4) {
-            toast.error("Maximum 4 blocks allowed per slide");
+            import("sonner").then(({ toast }) => toast.error("Maximum 4 blocks allowed per slide"));
             return;
         }
 
-        const newBlock = createNewBlock();
+        let newBlock = customBlockData 
+            ? JSON.parse(JSON.stringify(customBlockData)) 
+            : createNewBlock();
+            
+        newBlock.id = `block_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
         const updatedTree = splitSpecificLeaf(slide.contentTree, blockId, direction, newBlock);
 
         updatedSlides[activeSlideIndexRef.current] = { ...slide, contentTree: updatedTree };
@@ -684,6 +711,7 @@ export function useSlideEditor(initialPptData, isBusy) {
         handleAddSlide,
         handleDeleteSlide,
         handleMoveSlide,
+        handleReplaceBlock,
         editableSlidesRef,
         activeSlideIndexRef,
     };

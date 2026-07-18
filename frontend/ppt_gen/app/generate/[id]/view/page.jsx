@@ -105,6 +105,7 @@ export default function PPTSlidesViewerPage({ params }) {
         handleAddSlide,
         handleDeleteSlide,
         handleMoveSlide,
+        handleReplaceBlock,
         editableSlidesRef,
         activeSlideIndexRef,
     } = useSlideEditor(null, false /* isBusy assigned below */);
@@ -289,11 +290,46 @@ export default function PPTSlidesViewerPage({ params }) {
                 );
             } else if (e.key === "ArrowLeft") {
                 setActiveSlideIndex((prev) => Math.max(prev - 1, 0));
+            } else if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+                if (document.querySelector('.group\\/block.outline')) {
+                    // A block is selected. Let ContentBlock's keydown handler deal with the paste.
+                    return;
+                }
+
+                const copiedData = localStorage.getItem('ppt_copied_block');
+                if (copiedData) {
+                    try {
+                        const parsedBlock = JSON.parse(copiedData);
+                        const currentSlide = editableSlides[activeSlideIndexRef.current];
+                        
+                        // We can only paste on the slide if the slide's root block is empty
+                        const isDefaultItem = currentSlide?.contentTree?.items?.length === 1 && currentSlide.contentTree.items[0]?.header === "New Point";
+                        const isEmpty = currentSlide && currentSlide.contentTree && currentSlide.contentTree.type === 'leaf' && (!currentSlide.contentTree.layout || isDefaultItem || currentSlide.contentTree.items?.length === 0);
+
+                        if (isEmpty) {
+                            e.preventDefault();
+                            handleReplaceBlock(currentSlide.contentTree.id, parsedBlock);
+                            toast.success("Block pasted on slide successfully!");
+                        } else {
+                            e.preventDefault();
+                            handleAddBlock(parsedBlock);
+                            toast.success("Block pasted alongside existing content on the slide!");
+                        }
+                    } catch (error) {
+                        console.error("Failed to parse copied block data", error);
+                    }
+                }
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [editableSlides.length, handleUndo, handleRedo, isBusy]);
+    }, [editableSlides, activeSlideIndexRef, handleUndo, handleRedo, isBusy, handleReplaceBlock]);
+
+    // Clean up copied block on mount/unmount
+    useEffect(() => {
+        localStorage.removeItem('ppt_copied_block');
+        return () => localStorage.removeItem('ppt_copied_block');
+    }, []);
 
     // --- Sync info with header / navbar ---
     useEffect(() => {
@@ -494,6 +530,7 @@ export default function PPTSlidesViewerPage({ params }) {
         () => ({
             onUpdateSlide: isBusy ? undefined : handleUpdateSlide,
             onUpdateBlock: isBusy ? undefined : handleUpdateBlock,
+            onReplaceBlock: isBusy ? undefined : handleReplaceBlock,
             onDeleteBlock: isBusy ? undefined : handleDeleteBlock,
             onAddBlock: isBusy ? undefined : handleAddBlock,
             onSplitBlock: isBusy ? undefined : handleSplitBlock,
@@ -508,6 +545,7 @@ export default function PPTSlidesViewerPage({ params }) {
             isBusy,
             handleUpdateSlide,
             handleUpdateBlock,
+            handleReplaceBlock,
             handleDeleteBlock,
             handleAddBlock,
             handleSplitBlock,

@@ -7,8 +7,13 @@ import {
     AlignCenter,
     AlignRight,
     MoreHorizontal,
-    Type
+    Type,
 } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ALIGNMENTS = [
     { value: "left", icon: AlignLeft, label: "Left" },
@@ -71,29 +76,27 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
             )}
 
             {!readOnly && (
-                <div
-                    ref={menuRef}
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 z-20"
-                >
-                    <button
-                        onMouseDown={(e) => {
-                            e.stopPropagation();
-                            setMenuOpen((v) => !v);
-                        }}
-                        className={`flex items-center justify-center p-[0.3cqw] rounded-xs theme-menu-button transition-opacity cursor-pointer
-                            ${menuOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}
-                        title="Block options"
-                    >
-                        <MoreHorizontal className="w-[1.4cqw] h-[1.4cqw]" />
-                    </button>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
+                    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                        <DropdownMenuTrigger asChild>
+                            <button
+                                className={`flex items-center justify-center p-1 sm:p-1.5 rounded-xs theme-menu-button transition-opacity cursor-pointer
+                                    ${menuOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}
+                                title="Block options"
+                            >
+                                <MoreHorizontal className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            </button>
+                        </DropdownMenuTrigger>
 
-                    {menuOpen && (
-                        <div
-                            className="absolute left-1/2 -translate-x-1/2 top-[calc(100%+0.3cqw)] bg-background border border-border rounded-[0.6cqw] shadow-xl overflow-hidden z-30 flex items-center"
+                        <DropdownMenuContent
+                            side="top"
+                            align="center"
+                            sideOffset={6}
+                            className="bg-background border border-border rounded-md shadow-xl overflow-visible z-30 flex items-center p-0 min-w-max"
                             onMouseDown={(e) => e.stopPropagation()}
                         >
-                            <div className="px-[0.5cqw] pt-[0.3cqw] pb-[0.3cqw]">
-                                <div className="flex gap-[0.4cqw]">
+                            <div className="px-1 sm:px-1.5 py-1">
+                                <div className="flex gap-1 sm:gap-1.5">
                                     {ALIGNMENTS.map(
                                         ({ value, icon: Icon, label }) => (
                                             <button
@@ -105,7 +108,7 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                                                     )
                                                 }
                                                 title={label}
-                                                className={`flex-1 flex items-center justify-center p-[0.5cqw] rounded-[0.4cqw] transition-colors cursor-pointer
+                                                className={`flex-1 flex items-center justify-center p-1 sm:p-1.5 rounded transition-colors cursor-pointer
                                                 ${
                                                     block.align === value ||
                                                     (!block.align &&
@@ -114,16 +117,16 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                                                         : "hover:bg-muted text-muted-foreground"
                                                 }`}
                                             >
-                                                <Icon className="w-[1.3cqw] h-[1.3cqw]" />
+                                                <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                             </button>
                                         ),
                                     )}
                                 </div>
                             </div>
 
-                            <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
+                            <div className="w-px h-5 sm:h-6 bg-border mx-0.5 sm:mx-1"></div>
 
-                            <div className="flex flex-col px-[0.5cqw] py-[0.2cqw] gap-[0.2cqw]">
+                            <div className="flex flex-col px-1 sm:px-1.5 py-0.5 sm:py-1 gap-1">
                                 <FontSizeControl
                                     label="Title:"
                                     valueCqw={titleSize}
@@ -149,8 +152,8 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                                 )}
                             </div>
 
-                            <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
-                            <div className="px-[0.5cqw] py-[0.3cqw]">
+                            <div className="w-px h-5 sm:h-6 bg-border mx-0.5 sm:mx-1"></div>
+                            <div className="px-1 sm:px-1.5 py-1">
                                 <button
                                     onClick={() =>
                                         onUpdateBlock?.(
@@ -160,36 +163,36 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                                                 : "New Subtitle",
                                         )
                                     }
-                                    className="flex items-center justify-center gap-[0.6cqw] w-full text-[1.1cqw] hover:bg-muted transition-colors cursor-pointer p-[0.5cqw] rounded-[0.4cqw] text-foreground"
+                                    className="flex items-center justify-center gap-1 w-full hover:bg-muted transition-colors cursor-pointer p-1 sm:p-1.5 rounded text-foreground"
                                     title={
                                         block.subtitle !== undefined
                                             ? "Remove Subtitle"
                                             : "Add Subtitle"
                                     }
                                 >
-                                    <Type className="w-[1.3cqw] h-[1.3cqw]" />
+                                    <Type className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                 </button>
                             </div>
 
                             {onDeleteBlock && (
                                 <>
-                                    <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
-                                    <div className="px-[0.5cqw] py-[0.3cqw]">
+                                    <div className="w-px h-5 sm:h-6 bg-border mx-0.5 sm:mx-1"></div>
+                                    <div className="px-1 sm:px-1.5 py-1">
                                         <button
                                             onClick={() => {
                                                 setMenuOpen(false);
                                                 onDeleteBlock();
                                             }}
-                                            className="flex items-center gap-[0.6cqw] w-full text-[1.1cqw] text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer p-[0.5cqw] rounded-[0.4cqw]"
+                                            className="flex items-center gap-1 w-full text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer p-1 sm:p-1.5 rounded"
                                             title="Delete Header"
                                         >
-                                            <Trash2 className="w-[1.3cqw] h-[1.3cqw]" />
+                                            <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                         </button>
                                     </div>
                                 </>
                             )}
-                        </div>
-                    )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             )}
         </div>

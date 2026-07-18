@@ -51,6 +51,7 @@ const Slide = ({
     slide_content,
     onUpdateSlide,
     onUpdateBlock,
+    onReplaceBlock,
     onDeleteBlock,
     onAddBlock,
     onUpdateItem,
@@ -90,7 +91,7 @@ const Slide = ({
         if (macroType === "full-image") return null;
 
         return (
-            <div className="flex flex-col gap-[2cqw] w-full h-full p-[3cqw] relative">
+            <div className="flex flex-col gap-[1cqw] w-full h-full p-[3cqw] relative">
                 {slide_content.header && (
                     <HeaderBlock
                         key={slide_content.header.id || 'header'}
@@ -105,6 +106,7 @@ const Slide = ({
                     <BSPRenderer
                         node={slide_content.contentTree}
                         onUpdateBlock={onUpdateBlock}
+                        onReplaceBlock={onReplaceBlock}
                         onDeleteBlock={onDeleteBlock}
                         onAddBlock={onAddBlock}
                         onSplitBlock={onSplitBlock}

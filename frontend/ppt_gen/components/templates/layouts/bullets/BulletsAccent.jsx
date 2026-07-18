@@ -40,7 +40,7 @@ const BulletsAccent = ({
                 >
                     {/* Add/Delete controls */}
                     {!readOnly && (onAddItem || onDeleteItem) && (
-                        <div className="absolute -top-[1cqw] right-[0.5cqw] opacity-0 group-hover/item:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity z-10">
+                        <div className="absolute top-[0.5cqw] right-[0.5cqw] opacity-0 group-hover/item:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity z-10">
                             <ItemActionsMenu
                                 onAddBefore={
                                     onAddItem

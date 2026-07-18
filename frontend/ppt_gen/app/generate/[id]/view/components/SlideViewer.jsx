@@ -31,6 +31,7 @@ const SlideViewer = React.memo(function SlideViewer({
     isTouchDevice,
     onUpdateSlide,
     onUpdateBlock,
+    onReplaceBlock,
     onDeleteBlock,
     onAddBlock,
     onSplitBlock,
@@ -148,6 +149,7 @@ const SlideViewer = React.memo(function SlideViewer({
                                     slide_content={{ ...resolvedSlideContent, theme }}
                                     onUpdateSlide={isFullscreen ? undefined : onUpdateSlide}
                                     onUpdateBlock={isFullscreen ? undefined : onUpdateBlock}
+                                    onReplaceBlock={isFullscreen ? undefined : onReplaceBlock}
                                     onDeleteBlock={isFullscreen ? undefined : onDeleteBlock}
                                     onAddBlock={isFullscreen ? undefined : onAddBlock}
                                     onSplitBlock={isFullscreen ? undefined : onSplitBlock}
