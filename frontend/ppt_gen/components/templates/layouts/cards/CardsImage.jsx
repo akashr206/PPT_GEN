@@ -25,7 +25,7 @@ const CardsImage = ({ content, onUpdateItem, onEditImage, readOnly }) => {
                     <div className="flex flex-col gap-[1cqw] p-[2cqw]">
                         <EditableElement
                             as="h3"
-                            className="theme-font-heading font-bold text-[1.6cqw] leading-tight theme-text-primary"
+                            className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary"
                             value={item.header}
                             onChange={(val) => onUpdateItem(i, "header", val)}
                             readOnly={readOnly}
@@ -33,7 +33,7 @@ const CardsImage = ({ content, onUpdateItem, onEditImage, readOnly }) => {
                         />
                         <EditableElement
                             as="p"
-                            className="text-[1.2cqw] leading-relaxed theme-text-muted"
+                            className="text-[1.3cqw] leading-relaxed theme-text-muted"
                             value={item.description}
                             onChange={(val) => onUpdateItem(i, "description", val)}
                             readOnly={readOnly}

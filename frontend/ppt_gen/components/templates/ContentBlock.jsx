@@ -73,6 +73,7 @@ const ContentBlock = ({
                     blockId,
                     currentCategory: block.layout?.category,
                     currentType: block.layout?.type,
+                    blockData: block,
                     onSelect: handleLayoutSelect,
                 },
             })
@@ -84,7 +85,7 @@ const ContentBlock = ({
     return (
         <div
             style={{ width: "100%", minHeight: "100%", height: "fit-content" }}
-            className={`relative flex flex-col ${justifyClass} ${alignClass} group/block transition-colors p-[1cqw] ${
+            className={`relative flex flex-col ${justifyClass} ${alignClass} group/block transition-colors ${
                 !readOnly
                     ? isOpen
                         ? "outline outline-gray-400/80 bg-gray-500/5"

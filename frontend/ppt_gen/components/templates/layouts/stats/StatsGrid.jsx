@@ -20,7 +20,7 @@ const StatsGrid = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
             )}
 
             {items.map((item, i) => (
-                <AnimatedItem key={i} index={i} className="group/item relative flex-1 min-w-[40%] flex flex-col gap-[0.5cqw] p-[1cqw] -m-[1cqw] rounded-[1cqw] hover:bg-white/5 transition-colors">
+                <AnimatedItem key={i} index={i} className="group/item relative flex-1 min-w-[40%] flex flex-col gap-[0.5cqw] p-[1cqw] rounded-[1cqw] hover:bg-white/5 transition-colors">
                     {/* Item Actions Menu */}
                     {!readOnly && (onAddItem || onDeleteItem) && (
                         <div className="absolute top-[0.5cqw] right-[0.5cqw] opacity-0 group-hover/item:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity z-10">

@@ -19,9 +19,8 @@ const ItemImage = ({ imageUrl, imagePrompt, imageLoading, onEditImage, readOnly,
         setLocalFocus(focusPoint);
     }, [focusPoint]);
 
-    // Treat as loading if: explicitly loading, no url, or url is just a plain text query
     const resolvedUrl = isRealImageUrl(imageUrl) ? imageUrl : null;
-    const isLoading = imageLoading || !resolvedUrl;
+    const isLoading = imageLoading;
 
     return (
         <div 
@@ -30,13 +29,20 @@ const ItemImage = ({ imageUrl, imagePrompt, imageLoading, onEditImage, readOnly,
         >
             {isLoading ? (
                 <Skeleton className="w-full h-full skeleton-sweep absolute inset-0" />
-            ) : (
+            ) : resolvedUrl ? (
                 <img 
                     src={resolvedUrl} 
                     className="w-full h-full object-cover" 
                     style={{ objectPosition: localFocus }}
                     alt={imagePrompt || "Item"} 
                 />
+            ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/10 text-muted-foreground absolute inset-0">
+                    <ImageIcon size={24} className="opacity-40 mb-1" />
+                    <span className="text-[10px] font-medium opacity-50 px-2 text-center line-clamp-2 leading-tight">
+                        {imagePrompt || "No Image"}
+                    </span>
+                </div>
             )}
             
             {/* Hover Edit & Focus Overlay */}

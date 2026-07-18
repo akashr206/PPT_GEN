@@ -51,7 +51,7 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
         >
             <EditableElement
                 as="h1"
-                className="theme-font-heading font-bold leading-tight w-full text-wrap"
+                className="theme-heading font-bold leading-tight w-full text-wrap"
                 style={{ fontSize: `${titleSize}cqw` }}
                 value={block.title}
                 onChange={(val) => onUpdateBlock?.("title", val)}
@@ -61,7 +61,7 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
             {block.subtitle !== undefined && (
                 <EditableElement
                     as="p"
-                    className="text-muted-foreground leading-normal"
+                    className="theme-text-muted leading-normal"
                     style={{ fontSize: `${subSize}cqw` }}
                     value={block.subtitle || ""}
                     onChange={(val) => onUpdateBlock?.("subtitle", val)}
@@ -98,7 +98,12 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                                         ({ value, icon: Icon, label }) => (
                                             <button
                                                 key={value}
-                                                onClick={() => onUpdateBlock?.("align", value)}
+                                                onClick={() =>
+                                                    onUpdateBlock?.(
+                                                        "align",
+                                                        value,
+                                                    )
+                                                }
                                                 title={label}
                                                 className={`flex-1 flex items-center justify-center p-[0.5cqw] rounded-[0.4cqw] transition-colors cursor-pointer
                                                 ${
@@ -115,22 +120,31 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                                     )}
                                 </div>
                             </div>
-                            
+
                             <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
-                            
+
                             <div className="flex flex-col px-[0.5cqw] py-[0.2cqw] gap-[0.2cqw]">
-                                <FontSizeControl 
-                                    label="Title:" 
-                                    valueCqw={titleSize} 
-                                    onChangeCqw={(v) => onUpdateBlock?.("titleFontSize", v)} 
-                                    min={1} max={8} 
+                                <FontSizeControl
+                                    label="Title:"
+                                    valueCqw={titleSize}
+                                    onChangeCqw={(v) =>
+                                        onUpdateBlock?.("titleFontSize", v)
+                                    }
+                                    min={1}
+                                    max={8}
                                 />
                                 {block.subtitle !== undefined && (
-                                    <FontSizeControl 
-                                        label="Sub:" 
-                                        valueCqw={subSize} 
-                                        onChangeCqw={(v) => onUpdateBlock?.("subtitleFontSize", v)} 
-                                        min={0.5} max={5} 
+                                    <FontSizeControl
+                                        label="Sub:"
+                                        valueCqw={subSize}
+                                        onChangeCqw={(v) =>
+                                            onUpdateBlock?.(
+                                                "subtitleFontSize",
+                                                v,
+                                            )
+                                        }
+                                        min={0.5}
+                                        max={5}
                                     />
                                 )}
                             </div>
@@ -138,9 +152,20 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                             <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
                             <div className="px-[0.5cqw] py-[0.3cqw]">
                                 <button
-                                    onClick={() => onUpdateBlock?.("subtitle", block.subtitle !== undefined ? undefined : "New Subtitle")}
+                                    onClick={() =>
+                                        onUpdateBlock?.(
+                                            "subtitle",
+                                            block.subtitle !== undefined
+                                                ? undefined
+                                                : "New Subtitle",
+                                        )
+                                    }
                                     className="flex items-center justify-center gap-[0.6cqw] w-full text-[1.1cqw] hover:bg-muted transition-colors cursor-pointer p-[0.5cqw] rounded-[0.4cqw]"
-                                    title={block.subtitle !== undefined ? "Remove Subtitle" : "Add Subtitle"}
+                                    title={
+                                        block.subtitle !== undefined
+                                            ? "Remove Subtitle"
+                                            : "Add Subtitle"
+                                    }
                                 >
                                     <Type className="w-[1.3cqw] h-[1.3cqw]" />
                                 </button>
@@ -148,7 +173,7 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
 
                             {onDeleteBlock && (
                                 <>
-                                <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
+                                    <div className="w-[0.1cqw] h-[2cqw] bg-border mx-[0.2cqw]"></div>
                                     <div className="px-[0.5cqw] py-[0.3cqw]">
                                         <button
                                             onClick={() => {

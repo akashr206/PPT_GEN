@@ -17,7 +17,7 @@ const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                     <AnimatedItem key={i} index={i} className={`relative group/item flex flex-col gap-[1cqw] w-full ${alignClass}`}>
                         <EditableElement
                             as="h3"
-                            className="theme-font-heading font-bold text-[2.2cqw] leading-tight theme-text-primary w-full"
+                            className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary w-full"
                             style={{ fontSize: item.headerFontSize ? `${item.headerFontSize}cqw` : undefined }}
                             value={item.header}
                             onChange={(val) => onUpdateItem(i, "header", val)}
@@ -26,7 +26,7 @@ const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                         />
                         <EditableElement
                             as="p"
-                            className="text-[1.5cqw] leading-relaxed theme-text-muted w-full"
+                            className="text-[1.3cqw] leading-relaxed theme-text-muted w-full"
                             style={{ fontSize: item.descriptionFontSize ? `${item.descriptionFontSize}cqw` : undefined }}
                             value={item.description}
                             onChange={(val) => onUpdateItem(i, "description", val)}

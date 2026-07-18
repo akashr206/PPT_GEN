@@ -17,7 +17,7 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                     <AnimatedItem key={i} index={i} className={`relative group/item flex w-full ${alignClass}`}>
                         <EditableElement
                             as="p"
-                            className="text-[1.5cqw] leading-relaxed theme-text-muted w-full"
+                            className="text-[1.3cqw] leading-relaxed theme-text-muted w-full"
                             style={{ fontSize: item.descriptionFontSize ? `${item.descriptionFontSize}cqw` : undefined }}
                             value={item.description || item.header}
                             onChange={(val) => onUpdateItem(i, "description", val)}

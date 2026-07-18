@@ -43,7 +43,10 @@ export function useImageFetcher({
 }) {
     const [fetchedImages, setFetchedImages] = useState({});
     const [imageLoading, setImageLoading] = useState({});
+    const [fetchedIcons, setFetchedIcons] = useState({});
+    const [iconLoading, setIconLoading] = useState({});
     const fetchQueueRef = useRef(new Set());
+    const lastQueryRef = useRef({}); // { [itemKey]: lastSearchedQuery }
 
     const searchImagesStore = useMediaStore((state) => state.searchImages);
 
@@ -79,7 +82,7 @@ export function useImageFetcher({
                             image: finalImageUrl,
                             imageDescription: query,
                         };
-                    } else if (keyParts.length === 6 && keyParts[2] === "block" && keyParts[4] === "item") {
+                    } else if ((keyParts.length === 6 || keyParts.length === 7) && keyParts[2] === "block" && keyParts[4] === "item") {
                         const blockId = keyParts[3];
                         const iIndex = parseInt(keyParts[5], 10);
                         const updateTree = (node) => {
@@ -134,7 +137,71 @@ export function useImageFetcher({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Auto-queue image fetches when slides are loaded/streamed
+    const searchIconsStore = useMediaStore((state) => state.searchIcons);
+
+    const fetchIcon = useCallback(async (key, query) => {
+        setIconLoading((prev) => ({ ...prev, [key]: true }));
+        try {
+            const data = await searchIconsStore(query);
+            let finalIconName = "Star";
+            if (data && data.length > 0) {
+                finalIconName = data[0].name;
+            }
+            setFetchedIcons((prev) => ({ ...prev, [key]: finalIconName }));
+
+            const keyParts = key.split("_");
+            const sIndex = parseInt(keyParts[1], 10);
+            const blockId = keyParts[3];
+            const iIndex = parseInt(keyParts[5], 10);
+
+            const updateSlideIcon = (slidesList) => {
+                if (!slidesList || !slidesList[sIndex]) return slidesList;
+                const updated = [...slidesList];
+
+                const updateTree = (node) => {
+                    if (!node) return null;
+                    if (node.id === blockId) {
+                        if (node.items && node.items[iIndex]) {
+                            const newItems = [...node.items];
+                            newItems[iIndex] = {
+                                ...newItems[iIndex],
+                                icon: finalIconName,
+                                iconQuery: query,
+                            };
+                            return { ...node, items: newItems };
+                        }
+                        return node;
+                    }
+                    if (node.type === "split") {
+                        return {
+                            ...node,
+                            first: updateTree(node.first),
+                            second: updateTree(node.second),
+                        };
+                    }
+                    return node;
+                };
+
+                updated[sIndex] = {
+                    ...updated[sIndex],
+                    contentTree: updateTree(updated[sIndex].contentTree),
+                };
+                return updated;
+            };
+
+            setEditableSlides((prev) => updateSlideIcon(prev));
+            setPptData((prev) => {
+                if (!prev || !prev.slides) return prev;
+                return { ...prev, slides: updateSlideIcon(prev.slides) };
+            });
+        } catch (err) {
+            console.error(`Failed to fetch icon for key ${key}:`, err);
+        } finally {
+            setIconLoading((prev) => ({ ...prev, [key]: false }));
+        }
+    }, [searchIconsStore, setEditableSlides, setPptData]);
+
+    // Auto-queue image and icon fetches when slides are loaded, streamed, or edited
     useEffect(() => {
         if (!editableSlides || editableSlides.length === 0) return;
 
@@ -151,26 +218,58 @@ export function useImageFetcher({
                 return;
             }
 
-            // --- Block-layout image slides ---
+            // --- Block-layout content blocks ---
             const traverseTreeForFetch = (node) => {
                 if (!node) return;
                 if (node.type === "leaf" || node.type === "content" || node.blockType === "content") {
                     const cat = node.layout?.category?.toLowerCase();
                     const type = node.layout?.type?.toLowerCase();
+
+                    // 1. Fetch relevant images if layout requires them
                     const isImageCategory =
                         cat === "images" ||
                         cat === "image" ||
                         ((cat === "cards" || cat === "card") && type === "image");
-                    if (!isImageCategory) return;
-
-                    if (node.items) {
+                    if (isImageCategory && node.items) {
                         node.items.forEach((item, iIndex) => {
-                            const itemKey = `slide_${sIndex}_block_${node.id}_item_${iIndex}`;
+                            const itemKey = `slide_${sIndex}_block_${node.id}_item_${iIndex}_image`;
                             const hasUrl = isRealUrl(item.image);
-                            const query = hasUrl ? null : item.imageDescription || item.image || item.header;
-                            if (query && !fetchQueueRef.current.has(itemKey)) {
-                                fetchQueueRef.current.add(itemKey);
-                                fetchImage(itemKey, query);
+                            const query = item.header || "";
+                            if (query) {
+                                // Initialize lastQueryRef on load if image is already a URL
+                                if (hasUrl && !lastQueryRef.current[itemKey]) {
+                                    lastQueryRef.current[itemKey] = query;
+                                }
+                                // Fetch if there's no URL, or if the header/text query changed
+                                const shouldFetch = !hasUrl || (lastQueryRef.current[itemKey] && lastQueryRef.current[itemKey] !== query);
+                                const queueKey = `${itemKey}_img_${query}`;
+                                if (shouldFetch && !fetchQueueRef.current.has(queueKey)) {
+                                    fetchQueueRef.current.add(queueKey);
+                                    lastQueryRef.current[itemKey] = query;
+                                    fetchImage(itemKey, query);
+                                }
+                            }
+                        });
+                    }
+
+                    const isIconCategory = cat === "icons" || cat === "icon";
+                    if (isIconCategory && node.items) {
+                        node.items.forEach((item, iIndex) => {
+                            const itemKey = `slide_${sIndex}_block_${node.id}_item_${iIndex}_icon`;
+                            const query = item.iconKeywords || item.header || "";
+                            if (query) {
+                                // Initialize lastQueryRef on load if icon is already set
+                                if (item.icon && !lastQueryRef.current[itemKey]) {
+                                    lastQueryRef.current[itemKey] = query;
+                                }
+                                // Fetch if there's no icon, or if the header/text query changed
+                                const shouldFetch = !item.icon || (lastQueryRef.current[itemKey] && lastQueryRef.current[itemKey] !== query);
+                                const queueKey = `${itemKey}_ico_${query}`;
+                                if (shouldFetch && !fetchQueueRef.current.has(queueKey)) {
+                                    fetchQueueRef.current.add(queueKey);
+                                    lastQueryRef.current[itemKey] = query;
+                                    fetchIcon(itemKey, query);
+                                }
                             }
                         });
                     }
@@ -179,12 +278,12 @@ export function useImageFetcher({
                     traverseTreeForFetch(node.second);
                 }
             };
-            
+
             traverseTreeForFetch(slide.contentTree);
         });
-    }, [editableSlides, fetchImage]);
+    }, [editableSlides, fetchImage, fetchIcon]);
 
-    /** Merge fetchedImages / imageLoading into a slide object for rendering */
+    /** Merge fetchedImages / imageLoading / fetchedIcons / iconLoading into a slide object for rendering */
     const resolveSlideContent = useCallback(
         (slide, index) => {
             if (!slide) return null;
@@ -200,10 +299,13 @@ export function useImageFetcher({
                     const resolvedNode = { ...node };
                     if (resolvedNode.items) {
                         resolvedNode.items = resolvedNode.items.map((item, itemIdx) => {
-                            const itemKey = `slide_${index}_block_${node.id}_item_${itemIdx}`;
+                            const itemImageKey = `slide_${index}_block_${node.id}_item_${itemIdx}_image`;
+                            const itemIconKey = `slide_${index}_block_${node.id}_item_${itemIdx}_icon`;
                             const newItem = { ...item };
-                            if (fetchedImages[itemKey]) newItem.image = fetchedImages[itemKey];
-                            if (imageLoading[itemKey]) newItem.imageLoading = true;
+                            if (fetchedImages[itemImageKey]) newItem.image = fetchedImages[itemImageKey];
+                            if (imageLoading[itemImageKey]) newItem.imageLoading = true;
+                            if (fetchedIcons[itemIconKey]) newItem.icon = fetchedIcons[itemIconKey];
+                            if (iconLoading[itemIconKey]) newItem.iconLoading = true;
                             return newItem;
                         });
                     }
@@ -224,16 +326,19 @@ export function useImageFetcher({
 
             if (resolved.items) {
                 resolved.items = resolved.items.map((item, itemIdx) => {
-                    const itemKey = `slide_${index}_item_${itemIdx}`;
+                    const itemImageKey = `slide_${index}_item_${itemIdx}_image`;
+                    const itemIconKey = `slide_${index}_item_${itemIdx}_icon`;
                     const newItem = { ...item };
-                    if (fetchedImages[itemKey]) newItem.image = fetchedImages[itemKey];
-                    if (imageLoading[itemKey]) newItem.imageLoading = true;
+                    if (fetchedImages[itemImageKey]) newItem.image = fetchedImages[itemImageKey];
+                    if (imageLoading[itemImageKey]) newItem.imageLoading = true;
+                    if (fetchedIcons[itemIconKey]) newItem.icon = fetchedIcons[itemIconKey];
+                    if (iconLoading[itemIconKey]) newItem.iconLoading = true;
                     return newItem;
                 });
             }
             return resolved;
         },
-        [fetchedImages, imageLoading],
+        [fetchedImages, imageLoading, fetchedIcons, iconLoading],
     );
 
     /** Open the library sidebar in image-edit mode (wired via page.jsx callback) */
@@ -295,8 +400,8 @@ export function useImageFetcher({
                 imageEditContext.type === "slide"
                     ? `slide_${activeSlideIndex}`
                     : imageEditContext.blockId
-                    ? `slide_${activeSlideIndex}_block_${imageEditContext.blockId}_item_${imageEditContext.itemIndex}`
-                    : `slide_${activeSlideIndex}_item_${imageEditContext.itemIndex}`;
+                    ? `slide_${activeSlideIndex}_block_${imageEditContext.blockId}_item_${imageEditContext.itemIndex}_image`
+                    : `slide_${activeSlideIndex}_item_${imageEditContext.itemIndex}_image`;
 
             setFetchedImages((prev) => ({ ...prev, [cacheKey]: imageUrl }));
             updateSlidesState(updatedSlides);

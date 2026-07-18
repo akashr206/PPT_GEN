@@ -198,9 +198,9 @@ export const searchImages = async (req, res) => {
 
 export const searchIcons = async (req, res) => {
     try {
-        const query = req.query.q || req.query.description;
+        const query = req.query.q || req.query.description || req.query.keywords;
         if (!query) {
-            return sendError(res, "Query parameter 'q' or 'description' is required", null, 400);
+            return sendError(res, "Query parameter 'q', 'description' or 'keywords' is required", null, 400);
         }
 
         // Split the search query based on spaces, lowercase, and trim them

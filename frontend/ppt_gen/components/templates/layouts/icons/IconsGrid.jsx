@@ -2,14 +2,25 @@ import React from "react";
 import { EditableElement } from "@/components/ui/EditableElement";
 import { EditableIcon } from "@/components/ui/EditableIcon";
 import AnimatedItem from "../../AnimatedItem";
+import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
-const IconsGrid = ({ content, onUpdateItem, readOnly }) => {
+const IconsGrid = ({
+    content,
+    onUpdateItem,
+    onDeleteItem,
+    onAddItem,
+    readOnly,
+}) => {
     const items = content || [];
-    
+
     return (
-        <div className="w-full flex flex-row flex-wrap gap-[3cqw]">
+        <div className="w-full flex flex-row flex-wrap gap-[1cqw]">
             {items.map((item, i) => (
-                <AnimatedItem key={i} index={i} className="flex-1 min-w-[30%] flex flex-col items-center gap-[1cqw] p-[2cqw] text-center">
+                <AnimatedItem
+                    key={i}
+                    index={i}
+                    className="group/item relative flex-1 min-w-[30%] flex flex-col items-center gap-[0.8cqw] p-[1.5cqw] text-center"
+                >
                     <EditableIcon
                         iconName={item.icon}
                         onChange={(val) => onUpdateItem(i, "icon", val)}
@@ -34,6 +45,27 @@ const IconsGrid = ({ content, onUpdateItem, readOnly }) => {
                         readOnly={readOnly}
                         placeholder="Feature details and description."
                     />
+                    {!readOnly && (onAddItem || onDeleteItem) && (
+                        <div className="absolute top-[0.5cqw] right-[0.5cqw] opacity-0 group-hover/item:opacity-100 data-[menu-open=true]:opacity-100 transition-opacity z-10">
+                            <ItemActionsMenu
+                                onAddBefore={
+                                    onAddItem
+                                        ? () => onAddItem(i, "before")
+                                        : undefined
+                                }
+                                onAddAfter={
+                                    onAddItem
+                                        ? () => onAddItem(i, "after")
+                                        : undefined
+                                }
+                                onDelete={
+                                    onDeleteItem
+                                        ? () => onDeleteItem(i)
+                                        : undefined
+                                }
+                            />
+                        </div>
+                    )}
                 </AnimatedItem>
             ))}
         </div>

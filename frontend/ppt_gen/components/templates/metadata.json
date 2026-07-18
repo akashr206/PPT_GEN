@@ -102,7 +102,6 @@
             "name": "Full Image",
             "description": "Full bleed background image. NO blocks allowed in this slide type."
         },
-
         {
             "id": "agenda",
             "name": "Agenda Slide",
@@ -196,6 +195,11 @@
                     "id": "grid",
                     "name": "Icons Grid",
                     "description": "A structured grid of items prominently featuring a large icon for each. Best for visualizing abstract features or high-level business capabilities."
+                },
+                {
+                    "id": "card",
+                    "name": "Icons Card",
+                    "description": "A structured grid of items prominently featuring a large icon for each. Best for visualizing abstract features or high-level business capabilities."
                 }
             ],
             "constraints": {
@@ -212,7 +216,7 @@
                 {
                     "id": "highlight",
                     "name": "Stat Highlight",
-                    "description": "Emphasizes a single massive key metric with a detailed text callout description. Best for highlighting a single monumental breakthrough metric."
+                    "description": "Emphasizes a single massive key metric with a detailed text callout description. Best for highlighting a monumental breakthrough metric."
                 },
                 {
                     "id": "grid",
@@ -223,6 +227,33 @@
             "constraints": {
                 "maxItems": 6,
                 "recommendedItems": "2 to 6"
+            }
+        },
+        "timelines": {
+            "name": "Timeline Layouts",
+            "description": "Visual horizontal and vertical timeline tracks to represent milestones, project phases, or sequential stages.",
+            "fields": ["title", "subtitle", "items"],
+            "itemFields": ["header", "description"],
+            "types": [
+                {
+                    "id": "vertical",
+                    "name": "Vertical Timeline",
+                    "description": "A vertical timeline track with nodes alternating left and right, complete with connector lines."
+                },
+                {
+                    "id": "horizontal",
+                    "name": "Horizontal Timeline",
+                    "description": "A horizontal timeline track with nodes alternating top and bottom, perfect for broad horizontal milestones."
+                },
+                {
+                    "id": "chevron",
+                    "name": "Chevron Timeline",
+                    "description": "A horizontal sequence of connected chevron arrows with description text alternating top and bottom."
+                }
+            ],
+            "constraints": {
+                "maxItems": 6,
+                "recommendedItems": "3 to 5"
             }
         }
     }

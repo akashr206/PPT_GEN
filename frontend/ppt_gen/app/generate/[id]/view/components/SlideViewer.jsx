@@ -7,7 +7,7 @@ import SlideFloatingControls from "@/components/generate/SlideFloatingControls";
 import { PresentationContext } from "@/contexts/presentation-context";
 import { useSettingsStore } from "@/hooks/use-settings-store";
 import { motion, AnimatePresence } from "framer-motion";
-
+import "../../../../../components/templates/themes.css"
 const CURSOR_LEFT = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none'><path d='M19 12H5M12 19l-7-7 7-7' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M19 12H5M12 19l-7-7 7-7' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") 16 16, w-resize`;
 const CURSOR_RIGHT = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none'><path d='M5 12h14M12 5l7 7-7 7' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/><path d='M5 12h14M12 5l7 7-7 7' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>") 16 16, e-resize`;
 
@@ -72,9 +72,32 @@ const SlideViewer = React.memo(function SlideViewer({
 
     const { animationsEnabled } = useSettingsStore();
 
+    const prevIndexRef = useRef(activeSlideIndex);
+    const direction = activeSlideIndex >= prevIndexRef.current ? 1 : -1;
+
+    useEffect(() => {
+        prevIndexRef.current = activeSlideIndex;
+    }, [activeSlideIndex]);
+
+    const slideVariants = {
+        enter: (dir) => ({
+            x: isFullscreen && animationsEnabled ? (dir > 0 ? 20 : -20) : 0,
+            opacity: isFullscreen && animationsEnabled ? 0 : 1,
+        }),
+        center: {
+            x: 0,
+            opacity: 1,
+        },
+        exit: (dir) => ({
+            x: isFullscreen && animationsEnabled ? (dir < 0 ? 20 : -20) : 0,
+            opacity: isFullscreen && animationsEnabled ? 0 : 1,
+        }),
+    };
+
     return (
         <div
             ref={presentationRef}
+            data-theme={theme || resolvedSlideContent?.theme}
             className={`w-full relative group flex items-center justify-center ${isFullscreen ? "!max-w-none bg-black w-screen h-screen" : ""}`}
             style={
                 isFullscreen
@@ -101,20 +124,23 @@ const SlideViewer = React.memo(function SlideViewer({
 
             {/* Slide canvas */}
             <div
-                className={`w-full relative overflow-hidden ${
+                data-theme={theme || resolvedSlideContent?.theme}
+                className={`w-full relative overflow-hidden theme-container ${
                     isFullscreen
-                        ? "max-h-screen max-w-[calc(100vh*16/9)] bg-background"
+                        ? "max-h-screen max-w-[calc(100vh*16/9)]"
                         : "shadow-xl rounded-lg max-md:rounded-md overflow-hidden ring-1 ring-border/20"
                 }`}
             >
                 {activeSlide ? (
                     <PresentationContext.Provider value={{ isPresenting: isFullscreen }}>
-                        <AnimatePresence mode="wait">
+                        <AnimatePresence mode="wait" custom={direction}>
                             <motion.div
                                 key={activeSlideIndex}
-                                initial={isFullscreen && animationsEnabled ? { opacity: 0, x: 20 } : { opacity: 1, x: 0 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={isFullscreen && animationsEnabled ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
+                                custom={direction}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
                                 transition={{ duration: 0.3, ease: "easeInOut" }}
                                 className="w-full h-full"
                             >
