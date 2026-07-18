@@ -424,13 +424,13 @@ export default function PPTSlidesViewerPage({ params }) {
                                     }
                                 }
                                 if (item.image && !isRealUrl(item.image)) {
-                                    const query = item.image || item.header;
+                                    const query = item.image || item.imageDescription || item.header;
                                     const data = await searchImages(query);
                                     if (data && data.length > 0) {
                                         item.image = data[0].imageURL;
                                     }
                                 } else if (!item.image && (node.layout?.category === "images" || node.layout?.category === "image" || node.layout?.type === "image")) {
-                                    const query = item.header || "placeholder";
+                                    const query = item.imageDescription || item.header || "placeholder";
                                     const data = await searchImages(query);
                                     if (data && data.length > 0) {
                                         item.image = data[0].imageURL;

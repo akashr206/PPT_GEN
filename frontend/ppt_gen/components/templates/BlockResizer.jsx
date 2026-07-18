@@ -23,7 +23,7 @@ const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction
 
         const handleMouseUp = (e) => {
             setIsDragging(false);
-            document.body.style.cursor = "default";
+            document.body.style.cursor = "";
             
             if (onResizeEnd) {
                 const delta = isVertical ? (e.clientY - startPosRef.current) : (e.clientX - startPosRef.current);
@@ -43,6 +43,7 @@ const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
+            document.body.style.cursor = "";
         };
     }, [isDragging, onResize, onResizeEnd, isVertical]);
 
@@ -64,7 +65,7 @@ const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction
         return (
             <div
                 ref={resizerRef}
-                className={`h-[0.5cqw] group/resizer flex justify-center items-center cursor-row-resize shrink-0 z-40 transition-colors ${isDragging ? "bg-blue-500/20" : ""}`}
+                className={`h-[0.5cqw] my-[1cqw] group/resizer flex justify-center items-center cursor-row-resize shrink-0 z-40 transition-colors ${isDragging ? "bg-blue-500/20" : ""}`}
                 onMouseDown={handleMouseDown}
             >
                 <div
@@ -79,7 +80,7 @@ const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction
     return (
         <div
             ref={resizerRef}  
-            className={`w-[0.5cqw] group/resizer flex justify-center items-center cursor-col-resize shrink-0 z-40 transition-colors ${isDragging ? 'bg-blue-500/20' : ''}`}
+            className={`w-[0.5cqw] mx-[1.0cqw] group/resizer flex justify-center items-center cursor-col-resize shrink-0 z-40 transition-colors ${isDragging ? 'bg-blue-500/20' : ''}`}
             onMouseDown={handleMouseDown}
         >
             <div className={`h-[4cqw] w-[0.2cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-blue-500/50 group-hover/resizer:text-primary'}`}>

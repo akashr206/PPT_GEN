@@ -1,8 +1,13 @@
 import BulletsSimple from "./bullets/BulletsSimple";
 import BulletsGrid from "./bullets/BulletsGrid";
+import BulletsNumbered from "./bullets/BulletsNumbered";
+import BulletsAccent from "./bullets/BulletsAccent";
 
 import CardsBasic from "./cards/CardsBasic";
 import CardsImage from "./cards/CardsImage";
+
+import ImagesSingle from "./images/ImagesSingle";
+import ImagesGallery from "./images/ImagesGallery";
 
 import IconsList from "./icons/IconsList";
 import IconsGrid from "./icons/IconsGrid";
@@ -26,6 +31,12 @@ export const layout_map = {
     "bullets": {
         "simple": BulletsSimple,
         "grid": BulletsGrid,
+        "numbered": BulletsNumbered,
+        "accent": BulletsAccent,
+    },
+    "images": {
+        "single": ImagesSingle,
+        "gallery": ImagesGallery,
     },
     "cards": {
         "basic": CardsBasic,
@@ -54,3 +65,4 @@ layout_map.card = layout_map.cards;
 layout_map.icon = layout_map.icons;
 layout_map.stat = layout_map.stats;
 layout_map.timeline = layout_map.timelines;
+layout_map.image = layout_map.images;

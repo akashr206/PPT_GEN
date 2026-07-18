@@ -56,6 +56,7 @@ const SlideMiniPreview = ({ category, type, content, theme }) => {
     useEffect(() => {
         if (!containerRef.current) return;
         const updateScale = () => {
+            if (!containerRef.current) return;
             const width = containerRef.current.getBoundingClientRect().width;
             setScale(width / 960);
         };

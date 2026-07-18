@@ -157,11 +157,43 @@
                     "id": "grid",
                     "name": "Bullets Grid",
                     "description": "A structured grid of bullet items with headers and descriptions. Best for comparisons or scanning multiple parallel points at a glance."
+                },
+                {
+                    "id": "numbered",
+                    "name": "Numbered List",
+                    "description": "A sequential list with prominent numbers instead of basic bullets. Best for step-by-step processes or top N lists."
+                },
+                {
+                    "id": "accent",
+                    "name": "Accent Bullets",
+                    "description": "A refined list where items are highlighted with horizontal accent bars."
                 }
             ],
             "constraints": {
                 "maxItems": 8,
                 "recommendedItems": "3 to 6"
+            }
+        },
+        "images": {
+            "name": "Image Layouts",
+            "description": "Visual layouts focused primarily on presenting high-quality imagery.",
+            "fields": ["title", "subtitle", "items"],
+            "itemFields": ["image", "imageDescription", "imageFocus", "imageFit"],
+            "types": [
+                {
+                    "id": "single",
+                    "name": "Single Image",
+                    "description": "A single prominent image occupying maximum space, suitable for high-impact visual slides."
+                },
+                {
+                    "id": "gallery",
+                    "name": "Image Gallery",
+                    "description": "A dynamic grid gallery displaying multiple images beautifully."
+                }
+            ],
+            "constraints": {
+                "maxItems": 6,
+                "recommendedItems": "1 to 4"
             }
         },
         "cards": {

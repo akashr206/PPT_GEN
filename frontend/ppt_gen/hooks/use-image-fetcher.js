@@ -234,7 +234,7 @@ export function useImageFetcher({
                         node.items.forEach((item, iIndex) => {
                             const itemKey = `slide_${sIndex}_block_${node.id}_item_${iIndex}_image`;
                             const hasUrl = isRealUrl(item.image);
-                            const query = item.header || "";
+                            const query = item.imageDescription || item.header || "";
                             if (query) {
                                 // Initialize lastQueryRef on load if image is already a URL
                                 if (hasUrl && !lastQueryRef.current[itemKey]) {

@@ -12,7 +12,7 @@ const isRealImageUrl = (url) =>
 
 import FocusPointSelector from "./FocusPointSelector";
 
-const ItemImage = ({ imageUrl, imagePrompt, imageLoading, onEditImage, readOnly, focusPoint = "center", onUpdateFocus }) => {
+const ItemImage = ({ imageUrl, imagePrompt, imageLoading, onEditImage, readOnly, focusPoint = "center", onUpdateFocus, objectFit = "cover", onToggleFit }) => {
     const [localFocus, setLocalFocus] = React.useState(focusPoint);
 
     React.useEffect(() => {
@@ -24,7 +24,7 @@ const ItemImage = ({ imageUrl, imagePrompt, imageLoading, onEditImage, readOnly,
 
     return (
         <div 
-            className={`relative w-full h-full theme-bg-alt overflow-hidden flex items-center justify-center ${!readOnly && onEditImage ? "cursor-pointer group/itemimage hover:opacity-95" : ""}`}
+            className={`relative w-full h-full overflow-hidden flex items-center justify-center ${!readOnly && onEditImage ? "cursor-pointer group/itemimage hover:opacity-95" : ""}`}
             onClick={!readOnly && onEditImage ? onEditImage : undefined}
         >
             {isLoading ? (
@@ -32,8 +32,8 @@ const ItemImage = ({ imageUrl, imagePrompt, imageLoading, onEditImage, readOnly,
             ) : resolvedUrl ? (
                 <img 
                     src={resolvedUrl} 
-                    className="w-full h-full object-cover" 
-                    style={{ objectPosition: localFocus }}
+                    className="w-full h-full" 
+                    style={{ objectPosition: localFocus, objectFit: objectFit }}
                     alt={imagePrompt || "Item"} 
                 />
             ) : (
@@ -46,8 +46,8 @@ const ItemImage = ({ imageUrl, imagePrompt, imageLoading, onEditImage, readOnly,
             )}
             
             {/* Hover Edit & Focus Overlay */}
-            {!readOnly && (onEditImage || onUpdateFocus) && (
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/itemimage:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
+            {!readOnly && (onEditImage || onUpdateFocus || onToggleFit) && (
+                <div className="absolute inset-0 opacity-0 group-hover/itemimage:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
                     {onEditImage && (
                         <div 
                             onClick={(e) => {
@@ -58,6 +58,17 @@ const ItemImage = ({ imageUrl, imagePrompt, imageLoading, onEditImage, readOnly,
                         >
                             <ImageIcon size={14} />
                             <span className="text-xs font-medium">Edit</span>
+                        </div>
+                    )}
+                    {onToggleFit && (
+                        <div 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleFit(objectFit === "cover" ? "contain" : "cover");
+                            }}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-background/90 hover:bg-background text-foreground rounded-full shadow-md border border-border transition-transform scale-90 group-hover/itemimage:scale-100 cursor-pointer"
+                        >
+                            <span className="text-xs font-medium">{objectFit === "cover" ? "Fit" : "Cover"}</span>
                         </div>
                     )}
                     {onUpdateFocus && (

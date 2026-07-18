@@ -73,18 +73,18 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
             {!readOnly && (
                 <div
                     ref={menuRef}
-                    className="absolute top-0 left-1/2 -translate-x-1/2 z-20"
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 z-20"
                 >
                     <button
                         onMouseDown={(e) => {
                             e.stopPropagation();
                             setMenuOpen((v) => !v);
                         }}
-                        className={`flex items-center justify-center p-[0.3cqw] rounded-xs bg-background/80 border border-border/50 shadow-sm backdrop-blur-sm transition-opacity cursor-pointer
+                        className={`flex items-center justify-center p-[0.3cqw] rounded-xs theme-menu-button transition-opacity cursor-pointer
                             ${menuOpen ? "opacity-100" : "opacity-0 group-hover/block:opacity-100"}`}
                         title="Block options"
                     >
-                        <MoreHorizontal className="w-[1.4cqw] h-[1.4cqw] text-foreground" />
+                        <MoreHorizontal className="w-[1.4cqw] h-[1.4cqw]" />
                     </button>
 
                     {menuOpen && (
@@ -160,7 +160,7 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
                                                 : "New Subtitle",
                                         )
                                     }
-                                    className="flex items-center justify-center gap-[0.6cqw] w-full text-[1.1cqw] hover:bg-muted transition-colors cursor-pointer p-[0.5cqw] rounded-[0.4cqw]"
+                                    className="flex items-center justify-center gap-[0.6cqw] w-full text-[1.1cqw] hover:bg-muted transition-colors cursor-pointer p-[0.5cqw] rounded-[0.4cqw] text-foreground"
                                     title={
                                         block.subtitle !== undefined
                                             ? "Remove Subtitle"

@@ -51,8 +51,8 @@ const ContentBlock = ({
     if (block.align === "center") alignClass = "items-center";
     if (block.align === "right") alignClass = "items-end";
 
-    let justifyClass = "justify-start";
-    if (block.verticalAlign === "center") justifyClass = "justify-center";
+    let justifyClass = "justify-center";
+    if (block.verticalAlign === "start") justifyClass = "justify-start";
     else if (block.verticalAlign === "bottom") justifyClass = "justify-end";
 
     // For BSP, we don't rely on block.width, it's flexBasis controlled by parent.
