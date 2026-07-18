@@ -12,6 +12,7 @@ const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                 let alignClass = "text-left items-start";
                 if (item.align === "center") alignClass = "text-center items-center mx-auto";
                 else if (item.align === "right") alignClass = "text-right items-end ml-auto";
+                else if (item.align === "justify") alignClass = "text-justify items-stretch w-full";
 
                 return (
                     <AnimatedItem key={i} index={i} className={`relative group/item flex flex-col gap-[1cqw] w-full ${alignClass}`}>

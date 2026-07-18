@@ -25,7 +25,7 @@ const IconsList = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, re
                 <AnimatedItem 
                     key={i} 
                     index={i} 
-                    className="group/item relative flex-1 min-w-[25cqw]"
+                    className="group/item relative flex-1 min-w-[12cqw]"
                     style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
                 >
                     <div className="w-full flex flex-row items-center gap-[2.5cqw] py-[1.5cqw] px-[0.5cqw] rounded-[0.5cqw] hover:bg-white/5 transition-colors">

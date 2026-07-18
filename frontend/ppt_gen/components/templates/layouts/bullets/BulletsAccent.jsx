@@ -6,17 +6,19 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
 const BulletsAccent = ({
     content,
+    columns,
     onUpdateItem,
     onDeleteItem,
     onAddItem,
     readOnly,
 }) => {
     const items = content || [];
-    const useTwoColumns = items.length > 4;
+    const requestedCols = columns || 2;
+    const actualCols = Math.min(requestedCols, Math.max(1, items.length));
 
     return (
         <div
-            className={`w-full flex ${useTwoColumns ? "flex-row flex-wrap gap-[3cqw]" : "flex-row gap-[3cqw]"}`}
+            className="w-full flex flex-row flex-wrap gap-[3cqw]"
         >
             {/* Add before first item when empty */}
             {!readOnly && onAddItem && items.length === 0 && (
@@ -33,7 +35,8 @@ const BulletsAccent = ({
                 <AnimatedItem
                     key={i}
                     index={i}
-                    className={`flex flex-col group/item relative ${useTwoColumns ? "w-[calc(50%-1.5cqw)]" : "flex-1 min-w-0"}`}
+                    className="flex flex-col group/item relative flex-1 min-w-[12cqw]"
+                    style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 3}cqw) / ${actualCols})` }}
                 >
                     {/* Add/Delete controls */}
                     {!readOnly && (onAddItem || onDeleteItem) && (

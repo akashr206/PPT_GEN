@@ -6,17 +6,19 @@ import { ItemActionsMenu } from "@/components/ui/ItemActionsMenu";
 
 const BulletsNumbered = ({
     content,
+    columns,
     onUpdateItem,
     onDeleteItem,
     onAddItem,
     readOnly,
 }) => {
     const items = content || [];
-    const useTwoColumns = items.length > 4;
+    const requestedCols = columns || 2;
+    const actualCols = Math.min(requestedCols, Math.max(1, items.length));
 
     return (
         <div
-            className={`w-full flex ${useTwoColumns ? "flex-row flex-wrap gap-x-[4cqw] gap-y-0" : "flex-col gap-[0cqw]"}`}
+            className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-0"
         >
             {/* Add before first item when empty */}
             {!readOnly && onAddItem && items.length === 0 && (
@@ -33,7 +35,8 @@ const BulletsNumbered = ({
                 <AnimatedItem
                     key={i}
                     index={i}
-                    className={`flex gap-[1.5cqw] group/item relative pl-[0.5cqw] ${useTwoColumns ? "w-[calc(50%-2cqw)]" : "w-full"}`}
+                    className="flex gap-[1.5cqw] group/item relative pl-[0.5cqw] flex-1 min-w-[12cqw]"
+                    style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
                 >
                     {/* Add/Delete controls */}
                     {!readOnly && (onAddItem || onDeleteItem) && (

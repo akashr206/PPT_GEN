@@ -47,7 +47,7 @@ const TimelinesChevron = ({ content, onUpdateItem, onDeleteItem, onAddItem, read
                             )}
 
                             {/* Top part: Odd items description + line */}
-                            <div className="h-[12.5cqw] w-full flex flex-col justify-end items-center pb-[0.5cqw] min-w-0 overflow-hidden shrink">
+                            <div className="h-[12.5cqw] w-full flex flex-col justify-end items-center pb-[0.5cqw] min-w-0 shrink">
                                 {!isEven ? (
                                     <>
                                         <div className="px-[1.5cqw] text-center w-full min-w-0">
@@ -102,7 +102,7 @@ const TimelinesChevron = ({ content, onUpdateItem, onDeleteItem, onAddItem, read
                             </div>
 
                             {/* Bottom part: Even items line + description */}
-                            <div className="h-[12.5cqw] w-full flex flex-col justify-start items-center pt-[0.5cqw] min-w-0 overflow-hidden shrink">
+                            <div className="h-[12.5cqw] w-full flex flex-col justify-start items-center pt-[0.5cqw] min-w-0 shrink">
                                 {isEven ? (
                                     <>
                                         <div className="flex flex-col items-center mb-[0.5cqw] shrink-0">

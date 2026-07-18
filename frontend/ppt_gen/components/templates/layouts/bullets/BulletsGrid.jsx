@@ -24,7 +24,7 @@ const BulletsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, 
                 <AnimatedItem
                     key={i}
                     index={i}
-                    className="group/item relative flex-1 min-w-[20cqw]"
+                    className="group/item relative flex-1 min-w-[12cqw]"
                     style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
                 >
                     {/* Item Actions Menu */}

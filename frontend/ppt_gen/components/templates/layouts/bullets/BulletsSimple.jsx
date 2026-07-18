@@ -14,30 +14,20 @@ const BulletsSimple = ({
 }) => {
     const items = content || [];
     
-    // Default to 1 column for 1-4 items, 2 columns for 5+ items if columns isn't explicitly set
-    const requestedCols = columns || (items.length > 4 ? 2 : 1);
+    // Default to 2 columns if columns isn't explicitly set to keep consistent with UI
+    const requestedCols = columns || 2;
     const actualCols = Math.min(requestedCols, Math.max(1, items.length));
 
     return (
         <div
             className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-[0cqw]"
         >
-            {/* Add before first item when empty */}
-            {!readOnly && onAddItem && items.length === 0 && (
-                <button
-                    onClick={() => onAddItem(0, "before")}
-                    className="flex items-center justify-center gap-[0.5cqw] w-full py-[1cqw] text-[1.2cqw] text-muted-foreground/50 hover:text-primary hover:bg-primary/5 rounded-[0.5cqw] border border-dashed border-transparent hover:border-primary/30 transition-all cursor-pointer"
-                >
-                    <Plus className="w-[1.2cqw] h-[1.2cqw]" />
-                    Add First Point
-                </button>
-            )}
 
             {items.map((item, i) => (
                 <AnimatedItem
                     key={i}
                     index={i}
-                    className="flex gap-[1cqw] group/item relative pl-[1cqw] flex-1 min-w-[20cqw]"
+                    className="flex gap-[1cqw] group/item relative pl-[1cqw] flex-1 min-w-[12cqw]"
                     style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
                 >
                     {/* Add/Delete controls */}

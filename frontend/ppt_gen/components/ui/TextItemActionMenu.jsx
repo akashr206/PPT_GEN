@@ -5,6 +5,7 @@ import {
     AlignLeft,
     AlignCenter,
     AlignRight,
+    AlignJustify,
     Plus,
     ArrowUp,
     ArrowDown
@@ -21,6 +22,7 @@ const ALIGNMENTS = [
     { value: "left", icon: AlignLeft, label: "Left Align" },
     { value: "center", icon: AlignCenter, label: "Center Align" },
     { value: "right", icon: AlignRight, label: "Right Align" },
+    { value: "justify", icon: AlignJustify, label: "Justify" },
 ];
 
 export function TextItemActionMenu({
@@ -61,7 +63,7 @@ export function TextItemActionMenu({
                             e.stopPropagation();
                             setMenuOpen(true);
                         }}
-                        className="p-[0.3cqw] bg-background/95 border border-border/50 shadow-md backdrop-blur-sm rounded-xs hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer flex items-center justify-center"
+                        className="p-[0.3cqw] rounded-xs theme-menu-button cursor-pointer flex items-center justify-center"
                     >
                         <MoreHorizontal className="w-[1cqw] h-[1cqw] max-sm:w-3 max-sm:h-3" />
                     </button>

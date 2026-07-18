@@ -13,7 +13,7 @@ const IconsGrid = ({
     readOnly,
 }) => {
     const items = content || [];
-    const requestedCols = columns || (items.length > 4 ? 3 : 2);
+    const requestedCols = columns || 2;
     const actualCols = Math.min(requestedCols, Math.max(1, items.length));
 
     return (
@@ -22,7 +22,7 @@ const IconsGrid = ({
                 <AnimatedItem
                     key={i}
                     index={i}
-                    className="group/item relative flex-1 min-w-[20cqw] flex flex-col items-center gap-[0.8cqw] p-[1.5cqw] text-center"
+                    className="group/item relative flex-1 min-w-[10cqw] flex flex-col items-center gap-[0.8cqw] p-[1.5cqw] text-center"
                     style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 1}cqw) / ${actualCols})` }}
                 >
                     <EditableIcon

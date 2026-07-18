@@ -24,7 +24,7 @@ const StatsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, re
                 <AnimatedItem 
                     key={i} 
                     index={i} 
-                    className="group/item relative flex-1 min-w-[20cqw] flex flex-col gap-[0.5cqw] p-[1cqw] rounded-[1cqw] hover:bg-white/5 transition-colors"
+                    className="group/item relative flex-1 min-w-[10cqw] flex flex-col gap-[0.5cqw] p-[1cqw] rounded-[1cqw] hover:bg-white/5 transition-colors"
                     style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 4}cqw) / ${actualCols})` }}
                 >
                     {/* Item Actions Menu */}

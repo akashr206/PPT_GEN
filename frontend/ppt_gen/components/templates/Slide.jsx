@@ -35,6 +35,7 @@ const BSPRenderer = ({ node, ...props }) => {
                             if (props.onUpdateBlock) props.onUpdateBlock(node.id, 'splitRatio', newRatio);
                             setLocalRatio(null);
                         }}
+                        isContentBlock={true}
                     />
                 )}
                 <div style={{ flexBasis: `${100 - activeRatio}%` }} className="relative flex shrink min-h-0 min-w-0">

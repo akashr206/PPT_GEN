@@ -12,6 +12,7 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                 let alignClass = "text-left";
                 if (item.align === "center") alignClass = "text-center mx-auto";
                 else if (item.align === "right") alignClass = "text-right ml-auto";
+                else if (item.align === "justify") alignClass = "text-justify w-full";
 
                 return (
                     <AnimatedItem key={i} index={i} className={`relative group/item flex w-full ${alignClass}`}>
