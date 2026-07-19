@@ -472,6 +472,12 @@ export async function extractSlideData(slideWrapper, slideIndex = 0) {
       textTransform: style.textTransform,
       opacity: cumulativeOpacity,
       boxShadow: style.boxShadow,
+      padding: [
+        parseFloat(style.paddingTop) || 0,
+        parseFloat(style.paddingRight) || 0,
+        parseFloat(style.paddingBottom) || 0,
+        parseFloat(style.paddingLeft) || 0
+      ],
       runs,
       text: isTextBoxRoot ? runs.map(r => r.text).join('') : '',
       src: finalSrc,

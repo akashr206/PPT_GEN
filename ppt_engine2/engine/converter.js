@@ -370,17 +370,7 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
     txtH = Math.max(0.01, txtH - 2 * borderWidthIn);
   }
 
-  // Apply a 10% width buffer to prevent early wrapping on font substitutions
-  const deltaW = txtW * 0.05;
-  if (align === 'center') {
-    txtX = txtX - (deltaW / 2);
-    txtW = txtW + deltaW;
-  } else if (align === 'right') {
-    txtX = txtX - deltaW;
-    txtW = txtW + deltaW;
-  } else {
-    txtW = txtW + deltaW;
-  }
+  // We rely on 'wrap: true' instead of artificially expanding the bounding box.
 
   // Format runs
   const pptxRuns = el.runs.map(run => {
@@ -438,6 +428,10 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
     return { text: runText, options: runOpts };
   });
 
+  const textMarginPt = (el.padding && Array.isArray(el.padding))
+    ? el.padding.map(p => p * fontPtScale)
+    : [0, 0, 0, 0];
+
   const textOpts = {
     x: txtX,
     y: txtY,
@@ -450,9 +444,9 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
     color: textColor,
     align,
     valign: el.valign || 'top',
-    margin: [0, 0, 0, 0],
+    margin: textMarginPt,
     wrap: true,
-    autoFit: true,
+    fit: 'resize',
     transparency: Math.max(0, Math.min(100, textTrans))
   };
 
@@ -460,7 +454,7 @@ function drawTextLayer(slide, el, coords, designWidth = VIEWPORT_WIDTH) {
   if (el.lineHeight) {
     if (el.lineHeight.endsWith('px')) {
       const lhPt = parseFloat(el.lineHeight) * fontPtScale;
-      if (lhPt >= fontSizePt) {
+      if (lhPt > 0) {
         textOpts.lineSpacing = lhPt;
       }
     } else {
