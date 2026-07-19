@@ -76,15 +76,19 @@ export function useImageFetcher({
                 const updateSlideImage = (slidesList) => {
                     if (!slidesList || !slidesList[sIndex]) return slidesList;
                     const updated = [...slidesList];
-                    if (keyParts.length === 2) {
+                    
+                    const blockMatch = key.match(/slide_\d+_block_(.+)_item_(\d+)_image/);
+                    const itemMatch = !blockMatch ? key.match(/slide_\d+_item_(\d+)_image/) : null;
+
+                    if (!key.includes("_block_") && !key.includes("_item_")) {
                         updated[sIndex] = {
                             ...updated[sIndex],
                             image: finalImageUrl,
                             imageDescription: query,
                         };
-                    } else if ((keyParts.length === 6 || keyParts.length === 7) && keyParts[2] === "block" && keyParts[4] === "item") {
-                        const blockId = keyParts[3];
-                        const iIndex = parseInt(keyParts[5], 10);
+                    } else if (blockMatch) {
+                        const blockId = blockMatch[1];
+                        const iIndex = parseInt(blockMatch[2], 10);
                         const updateTree = (node) => {
                             if (!node) return null;
                             if (node.id === blockId) {
@@ -112,8 +116,8 @@ export function useImageFetcher({
                             ...updated[sIndex],
                             contentTree: updateTree(updated[sIndex].contentTree)
                         };
-                    } else if (keyParts.length === 4 && keyParts[2] === "item") {
-                        const iIndex = parseInt(keyParts[3], 10);
+                    } else if (itemMatch) {
+                        const iIndex = parseInt(itemMatch[1], 10);
                         if (updated[sIndex].items && updated[sIndex].items[iIndex]) {
                             const updatedItems = [...updated[sIndex].items];
                             updatedItems[iIndex] = {
@@ -149,10 +153,10 @@ export function useImageFetcher({
             }
             setFetchedIcons((prev) => ({ ...prev, [key]: finalIconName }));
 
-            const keyParts = key.split("_");
-            const sIndex = parseInt(keyParts[1], 10);
-            const blockId = keyParts[3];
-            const iIndex = parseInt(keyParts[5], 10);
+            const sIndex = parseInt(key.split("_")[1], 10);
+            const match = key.match(/slide_\d+_block_(.+)_item_(\d+)_icon/);
+            const blockId = match ? match[1] : null;
+            const iIndex = match ? parseInt(match[2], 10) : null;
 
             const updateSlideIcon = (slidesList) => {
                 if (!slidesList || !slidesList[sIndex]) return slidesList;
@@ -240,8 +244,8 @@ export function useImageFetcher({
                                 if (hasUrl && !lastQueryRef.current[itemKey]) {
                                     lastQueryRef.current[itemKey] = query;
                                 }
-                                // Fetch if there's no URL, or if the header/text query changed
-                                const shouldFetch = !hasUrl || (lastQueryRef.current[itemKey] && lastQueryRef.current[itemKey] !== query);
+                                // Fetch only if there's no URL. Don't auto-update if the user changes text to prevent overriding manually set images.
+                                const shouldFetch = !hasUrl;
                                 const queueKey = `${itemKey}_img_${query}`;
                                 if (shouldFetch && !fetchQueueRef.current.has(queueKey)) {
                                     fetchQueueRef.current.add(queueKey);
@@ -262,8 +266,8 @@ export function useImageFetcher({
                                 if (item.icon && !lastQueryRef.current[itemKey]) {
                                     lastQueryRef.current[itemKey] = query;
                                 }
-                                // Fetch if there's no icon, or if the header/text query changed
-                                const shouldFetch = !item.icon || (lastQueryRef.current[itemKey] && lastQueryRef.current[itemKey] !== query);
+                                // Fetch only if there's no icon. Don't auto-update if the user changes text to prevent overriding manually set icons.
+                                const shouldFetch = !item.icon;
                                 const queueKey = `${itemKey}_ico_${query}`;
                                 if (shouldFetch && !fetchQueueRef.current.has(queueKey)) {
                                     fetchQueueRef.current.add(queueKey);

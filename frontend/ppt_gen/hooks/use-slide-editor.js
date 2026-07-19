@@ -475,6 +475,11 @@ export function useSlideEditor(initialPptData, isBusy) {
             return;
         }
 
+        // Ignore React synthetic events passed accidentally
+        if (customBlockData && customBlockData.nativeEvent) {
+            customBlockData = null;
+        }
+
         let newBlock = customBlockData
             ? JSON.parse(JSON.stringify(customBlockData))
             : createNewBlock();

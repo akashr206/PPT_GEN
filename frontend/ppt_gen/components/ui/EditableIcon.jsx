@@ -116,6 +116,7 @@ export function EditableIcon({
                                     detail: {
                                         tab: "icons",
                                         onSelectIcon: onChange,
+                                        recommendedIcons: recommendedIcons
                                     },
                                 },
                             );

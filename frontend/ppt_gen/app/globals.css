@@ -159,3 +159,44 @@
 .animate-placeholder-out {
     animation: slide-out-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes sweep {
+    0% {
+        transform: translate(-150%, -150%) rotate(45deg);
+    }
+    100% {
+        transform: translate(150%, 150%) rotate(45deg);
+    }
+}
+.sweep-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(151, 106, 255, 0.01) 30%,
+        rgba(151, 106, 255, 0.10) 50%,
+        rgba(151, 106, 255, 0.01) 70%,
+        transparent 100%
+    );
+    animation: sweep 2s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes spin-pause {
+    0% {
+        transform: rotate(0deg);
+    }
+    83.33% {
+        transform: rotate(360deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.animate-spin-pause {
+    animation: spin-pause 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

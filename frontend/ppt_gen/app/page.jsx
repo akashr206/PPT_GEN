@@ -53,6 +53,12 @@ export default function LandingPage() {
         }
     };
 
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace("/dashboard");
+        }
+    }, [session]);
+
     return (
         <div className="min-h-screen bg-[#050505] text-zinc-50 font-sans selection:bg-blue-500/30 relative overflow-hidden flex flex-col">
             <motion.div

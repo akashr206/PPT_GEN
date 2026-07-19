@@ -139,6 +139,7 @@ export default function PPTSlidesViewerPage({ params }) {
         isLibraryOpen,
         libraryActiveTab,
         imageEditContext,
+        iconEditContext,
         libraryIconCallback,
         openLibrary,
         openLibraryForImage,
@@ -562,7 +563,7 @@ export default function PPTSlidesViewerPage({ params }) {
     if (isLoading) {
         return (
             <div className="w-full flex-1 flex flex-col justify-center items-center p-8 min-h-[60vh]">
-                <div className="w-full max-w-[1000px] aspect-[16/9] bg-card/25 border border-border/30 rounded-md p-6 flex flex-col justify-between relative overflow-hidden">
+                <div className="w-full max-w-[1000px] aspect-[16/9] bg-card border border-border shadow-md rounded-md p-6 flex flex-col justify-between relative overflow-hidden">
                     <div className="space-y-3">
                         <Skeleton className="h-5 w-20" />
                         <Skeleton className="h-7 w-3/4 max-w-[450px]" />
@@ -633,6 +634,7 @@ export default function PPTSlidesViewerPage({ params }) {
                     isOpen={isLibraryOpen}
                     isBusy={isBusy}
                     imageEditContext={imageEditContext}
+                    iconEditContext={iconEditContext}
                     onSelectImage={handleSelectSidebarImageBridged}
                     iconEditCallback={libraryIconCallback}
                     onSelectIcon={handleSelectSidebarIcon}

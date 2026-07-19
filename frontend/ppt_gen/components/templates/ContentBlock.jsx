@@ -62,12 +62,8 @@ const ContentBlock = ({
     if (block.align === "right") alignClass = "items-end";
 
     let justifyClass = "justify-center";
-    if (block.verticalAlign === "start") justifyClass = "justify-start";
+    if (block.verticalAlign === "top") justifyClass = "justify-start";
     else if (block.verticalAlign === "bottom") justifyClass = "justify-end";
-
-    // For BSP, we don't rely on block.width, it's flexBasis controlled by parent.
-    // We just take full width/height of our container.
-    const flexBasis = "100%";
 
     const handleLayoutSelect = (cat, type) => {
         if (onUpdateBlock) {
@@ -203,6 +199,12 @@ const ContentBlock = ({
                 layoutType={block.layout?.type}
                 content={block.items || []}
                 columns={block.columns}
+                block={block}
+                onUpdateBlock={
+                    onUpdateBlock
+                        ? (field, value) => onUpdateBlock(blockId, field, value)
+                        : undefined
+                }
                 onUpdateItem={
                     onUpdateItem
                         ? (i, f, v) => onUpdateItem(blockId, i, f, v)

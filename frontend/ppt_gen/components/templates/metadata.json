@@ -114,33 +114,19 @@
         }
     ],
     "layoutCategories": {
-        "text": {
-            "name": "Text Block",
-            "description": "Clean text block for large titles, quotes, or long-form paragraphs. Supports optional block-level 'verticalAlign' string ('top', 'center', 'bottom').",
-            "fields": ["title", "subtitle", "items", "verticalAlign"],
-            "itemFields": ["header", "description", "align", "headerFontSize", "descriptionFontSize"],
-            "types": [
-                {
-                    "id": "large",
-                    "name": "Large Text",
-                    "description": "Large text perfect for main slide titles or big statements."
-                },
-                {
-                    "id": "plain",
-                    "name": "Plain Text",
-                    "description": "A clean, simple text paragraph layout for long-form descriptions or quotes."
-                }
-            ],
-            "constraints": {
-                "maxItems": 4,
-                "recommendedItems": "1 to 2"
-            }
-        },
         "bullets": {
             "name": "Bullet Points",
             "description": "Standard lists or grids containing multiple sequential headers and descriptions.",
-            "fields": ["title", "subtitle", "items", "columns"],
-            "itemFields": ["header", "description"],
+            "fields": [
+                "title",
+                "subtitle",
+                "items",
+                "columns"
+            ],
+            "itemFields": [
+                "header",
+                "description"
+            ],
             "types": [
                 {
                     "id": "simple",
@@ -172,34 +158,19 @@
                 "recommendedItems": "3 to 6"
             }
         },
-        "images": {
-            "name": "Image Layouts",
-            "description": "Visual layouts focused primarily on presenting high-quality imagery.",
-            "fields": ["title", "subtitle", "items", "columns"],
-            "itemFields": ["image", "imageDescription", "imageFocus", "imageFit"],
-            "types": [
-                {
-                    "id": "single",
-                    "name": "Single Image",
-                    "description": "A single prominent image occupying maximum space, suitable for high-impact visual slides."
-                },
-                {
-                    "id": "gallery",
-                    "name": "Image Gallery",
-                    "description": "A dynamic grid gallery displaying multiple images beautifully.",
-                    "supportsColumns": true
-                }
-            ],
-            "constraints": {
-                "maxItems": 6,
-                "recommendedItems": "1 to 4"
-            }
-        },
         "cards": {
             "name": "Card Layouts",
             "description": "Grid or block cards to visually separate and present group data.",
-            "fields": ["title", "subtitle", "items", "columns"],
-            "itemFields": ["header", "description"],
+            "fields": [
+                "title",
+                "subtitle",
+                "items",
+                "columns"
+            ],
+            "itemFields": [
+                "header",
+                "description"
+            ],
             "types": [
                 {
                     "id": "basic",
@@ -222,8 +193,17 @@
         "icons": {
             "name": "Icon Layouts",
             "description": "Visual layouts featuring prominent icons to represent concepts.",
-            "fields": ["title", "subtitle", "items", "columns"],
-            "itemFields": ["header", "description", "iconKeywords"],
+            "fields": [
+                "title",
+                "subtitle",
+                "items",
+                "columns"
+            ],
+            "itemFields": [
+                "header",
+                "description",
+                "iconKeywords"
+            ],
             "types": [
                 {
                     "id": "list",
@@ -252,8 +232,16 @@
         "stats": {
             "name": "Key Metrics & Statistics",
             "description": "Large text indicators highlighting critical figures or metrics.",
-            "fields": ["title", "subtitle", "items", "columns"],
-            "itemFields": ["header", "description"],
+            "fields": [
+                "title",
+                "subtitle",
+                "items",
+                "columns"
+            ],
+            "itemFields": [
+                "header",
+                "description"
+            ],
             "types": [
                 {
                     "id": "highlight",
@@ -275,8 +263,15 @@
         "timelines": {
             "name": "Timeline Layouts",
             "description": "Visual horizontal and vertical timeline tracks to represent milestones, project phases, or sequential stages.",
-            "fields": ["title", "subtitle", "items"],
-            "itemFields": ["header", "description"],
+            "fields": [
+                "title",
+                "subtitle",
+                "items"
+            ],
+            "itemFields": [
+                "header",
+                "description"
+            ],
             "types": [
                 {
                     "id": "vertical",
@@ -297,6 +292,65 @@
             "constraints": {
                 "maxItems": 6,
                 "recommendedItems": "3 to 5"
+            }
+        },
+        "basic": {
+            "name": "Basic Blocks",
+            "description": "Essential structural blocks like text, images, tables, and code snippets.",
+            "fields": [
+                "title",
+                "subtitle",
+                "items",
+                "verticalAlign",
+                "columns"
+            ],
+            "itemFields": [
+                "header",
+                "description",
+                "align",
+                "headerFontSize",
+                "descriptionFontSize",
+                "image",
+                "imageDescription",
+                "imageFocus",
+                "imageFit"
+            ],
+            "types": [
+                {
+                    "id": "large",
+                    "name": "Large Text",
+                    "description": "Large text perfect for main slide titles or big statements."
+                },
+                {
+                    "id": "plain",
+                    "name": "Plain Text",
+                    "description": "A clean, simple text paragraph layout for long-form descriptions or quotes."
+                },
+                {
+                    "id": "single",
+                    "name": "Single Image",
+                    "description": "A single prominent image occupying maximum space, suitable for high-impact visual slides."
+                },
+                {
+                    "id": "gallery",
+                    "name": "Image Gallery",
+                    "description": "A dynamic grid gallery displaying multiple images beautifully.",
+                    "supportsColumns": true
+                },
+                {
+                    "id": "table",
+                    "name": "Table",
+                    "description": "A clean 2-column table layout perfect for comparing categories with their detailed descriptions."
+                },
+                {
+                    "id": "code",
+                    "name": "Code Block",
+                    "description": "A preformatted code block for displaying source code."
+                }
+            ],
+            "constraints": {
+                "maxItems": 10,
+                "recommendedItems": "1 to 6"
             }
         }
     }

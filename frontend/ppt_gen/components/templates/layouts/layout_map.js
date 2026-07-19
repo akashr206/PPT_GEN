@@ -23,20 +23,15 @@ import TimelinesHorizontal from "./timelines/TimelinesHorizontal";
 import TimelinesChevron from "./timelines/TimelinesChevron";
 import TimelinesVertical from "./timelines/TimelinesVertical";
 
+import TableBasic from "./tables/TableBasic";
+import CodeBlock from "./basic/CodeBlock";
+
 export const layout_map = {
-    "text": {
-        "plain": PlainText,
-        "large": LargeText
-    },
     "bullets": {
         "simple": BulletsSimple,
         "grid": BulletsGrid,
         "numbered": BulletsNumbered,
         "accent": BulletsAccent,
-    },
-    "images": {
-        "single": ImagesSingle,
-        "gallery": ImagesGallery,
     },
     "cards": {
         "basic": CardsBasic,
@@ -56,6 +51,14 @@ export const layout_map = {
         "chevron": TimelinesChevron,
         "vertical": TimelinesVertical,
         "alternating": TimelinesVertical
+    },
+    "basic": {
+        "table": TableBasic,
+        "plain": PlainText,
+        "large": LargeText,
+        "single": ImagesSingle,
+        "gallery": ImagesGallery,
+        "code": CodeBlock
     }
 };
 
@@ -65,4 +68,3 @@ layout_map.card = layout_map.cards;
 layout_map.icon = layout_map.icons;
 layout_map.stat = layout_map.stats;
 layout_map.timeline = layout_map.timelines;
-layout_map.image = layout_map.images;

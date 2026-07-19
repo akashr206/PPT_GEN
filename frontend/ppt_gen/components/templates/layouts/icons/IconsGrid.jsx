@@ -30,8 +30,8 @@ const IconsGrid = ({
                         onChange={(val) => onUpdateItem(i, "icon", val)}
                         readOnly={readOnly}
                         contextText={item.header}
-                        iconClassName="w-[2.5cqw] h-[2.5cqw] theme-text-primary"
-                        className="flex items-center justify-center shrink-0 mb-[1cqw]"
+                        iconClassName="w-[4cqw] h-[4cqw] theme-text-primary"
+                        className="flex items-center justify-center shrink-0"
                     />
                     <EditableElement
                         as="h3"

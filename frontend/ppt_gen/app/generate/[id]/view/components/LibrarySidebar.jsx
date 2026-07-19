@@ -36,6 +36,7 @@ export default function LibrarySidebar({
     isOpen,
     isBusy,
     imageEditContext,
+    iconEditContext,
     onSelectImage,
     iconEditCallback,
     onSelectIcon,
@@ -149,6 +150,18 @@ export default function LibrarySidebar({
             }
         }
     }, [isOpen, activeTab, imageEditContext, handleSearchPexels]);
+
+    // Auto-search System Icons if recommendedIcons exists from icon edit trigger
+    useEffect(() => {
+        if (
+            isOpen &&
+            activeTab === "icons" &&
+            iconEditContext?.recommendedIcons?.length > 0
+        ) {
+            setIconSubTab("system");
+            setSystemIconQuery(iconEditContext.recommendedIcons[0]);
+        }
+    }, [isOpen, activeTab, iconEditContext]);
 
     // Upload Handlers
     const handleImageUpload = async (e) => {

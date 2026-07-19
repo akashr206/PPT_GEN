@@ -130,7 +130,7 @@ const Slide = ({
                     <MacroImage
                         imageUrl={imageUrl}
                         imageLoading={slide_content.imageLoading}
-                        onEditImage={onEditImage}
+                        onEditImage={onEditImage ? () => onEditImage({ type: "slide", currentQuery: slide_content.imageDescription || slide_content.imagePrompt }) : undefined}
                         readOnly={!onUpdateSlide}
                         focusPoint={slide_content.imageFocus}
                         onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
@@ -149,7 +149,7 @@ const Slide = ({
                         <MacroImage
                             imageUrl={imageUrl}
                             imageLoading={slide_content.imageLoading}
-                            onEditImage={onEditImage}
+                            onEditImage={onEditImage ? () => onEditImage({ type: "slide", currentQuery: slide_content.imageDescription || slide_content.imagePrompt }) : undefined}
                             readOnly={!onUpdateSlide}
                             focusPoint={slide_content.imageFocus}
                             onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
@@ -200,7 +200,7 @@ const Slide = ({
                             imageUrl={imageUrl}
                             imagePrompt={slide_content.imagePrompt}
                             imageLoading={slide_content.imageLoading}
-                            onEditImage={onEditImage}
+                            onEditImage={onEditImage ? () => onEditImage({ type: "slide", currentQuery: slide_content.imageDescription || slide_content.imagePrompt }) : undefined}
                             readOnly={!onUpdateSlide}
                             focusPoint={slide_content.imageFocus}
                             onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
@@ -221,7 +221,7 @@ const Slide = ({
                             imageUrl={imageUrl}
                             imagePrompt={slide_content.imagePrompt}
                             imageLoading={slide_content.imageLoading}
-                            onEditImage={onEditImage}
+                            onEditImage={onEditImage ? () => onEditImage({ type: "slide", currentQuery: slide_content.imageDescription || slide_content.imagePrompt }) : undefined}
                             readOnly={!onUpdateSlide}
                             focusPoint={slide_content.imageFocus}
                             onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
