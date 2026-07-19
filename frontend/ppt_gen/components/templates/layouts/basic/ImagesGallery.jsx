@@ -66,7 +66,7 @@ const ImagesGallery = ({
                                 imageUrl={item.image}
                                 imagePrompt={item.imageDescription}
                                 imageLoading={item.imageLoading}
-                                onEditImage={!readOnly && onEditImage ? () => onEditImage({ type: "item", itemIndex: i }) : undefined}
+                                onEditImage={!readOnly && onEditImage ? () => onEditImage({ type: "item", itemIndex: i, currentQuery: item.imageDescription || item.header }) : undefined}
                                 readOnly={readOnly}
                                 focusPoint={item.imageFocus}
                                 onUpdateFocus={(val) => onUpdateItem && onUpdateItem(i, "imageFocus", val)}

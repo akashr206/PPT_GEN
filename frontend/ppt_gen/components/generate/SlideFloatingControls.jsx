@@ -31,7 +31,7 @@ const SlideFloatingControls = React.memo(({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={onAddBlock}
+                                onClick={() => onAddBlock()}
                                 className="h-4 w-4 p-1 cursor-pointer"
                                 disabled={isBusy}
                             >

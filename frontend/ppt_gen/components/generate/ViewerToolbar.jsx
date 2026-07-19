@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Undo, Redo, SlidersHorizontal, FolderOpen, Diamond } from "lucide-react";
+import { Undo, Redo, SlidersHorizontal, FolderOpen, Diamond, Palette } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,7 +16,9 @@ const ViewerToolbar = React.memo(({
     onUndo, 
     onRedo, 
     onOpenSettings, 
-    onOpenLibrary 
+    onOpenLibrary,
+    onOpenThemeSelector,
+    themeName
 }) => {
     return (
         <div className="w-full h-12 relative bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 flex items-center justify-between px-6 z-20 shrink-0 select-none">
@@ -42,6 +44,15 @@ const ViewerToolbar = React.memo(({
                     </button>
                 </div>
                 <div className="flex gap-2 max-md:hidden text-xs">
+                    <Button
+                        variant="outline"
+                        onClick={onOpenThemeSelector}
+                        className="cursor-pointer rounded-sm text-xs border-border text-foreground hover:bg-accent hover:text-accent-foreground flex items-center px-3"
+                    >
+                        <Palette size={14} className="text-primary mr-1" />
+                        <span className="capitalize">{themeName || "Theme"}</span>
+                    </Button>
+
                     <Button
                         variant="outline"
                         onClick={onOpenSettings}
@@ -76,6 +87,14 @@ const ViewerToolbar = React.memo(({
                         align="start"
                         className="min-w-[180px] bg-popover border-border text-popover-foreground rounded-md p-1.5 shadow-2xl z-50"
                     >
+                        <DropdownMenuItem
+                            onClick={onOpenThemeSelector}
+                            className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
+                        >
+                            <Palette size={14} className="text-primary" />
+                            <span className="capitalize">Theme: {themeName || "Default"}</span>
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem
                             onClick={onOpenSettings}
                             className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"

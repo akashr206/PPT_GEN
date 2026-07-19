@@ -35,7 +35,7 @@ const BulletsAccent = ({
                 <AnimatedItem
                     key={i}
                     index={i}
-                    className="flex flex-col group/item relative flex-1 min-w-[12cqw]"
+                    className="flex flex-col p-[0.5cqw] group/item relative flex-1 min-w-[12cqw]"
                     style={{ flexBasis: `calc((100% - ${(actualCols - 1) * 3}cqw) / ${actualCols})` }}
                 >
                     {/* Add/Delete controls */}
@@ -62,12 +62,12 @@ const BulletsAccent = ({
                     )}
                     
                     {/* Accent Line */}
-                    <div className="w-[4cqw] h-[0.4cqw] theme-bg-primary rounded-full mb-[1cqw] shrink-0" />
+                    <div className="w-full h-[0.15cqw] theme-bg-primary rounded-full mb-[1cqw] shrink-0" />
                     
                     <div className="flex flex-col min-w-0 pb-[1cqw]">
                         <EditableElement
                             as="h3"
-                            className="theme-font-heading font-semibold text-[1.8cqw] leading-snug theme-text-primary"
+                            className="theme-font-heading font-semibold theme-text-heading-size leading-snug theme-text-primary"
                             value={item.header}
                             onChange={(val) => onUpdateItem(i, "header", val)}
                             readOnly={readOnly}
@@ -75,7 +75,7 @@ const BulletsAccent = ({
                         />
                         <EditableElement
                             as="p"
-                            className="text-[1.3cqw] leading-relaxed theme-text-muted mt-[0.6cqw]"
+                            className="theme-text-description-size leading-relaxed theme-text-muted mt-[0.6cqw]"
                             value={item.description}
                             onChange={(val) =>
                                 onUpdateItem(i, "description", val)

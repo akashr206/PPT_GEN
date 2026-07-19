@@ -6,8 +6,8 @@ import BulletsAccent from "./bullets/BulletsAccent";
 import CardsBasic from "./cards/CardsBasic";
 import CardsImage from "./cards/CardsImage";
 
-import ImagesSingle from "./images/ImagesSingle";
-import ImagesGallery from "./images/ImagesGallery";
+import ImagesSingle from "./basic/ImagesSingle";
+import ImagesGallery from "./basic/ImagesGallery";
 
 import IconsList from "./icons/IconsList";
 import IconsGrid from "./icons/IconsGrid";
@@ -16,27 +16,22 @@ import IconsCard from "./icons/IconsCard";
 import StatsHighlight from "./stats/StatsHighlight";
 import StatsGrid from "./stats/StatsGrid";
 
-import PlainText from "./text/PlainText";
-import LargeText from "./text/LargeText";
+import PlainText from "./basic/PlainText";
+import LargeText from "./basic/LargeText";
 
 import TimelinesHorizontal from "./timelines/TimelinesHorizontal";
 import TimelinesChevron from "./timelines/TimelinesChevron";
 import TimelinesVertical from "./timelines/TimelinesVertical";
 
+import TableBasic from "./basic/TableBasic";
+import CodeBlock from "./basic/CodeBlock";
+
 export const layout_map = {
-    "text": {
-        "plain": PlainText,
-        "large": LargeText
-    },
     "bullets": {
         "simple": BulletsSimple,
         "grid": BulletsGrid,
         "numbered": BulletsNumbered,
         "accent": BulletsAccent,
-    },
-    "images": {
-        "single": ImagesSingle,
-        "gallery": ImagesGallery,
     },
     "cards": {
         "basic": CardsBasic,
@@ -56,6 +51,14 @@ export const layout_map = {
         "chevron": TimelinesChevron,
         "vertical": TimelinesVertical,
         "alternating": TimelinesVertical
+    },
+    "basic": {
+        "table": TableBasic,
+        "plain": PlainText,
+        "large": LargeText,
+        "single": ImagesSingle,
+        "gallery": ImagesGallery,
+        "code": CodeBlock
     }
 };
 
@@ -65,4 +68,3 @@ layout_map.card = layout_map.cards;
 layout_map.icon = layout_map.icons;
 layout_map.stat = layout_map.stats;
 layout_map.timeline = layout_map.timelines;
-layout_map.image = layout_map.images;

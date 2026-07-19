@@ -53,6 +53,7 @@ const ContentBlock = ({
     theme,
     onEditImage,
     readOnly,
+    textSizes,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [showColsDropdown, setShowColsDropdown] = useState(false);
@@ -62,12 +63,8 @@ const ContentBlock = ({
     if (block.align === "right") alignClass = "items-end";
 
     let justifyClass = "justify-center";
-    if (block.verticalAlign === "start") justifyClass = "justify-start";
+    if (block.verticalAlign === "top") justifyClass = "justify-start";
     else if (block.verticalAlign === "bottom") justifyClass = "justify-end";
-
-    // For BSP, we don't rely on block.width, it's flexBasis controlled by parent.
-    // We just take full width/height of our container.
-    const flexBasis = "100%";
 
     const handleLayoutSelect = (cat, type) => {
         if (onUpdateBlock) {
@@ -178,6 +175,7 @@ const ContentBlock = ({
         <div
             onClick={(e) => {
                 // Do not trigger selection if clicking on an interactive element
+                // console.log(e.target?.id);
                 if (
                     e.target.closest(
                         'input, textarea, button, a, [contenteditable="true"]',
@@ -193,8 +191,8 @@ const ContentBlock = ({
             className={`relative flex flex-col p-[1cqw] ${justifyClass} ${alignClass} group/block transition-colors ${
                 !readOnly
                     ? isOpen
-                        ? "outline outline-gray-400/80 bg-gray-500/5"
-                        : "hover:outline  hover:outline-gray-400/80 hover:bg-gray-500/5"
+                        ? "outline-1 outline-(--theme-primary) bg-gray-500/5"
+                        : "hover:outline hover:outline-gray-400/80 hover:bg-gray-500/5"
                     : ""
             }`}
         >
@@ -203,6 +201,12 @@ const ContentBlock = ({
                 layoutType={block.layout?.type}
                 content={block.items || []}
                 columns={block.columns}
+                block={block}
+                onUpdateBlock={
+                    onUpdateBlock
+                        ? (field, value) => onUpdateBlock(blockId, field, value)
+                        : undefined
+                }
                 onUpdateItem={
                     onUpdateItem
                         ? (i, f, v) => onUpdateItem(blockId, i, f, v)
@@ -221,6 +225,7 @@ const ContentBlock = ({
                 }
                 theme={theme}
                 readOnly={readOnly}
+                textSizes={textSizes}
             />
 
             {!readOnly && (

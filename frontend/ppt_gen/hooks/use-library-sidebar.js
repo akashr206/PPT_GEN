@@ -10,16 +10,22 @@ export function useLibrarySidebar() {
     const [libraryActiveTab, setLibraryActiveTab] = useState("images");
     const [imageEditContext, setImageEditContext] = useState(null);
     const [libraryIconCallback, setLibraryIconCallback] = useState(null);
+    const [iconEditContext, setIconEditContext] = useState(null);
 
     // Listen for global events from deeply nested components (e.g. EditableIcon)
     useEffect(() => {
         const handleOpenLibraryEvent = (e) => {
-            const { tab, onSelectIcon } = e.detail;
+            const { tab, onSelectIcon, recommendedIcons, contextText } = e.detail;
             setLibraryActiveTab(tab || "images");
             if (onSelectIcon) {
                 setLibraryIconCallback(() => onSelectIcon);
             } else {
                 setLibraryIconCallback(null);
+            }
+            if (recommendedIcons || contextText) {
+                setIconEditContext({ recommendedIcons, contextText });
+            } else {
+                setIconEditContext(null);
             }
             setIsLibraryOpen(true);
         };
@@ -62,6 +68,7 @@ export function useLibrarySidebar() {
         isLibraryOpen,
         libraryActiveTab,
         imageEditContext,
+        iconEditContext,
         libraryIconCallback,
         openLibrary,
         openLibraryForImage,

@@ -60,7 +60,7 @@ const TimelinesHorizontal = ({ content, onUpdateItem, onDeleteItem, onAddItem, r
                                 <div className="absolute top-0 left-0 right-0 h-[10.5cqw] flex flex-col justify-end items-center text-center min-w-0">
                                     <EditableElement
                                         as="h3"
-                                        className="theme-font-heading font-bold text-[1.6cqw] leading-tight theme-text-primary px-[0.5cqw] w-full"
+                                        className="theme-font-heading font-bold theme-text-heading-size leading-tight theme-text-primary px-[0.5cqw] w-full"
                                         value={item.header}
                                         onChange={(val) => onUpdateItem(i, "header", val)}
                                         readOnly={readOnly}
@@ -68,7 +68,7 @@ const TimelinesHorizontal = ({ content, onUpdateItem, onDeleteItem, onAddItem, r
                                     />
                                     <EditableElement
                                         as="p"
-                                        className="text-[1.2cqw] leading-relaxed theme-text-muted mt-[0.25cqw] px-[0.5cqw] w-full"
+                                        className="theme-text-description-size leading-relaxed theme-text-muted mt-[0.25cqw] px-[0.5cqw] w-full"
                                         value={item.description}
                                         onChange={(val) => onUpdateItem(i, "description", val)}
                                         readOnly={readOnly}
@@ -101,7 +101,7 @@ const TimelinesHorizontal = ({ content, onUpdateItem, onDeleteItem, onAddItem, r
                                 <div className="absolute bottom-0 left-0 right-0 h-[10.5cqw] flex flex-col justify-start items-center text-center min-w-0">
                                     <EditableElement
                                         as="h3"
-                                        className="theme-font-heading font-bold text-[1.6cqw] leading-tight theme-text-primary px-[0.5cqw] w-full"
+                                        className="theme-font-heading font-bold theme-text-heading-size leading-tight theme-text-primary px-[0.5cqw] w-full"
                                         value={item.header}
                                         onChange={(val) => onUpdateItem(i, "header", val)}
                                         readOnly={readOnly}
@@ -109,7 +109,7 @@ const TimelinesHorizontal = ({ content, onUpdateItem, onDeleteItem, onAddItem, r
                                     />
                                     <EditableElement
                                         as="p"
-                                        className="text-[1.2cqw] leading-relaxed theme-text-muted mt-[0.25cqw] px-[0.5cqw] w-full"
+                                        className="theme-text-description-size leading-relaxed theme-text-muted mt-[0.25cqw] px-[0.5cqw] w-full"
                                         value={item.description}
                                         onChange={(val) => onUpdateItem(i, "description", val)}
                                         readOnly={readOnly}

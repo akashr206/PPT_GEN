@@ -61,6 +61,7 @@ const Slide = ({
     onEditImage,
     onSplitBlock,
     slideIndex,
+    textSizes,
 }) => {
     const macroType = slide_content.type || "normal";
     const blocks = slide_content.blocks || [];
@@ -99,6 +100,7 @@ const Slide = ({
                         onUpdateBlock={onUpdateBlock ? (f, v) => onUpdateBlock(slide_content.header.id, f, v) : undefined}
                         onDeleteBlock={onDeleteBlock ? () => onDeleteBlock(slide_content.header.id) : undefined}
                         readOnly={!onUpdateSlide}
+                        textSizes={textSizes}
                     />
                 )}
                 
@@ -116,6 +118,7 @@ const Slide = ({
                         theme={theme || slide_content.theme}
                         onEditImage={onEditImage}
                         readOnly={!onUpdateSlide}
+                        textSizes={textSizes}
                     />
                 </div>
             </div>
@@ -130,7 +133,7 @@ const Slide = ({
                     <MacroImage
                         imageUrl={imageUrl}
                         imageLoading={slide_content.imageLoading}
-                        onEditImage={onEditImage}
+                        onEditImage={onEditImage ? () => onEditImage({ type: "slide", currentQuery: slide_content.imageDescription || slide_content.imagePrompt }) : undefined}
                         readOnly={!onUpdateSlide}
                         focusPoint={slide_content.imageFocus}
                         onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
@@ -149,7 +152,7 @@ const Slide = ({
                         <MacroImage
                             imageUrl={imageUrl}
                             imageLoading={slide_content.imageLoading}
-                            onEditImage={onEditImage}
+                            onEditImage={onEditImage ? () => onEditImage({ type: "slide", currentQuery: slide_content.imageDescription || slide_content.imagePrompt }) : undefined}
                             readOnly={!onUpdateSlide}
                             focusPoint={slide_content.imageFocus}
                             onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
@@ -200,7 +203,7 @@ const Slide = ({
                             imageUrl={imageUrl}
                             imagePrompt={slide_content.imagePrompt}
                             imageLoading={slide_content.imageLoading}
-                            onEditImage={onEditImage}
+                            onEditImage={onEditImage ? () => onEditImage({ type: "slide", currentQuery: slide_content.imageDescription || slide_content.imagePrompt }) : undefined}
                             readOnly={!onUpdateSlide}
                             focusPoint={slide_content.imageFocus}
                             onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
@@ -221,7 +224,7 @@ const Slide = ({
                             imageUrl={imageUrl}
                             imagePrompt={slide_content.imagePrompt}
                             imageLoading={slide_content.imageLoading}
-                            onEditImage={onEditImage}
+                            onEditImage={onEditImage ? () => onEditImage({ type: "slide", currentQuery: slide_content.imageDescription || slide_content.imagePrompt }) : undefined}
                             readOnly={!onUpdateSlide}
                             focusPoint={slide_content.imageFocus}
                             onUpdateFocus={(val) => onUpdateSlide && onUpdateSlide("imageFocus", val)}
@@ -256,6 +259,12 @@ const Slide = ({
         <div
             className="slide flex flex-col theme-container group/slide bg-theme-bg text-theme-fg relative"
             data-theme={theme || slide_content.theme}
+            style={textSizes ? {
+                '--text-title': `${textSizes.title}cqw`,
+                '--text-subtitle': `${textSizes.subtitle}cqw`,
+                '--text-heading': `${textSizes.heading}cqw`,
+                '--text-description': `${textSizes.description}cqw`
+            } : {}}
         >
             {!slide_content.header && !!onUpdateSlide && (
                 <div className="absolute top-[1.5cqw] left-[1.5cqw] z-40 transition-opacity opacity-0 group-hover/slide:opacity-100 pointer-events-auto">

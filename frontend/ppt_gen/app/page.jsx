@@ -53,13 +53,19 @@ export default function LandingPage() {
         }
     };
 
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace("/dashboard");
+        }
+    }, [session]);
+
     return (
         <div className="min-h-screen bg-[#050505] text-zinc-50 font-sans selection:bg-blue-500/30 relative overflow-hidden flex flex-col">
             <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 4.5, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute top-1/3 -left-[20%] w-[50%] h-[60%] bg-gradient-to-r from-violet-600/40 to-blue-600/40 blur-[140px] rounded-full pointer-events-none z-0 mix-blend-screen transform -rotate-12"
+                className="absolute top-1/3 left-[-20%] w-[50%] h-[60%] bg-gradient-to-r from-violet-600/40 to-blue-600/40 blur-[140px] rounded-full pointer-events-none z-0 mix-blend-screen transform -rotate-12"
             />
             <motion.div
                 initial={{ scale: 0 }}

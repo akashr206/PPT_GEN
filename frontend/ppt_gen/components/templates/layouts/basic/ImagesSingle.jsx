@@ -32,7 +32,7 @@ const ImagesSingle = ({
                         imageUrl={item.image}
                         imagePrompt={item.imageDescription}
                         imageLoading={item.imageLoading}
-                        onEditImage={!readOnly && onEditImage ? () => onEditImage({ type: "item", itemIndex: 0 }) : undefined}
+                        onEditImage={!readOnly && onEditImage ? () => onEditImage({ type: "item", itemIndex: 0, currentQuery: item.imageDescription || item.header }) : undefined}
                         readOnly={readOnly}
                         focusPoint={item.imageFocus}
                         onUpdateFocus={(val) => onUpdateItem && onUpdateItem(0, "imageFocus", val)}

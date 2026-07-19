@@ -32,6 +32,7 @@
 
 .group\/item:focus-within {
     outline: 2px solid var(--theme-primary);
+    border-radius: 0;
 }
 
 /* Show the actions menu when the item has focus-within (e.g. text is clicked/active) */
@@ -94,3 +95,9 @@
 .theme-text-muted { color: var(--theme-fg-muted); }
 .theme-bg-alt { background-color: var(--theme-bg-alt); }
 .theme-bullet-bg { background-color: var(--theme-bullet); }
+
+/* Theme Global Text Sizes */
+.theme-text-title-size { font-size: var(--text-title, 2.8cqw); }
+.theme-text-subtitle-size { font-size: var(--text-subtitle, 2cqw); }
+.theme-text-heading-size { font-size: var(--text-heading, 1.8cqw); }
+.theme-text-description-size { font-size: var(--text-description, 1.3cqw); }

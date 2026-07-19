@@ -378,7 +378,7 @@ function ThemeGeneratorContent() {
         <div className="h-screen w-screen flex flex-col overflow-hidden text-foreground font-sans relative z-10 ">
             <Navbar />
 
-            <div className="flex-grow flex max-lg:flex-col-reverse flex-col lg:flex-row min-h-0 max-lg:overflow-y-auto lg:overflow-hidden relative">
+            <div className="grow flex max-lg:flex-col-reverse flex-col lg:flex-row min-h-0 max-lg:overflow-y-auto lg:overflow-hidden relative">
                 {/* Sidebar color controls */}
                 <aside className="w-full lg:w-96 lg:h-full max-lg:h-auto bg-card text-card-foreground flex flex-col border-r border-border shrink-0 select-none lg:min-h-0">
                     {/* Sidebar Header */}
@@ -499,7 +499,7 @@ function ThemeGeneratorContent() {
                 </aside>
 
                 {/* Central Slide Preview Section */}
-                <main className="flex-grow lg:h-full lg:overflow-y-auto max-lg:overflow-visible flex flex-col items-center justify-start p-4 md:p-8 lg:p-12 relative select-none gap-4">
+                <main className="grow lg:h-full lg:overflow-y-auto max-lg:overflow-visible flex flex-col items-center justify-start p-4 md:p-8 lg:p-12 relative select-none gap-4">
                     {/* Layout Selector Bar */}
                     <div className="w-full max-w-[1000px] flex items-center justify-between bg-card text-card-foreground border border-border px-4 py-2.5 rounded-lg shadow-sm shrink-0">
                         <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
@@ -552,7 +552,7 @@ function ThemeGeneratorContent() {
                             "--theme-font-heading": fontHeading,
                             "--theme-font-body": fontBody,
                         }}
-                        className="w-full rounded-md overflow-hidden pointer-events-none max-w-[1000px] [container-type:inline-size]"
+                        className="w-full rounded-md overflow-hidden pointer-events-none max-w-[1000px] @container"
                     >
                         {memoizedSlide}
                     </div>

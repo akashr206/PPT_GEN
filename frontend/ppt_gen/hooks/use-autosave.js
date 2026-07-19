@@ -15,17 +15,22 @@ const AUTOSAVE_DELAY_MS = 1500; // debounce: save 1.5s after last edit
  * @param {Array}  opts.editableSlides
  * @param {string} opts.initialDataRef - ref whose .current holds the initial JSON snapshot
  * @param {boolean} opts.isBusy - skip save while streaming/exporting
+ * @param {object} opts.textSizes - global text sizes to embed
  */
-export function useAutosave({ pptId, editableSlides, initialDataRef, isBusy }) {
+export function useAutosave({ pptId, editableSlides, initialDataRef, isBusy, textSizes }) {
     const timerRef = useRef(null);
     const isSavingRef = useRef(false);
 
-    const save = useCallback(async (slides) => {
+    const save = useCallback(async (slides, currentTextSizes) => {
         if (!pptId || isSavingRef.current) return;
         isSavingRef.current = true;
         try {
-            await api.patch(`/api/ppt/${pptId}`, { slides });
-            console.log("[Autosave] Slides saved.");
+            const payload = JSON.parse(JSON.stringify(slides));
+            if (payload.length > 0 && currentTextSizes) {
+                payload[0].globalTextSizes = currentTextSizes;
+            }
+            await api.patch(`/api/ppt/${pptId}`, { slides: payload });
+            console.log("[Autosave] Slides saved with text sizes embedded.");
         } catch (err) {
             console.error("[Autosave] Failed to save slides:", err);
         } finally {
@@ -50,7 +55,7 @@ export function useAutosave({ pptId, editableSlides, initialDataRef, isBusy }) {
         // Debounce: clear any pending save and schedule a new one
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = setTimeout(() => {
-            save(editableSlides);
+            save(editableSlides, textSizes);
         }, AUTOSAVE_DELAY_MS);
 
         return () => {

@@ -116,6 +116,8 @@ export function EditableIcon({
                                     detail: {
                                         tab: "icons",
                                         onSelectIcon: onChange,
+                                        recommendedIcons: recommendedIcons,
+                                        contextText: contextText
                                     },
                                 },
                             );
@@ -139,6 +141,8 @@ export function EditableIcon({
                             detail: {
                                 tab: "icons",
                                 onSelectIcon: onChange,
+                                recommendedIcons: recommendedIcons,
+                                contextText: contextText
                             },
                         },
                     );

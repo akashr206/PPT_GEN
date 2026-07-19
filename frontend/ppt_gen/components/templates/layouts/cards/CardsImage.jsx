@@ -22,7 +22,7 @@ const CardsImage = ({ content, columns, onUpdateItem, onEditImage, readOnly }) =
                             imageUrl={item.image}
                             imagePrompt={item.imageDescription || item.header}
                             imageLoading={item.imageLoading}
-                            onEditImage={!readOnly && onEditImage ? () => onEditImage({ type: "item", itemIndex: i }) : undefined}
+                            onEditImage={!readOnly && onEditImage ? () => onEditImage({ type: "item", itemIndex: i, currentQuery: item.imageDescription || item.header }) : undefined}
                             readOnly={readOnly}
                             focusPoint={item.imageFocus}
                             onUpdateFocus={(val) => onUpdateItem && onUpdateItem(i, "imageFocus", val)}
@@ -31,7 +31,7 @@ const CardsImage = ({ content, columns, onUpdateItem, onEditImage, readOnly }) =
                     <div className="flex flex-col gap-[1cqw] p-[2cqw]">
                         <EditableElement
                             as="h3"
-                            className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary"
+                            className="theme-font-heading font-bold theme-text-heading-size leading-tight theme-text-primary"
                             value={item.header}
                             onChange={(val) => onUpdateItem(i, "header", val)}
                             readOnly={readOnly}
@@ -39,7 +39,7 @@ const CardsImage = ({ content, columns, onUpdateItem, onEditImage, readOnly }) =
                         />
                         <EditableElement
                             as="p"
-                            className="text-[1.3cqw] leading-relaxed theme-text-muted"
+                            className="theme-text-description-size leading-relaxed theme-text-muted"
                             value={item.description}
                             onChange={(val) => onUpdateItem(i, "description", val)}
                             readOnly={readOnly}
