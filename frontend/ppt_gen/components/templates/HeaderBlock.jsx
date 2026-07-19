@@ -21,7 +21,7 @@ const ALIGNMENTS = [
     { value: "right", icon: AlignRight, label: "Right" },
 ];
 
-const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
+const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly, textSizes }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -47,8 +47,8 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
         itemsAlign = "items-end";
     }
 
-    const titleSize = block.titleFontSize || 2.8;
-    const subSize = block.subtitleFontSize || 2.0;
+    const titleSize = block.titleFontSize || textSizes?.title || 2.8;
+    const subSize = block.subtitleFontSize || textSizes?.subtitle || 2.0;
 
     return (
         <div
@@ -56,8 +56,8 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
         >
             <EditableElement
                 as="h1"
-                className="theme-heading font-bold leading-tight w-full text-wrap"
-                style={{ fontSize: `${titleSize}cqw` }}
+                className="theme-heading font-bold leading-tight w-full text-wrap theme-text-title-size"
+                style={block.titleFontSize ? { fontSize: `${titleSize}cqw` } : undefined}
                 value={block.title}
                 onChange={(val) => onUpdateBlock?.("title", val)}
                 readOnly={readOnly}
@@ -66,8 +66,8 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly }) => {
             {block.subtitle !== undefined && (
                 <EditableElement
                     as="p"
-                    className="theme-text-muted leading-normal"
-                    style={{ fontSize: `${subSize}cqw` }}
+                    className="theme-text-muted leading-normal theme-text-subtitle-size mt-[0.5cqw]"
+                    style={block.subtitleFontSize ? { fontSize: `${subSize}cqw` } : undefined}
                     value={block.subtitle || ""}
                     onChange={(val) => onUpdateBlock?.("subtitle", val)}
                     readOnly={readOnly}

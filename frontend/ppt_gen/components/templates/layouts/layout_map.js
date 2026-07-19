@@ -6,8 +6,8 @@ import BulletsAccent from "./bullets/BulletsAccent";
 import CardsBasic from "./cards/CardsBasic";
 import CardsImage from "./cards/CardsImage";
 
-import ImagesSingle from "./images/ImagesSingle";
-import ImagesGallery from "./images/ImagesGallery";
+import ImagesSingle from "./basic/ImagesSingle";
+import ImagesGallery from "./basic/ImagesGallery";
 
 import IconsList from "./icons/IconsList";
 import IconsGrid from "./icons/IconsGrid";
@@ -16,14 +16,14 @@ import IconsCard from "./icons/IconsCard";
 import StatsHighlight from "./stats/StatsHighlight";
 import StatsGrid from "./stats/StatsGrid";
 
-import PlainText from "./text/PlainText";
-import LargeText from "./text/LargeText";
+import PlainText from "./basic/PlainText";
+import LargeText from "./basic/LargeText";
 
 import TimelinesHorizontal from "./timelines/TimelinesHorizontal";
 import TimelinesChevron from "./timelines/TimelinesChevron";
 import TimelinesVertical from "./timelines/TimelinesVertical";
 
-import TableBasic from "./tables/TableBasic";
+import TableBasic from "./basic/TableBasic";
 import CodeBlock from "./basic/CodeBlock";
 
 export const layout_map = {

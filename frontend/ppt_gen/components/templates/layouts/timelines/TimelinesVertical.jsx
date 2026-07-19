@@ -50,7 +50,7 @@ const TimelinesVertical = ({ content, onUpdateItem, onDeleteItem, onAddItem, rea
                                 )}
                                 <EditableElement
                                     as="h3"
-                                    className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary px-[1cqw]"
+                                    className="theme-font-heading font-bold theme-text-heading-size leading-tight theme-text-primary px-[1cqw]"
                                     value={item.header}
                                     onChange={(val) => onUpdateItem(i, "header", val)}
                                     readOnly={readOnly}
@@ -58,7 +58,7 @@ const TimelinesVertical = ({ content, onUpdateItem, onDeleteItem, onAddItem, rea
                                 />
                                 <EditableElement
                                     as="p"
-                                    className="text-[1.3cqw] leading-relaxed theme-text-muted mt-[0.5cqw] px-[1cqw]"
+                                    className="theme-text-description-size leading-relaxed theme-text-muted mt-[0.5cqw] px-[1cqw]"
                                     value={item.description}
                                     onChange={(val) => onUpdateItem(i, "description", val)}
                                     readOnly={readOnly}
@@ -101,7 +101,7 @@ const TimelinesVertical = ({ content, onUpdateItem, onDeleteItem, onAddItem, rea
                                 )}
                                 <EditableElement
                                     as="h3"
-                                    className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary px-[1cqw]"
+                                    className="theme-font-heading font-bold theme-text-heading-size leading-tight theme-text-primary px-[1cqw]"
                                     value={item.header}
                                     onChange={(val) => onUpdateItem(i, "header", val)}
                                     readOnly={readOnly}
@@ -109,7 +109,7 @@ const TimelinesVertical = ({ content, onUpdateItem, onDeleteItem, onAddItem, rea
                                 />
                                 <EditableElement
                                     as="p"
-                                    className="text-[1.3cqw] leading-relaxed theme-text-muted mt-[0.5cqw] px-[1cqw]"
+                                    className="theme-text-description-size leading-relaxed theme-text-muted mt-[0.5cqw] px-[1cqw]"
                                     value={item.description}
                                     onChange={(val) => onUpdateItem(i, "description", val)}
                                     readOnly={readOnly}

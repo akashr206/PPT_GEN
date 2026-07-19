@@ -52,6 +52,7 @@ export default function LibrarySidebar({
     const [isSearchingPexels, setIsSearchingPexels] = useState(false);
     
     const searchImagesStore = useMediaStore(state => state.searchImages);
+    const searchIconsStore = useMediaStore(state => state.searchIcons);
 
     const userImages = useMediaStore(state => state.userImages);
     const fetchUserImagesStore = useMediaStore(state => state.fetchUserImages);
@@ -64,6 +65,8 @@ export default function LibrarySidebar({
     // Icons States
     const [iconSubTab, setIconSubTab] = useState("uploads"); // "uploads" | "system"
     const [systemIconQuery, setSystemIconQuery] = useState("");
+    const [systemIconResults, setSystemIconResults] = useState([]);
+    const [isSearchingSystemIcons, setIsSearchingSystemIcons] = useState(false);
     const [isLoadingIcons, setIsLoadingIcons] = useState(false);
     const [isUploadingIcon, setIsUploadingIcon] = useState(false);
     const [pastedSvg, setPastedSvg] = useState("");
@@ -133,6 +136,25 @@ export default function LibrarySidebar({
         }
     }, [searchImagesStore]);
 
+    // Icon Search (Backend)
+    const handleSearchSystemIcons = useCallback(async (query) => {
+        if (!query || query.trim() === "") {
+            setSystemIconResults([]);
+            return;
+        }
+        setIsSearchingSystemIcons(true);
+        try {
+            const data = await searchIconsStore(query);
+            setSystemIconResults(data);
+        } catch (err) {
+            console.error("Failed to search system icons:", err);
+            setSystemIconResults([]);
+            toast.error("Failed to search system icons.");
+        } finally {
+            setIsSearchingSystemIcons(false);
+        }
+    }, [searchIconsStore]);
+
     // Auto-search Pexels if query context exists from image edit trigger
     useEffect(() => {
         if (
@@ -156,12 +178,14 @@ export default function LibrarySidebar({
         if (
             isOpen &&
             activeTab === "icons" &&
-            iconEditContext?.recommendedIcons?.length > 0
+            (iconEditContext?.recommendedIcons?.length > 0 || iconEditContext?.contextText)
         ) {
             setIconSubTab("system");
-            setSystemIconQuery(iconEditContext.recommendedIcons[0]);
+            const query = iconEditContext.contextText || iconEditContext.recommendedIcons[0];
+            setSystemIconQuery(query);
+            handleSearchSystemIcons(query);
         }
-    }, [isOpen, activeTab, iconEditContext]);
+    }, [isOpen, activeTab, iconEditContext, handleSearchSystemIcons]);
 
     // Upload Handlers
     const handleImageUpload = async (e) => {
@@ -339,23 +363,7 @@ export default function LibrarySidebar({
         }
     };
 
-    // Filter Phosphor icons list for the system icons tab
-    const filteredSystemIcons = React.useMemo(() => {
-        const query = systemIconQuery.toLowerCase().trim();
-        const allNames = Object.keys(phosphorIcons).filter((name) => {
-            return (
-                name !== "default" &&
-                name !== "IconContext" &&
-                name !== "IconBase" &&
-                /^[A-Z]/.test(name) &&
-                !name.endsWith("Props")
-            );
-        });
-        if (!query) return allNames.slice(0, 36);
-        return allNames
-            .filter((name) => name.toLowerCase().includes(query))
-            .slice(0, 48);
-    }, [systemIconQuery]);
+    // Backend search results are stored in systemIconResults
 
     if (!isOpen || isBusy) return null;
 
@@ -411,7 +419,7 @@ export default function LibrarySidebar({
                 </div>
 
                 {/* Content Body */}
-                <div className="flex-grow overflow-y-auto flex flex-col min-h-0">
+                <div className="grow overflow-y-auto flex flex-col min-h-0">
                     {/* ---------------- IMAGES TAB ---------------- */}
                     {activeTab === "images" && (
                         <div className="flex-1 flex flex-col p-4 gap-4">
@@ -463,10 +471,10 @@ export default function LibrarySidebar({
                                         {isLoadingImages ? (
                                             <div className="w-full overflow-hidden">
                                                 <div className="columns-2 gap-3">
-                                                    <div className="aspect-[3/4] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[120px]" />
+                                                    <div className="aspect-3/4 rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[120px]" />
                                                     <div className="aspect-video rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[80px]" />
-                                                    <div className="aspect-[4/3] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[100px]" />
-                                                    <div className="aspect-[3/2] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[90px]" />
+                                                    <div className="aspect-4/3 rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[100px]" />
+                                                    <div className="aspect-3/2 rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[90px]" />
                                                 </div>
                                             </div>
                                         ) : userImages.length > 0 ? (
@@ -498,7 +506,7 @@ export default function LibrarySidebar({
                                                         </div>
 
                                                         {/* Hover Overlay */}
-                                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-300 p-2 flex flex-col justify-between pointer-events-none z-20">
+                                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-linear-to-t from-black/80 via-black/30 to-transparent transition-all duration-300 p-2 flex flex-col justify-between pointer-events-none z-20">
                                                             {/* Top actions */}
                                                             <div className="flex justify-end pointer-events-auto">
                                                                 <button
@@ -541,7 +549,7 @@ export default function LibrarySidebar({
                                 </div>
                             ) : (
                                 // Search Pexels Tab
-                                <div className="flex-grow flex flex-col gap-4 min-h-0">
+                                <div className="grow flex flex-col gap-4 min-h-0">
                                     <form
                                         onSubmit={(e) => {
                                             e.preventDefault();
@@ -556,7 +564,7 @@ export default function LibrarySidebar({
                                                 setPexelsQuery(e.target.value)
                                             }
                                             placeholder="Search Pexels"
-                                            className="flex-grow p-2 border border-border rounded-md text-xs bg-background"
+                                            className="grow p-2 border border-border rounded-md text-xs bg-background"
                                         />
                                         <button
                                             type="submit"
@@ -584,10 +592,10 @@ export default function LibrarySidebar({
                                         {isSearchingPexels ? (
                                             <div className="w-full overflow-hidden">
                                                 <div className="columns-2 gap-3">
-                                                    <div className="aspect-[4/3] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[100px]" />
-                                                    <div className="aspect-[3/4] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[130px]" />
+                                                    <div className="aspect-4/3 rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[100px]" />
+                                                    <div className="aspect-3/4 rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[130px]" />
                                                     <div className="aspect-video rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[80px]" />
-                                                    <div className="aspect-[3/2] rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[95px]" />
+                                                    <div className="aspect-3/2 rounded-lg skeleton-sweep border border-border/30 mb-3 break-inside-avoid h-[95px]" />
                                                 </div>
                                             </div>
                                         ) : pexelsResults.length > 0 ? (
@@ -619,7 +627,7 @@ export default function LibrarySidebar({
                                                         </div>
 
                                                         {/* Hover Overlay */}
-                                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-300 p-2 flex flex-col justify-between pointer-events-none z-20">
+                                                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-linear-to-t from-black/80 via-black/30 to-transparent transition-all duration-300 p-2 flex flex-col justify-between pointer-events-none z-20">
                                                             {/* Center check indicator (Apply) */}
                                                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                                                 <div className="w-7 h-7 rounded-full bg-primary/95 text-primary-foreground flex items-center justify-center shadow-lg border border-white/15 scale-90 group-hover:scale-100 transition-transform duration-300">
@@ -677,7 +685,7 @@ export default function LibrarySidebar({
                             </div>
 
                             {iconSubTab === "uploads" ? (
-                                <div className="flex-grow flex flex-col gap-4 min-h-0">
+                                <div className="grow flex flex-col gap-4 min-h-0">
                                     {!showPasteArea ? (
                                         <div className="flex gap-2 shrink-0">
                                             <label className="flex-1 border-2 border-dashed border-border hover:border-primary/50 bg-secondary/10 hover:bg-secondary/20 rounded-md p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all group relative">
@@ -758,7 +766,7 @@ export default function LibrarySidebar({
                                     )}
 
                                     {/* User Uploaded Custom Icons List */}
-                                    <div className="flex-grow overflow-y-auto min-h-0">
+                                    <div className="grow overflow-y-auto min-h-0">
                                         {isLoadingIcons ? (
                                             <div className="w-full overflow-hidden">
                                                 <div className="grid grid-cols-4 gap-3">
@@ -835,8 +843,14 @@ export default function LibrarySidebar({
                                 </div>
                             ) : (
                                 // Search System Icons Tab
-                                <div className="flex-grow flex flex-col gap-4 min-h-0">
-                                    <div className="flex gap-2 shrink-0">
+                                <div className="grow flex flex-col gap-4 min-h-0">
+                                    <form 
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            handleSearchSystemIcons(systemIconQuery);
+                                        }}
+                                        className="flex gap-2 shrink-0"
+                                    >
                                         <input
                                             type="text"
                                             value={systemIconQuery}
@@ -846,36 +860,78 @@ export default function LibrarySidebar({
                                                 )
                                             }
                                             placeholder="Search Phosphor icons"
-                                            className="flex-grow p-2 border border-border rounded-md text-xs bg-background"
+                                            className="grow p-2 border border-border rounded-md text-xs bg-background"
                                         />
-                                    </div>
+                                        <button
+                                            type="submit"
+                                            disabled={isSearchingSystemIcons}
+                                            className="px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold cursor-pointer disabled:opacity-50 hover:bg-primary/95 transition-colors"
+                                        >
+                                            {isSearchingSystemIcons ? "..." : "Search"}
+                                        </button>
+                                    </form>
 
-                                    <div className="flex-grow overflow-y-auto min-h-0">
-                                        <div className="grid grid-cols-6 gap-2.5">
-                                            {filteredSystemIcons.map((name) => {
-                                                const IconComponent =
-                                                    phosphorIcons[name];
-                                                if (!IconComponent) return null;
-                                                return (
-                                                    <button
-                                                        key={name}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            handleSelectSystemIconItem(
-                                                                name,
-                                                            )
-                                                        }
-                                                        className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group p-1.5"
-                                                        title={name}
-                                                    >
-                                                        <IconComponent
-                                                            weight="regular"
-                                                            className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors"
-                                                        />
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
+                                    <div className="grow overflow-y-auto min-h-0">
+                                        {isSearchingSystemIcons ? (
+                                            <div className="grid grid-cols-6 gap-2.5">
+                                                {Array.from({ length: 12 }).map((_, i) => (
+                                                    <div key={i} className="aspect-square rounded-md skeleton-sweep border border-border/50" />
+                                                ))}
+                                            </div>
+                                        ) : systemIconResults.length > 0 || iconEditContext?.recommendedIcons?.length > 0 ? (
+                                            <div className="flex flex-col gap-4">
+                                                {iconEditContext?.recommendedIcons?.length > 0 && (
+                                                    <div className="flex flex-col gap-2">
+                                                        <span className="text-xs font-semibold text-muted-foreground">Recommended for this block</span>
+                                                        <div className="grid grid-cols-6 gap-2.5">
+                                                            {iconEditContext.recommendedIcons.map((name) => {
+                                                                const IconComponent = phosphorIcons[name];
+                                                                if (!IconComponent) return null;
+                                                                return (
+                                                                    <button
+                                                                        key={name}
+                                                                        type="button"
+                                                                        onClick={() => handleSelectSystemIconItem(name)}
+                                                                        className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group p-1.5"
+                                                                        title={name}
+                                                                    >
+                                                                        <IconComponent weight="regular" className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {systemIconResults.length > 0 && (
+                                                    <div className="flex flex-col gap-2">
+                                                        <span className="text-xs font-semibold text-muted-foreground">Search Results</span>
+                                                        <div className="grid grid-cols-6 gap-2.5">
+                                                            {systemIconResults.map((iconObj) => {
+                                                                const name = iconObj.name;
+                                                                const IconComponent = phosphorIcons[name];
+                                                                if (!IconComponent) return null;
+                                                                return (
+                                                                    <button
+                                                                        key={name}
+                                                                        type="button"
+                                                                        onClick={() => handleSelectSystemIconItem(name)}
+                                                                        className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group p-1.5"
+                                                                        title={name}
+                                                                    >
+                                                                        <IconComponent weight="regular" className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                                                <Search className="w-8 h-8 opacity-20 mb-2" />
+                                                <span className="text-xs">Search for an icon above</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

@@ -53,6 +53,7 @@ const ContentBlock = ({
     theme,
     onEditImage,
     readOnly,
+    textSizes,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [showColsDropdown, setShowColsDropdown] = useState(false);
@@ -174,6 +175,7 @@ const ContentBlock = ({
         <div
             onClick={(e) => {
                 // Do not trigger selection if clicking on an interactive element
+                // console.log(e.target?.id);
                 if (
                     e.target.closest(
                         'input, textarea, button, a, [contenteditable="true"]',
@@ -189,8 +191,8 @@ const ContentBlock = ({
             className={`relative flex flex-col p-[1cqw] ${justifyClass} ${alignClass} group/block transition-colors ${
                 !readOnly
                     ? isOpen
-                        ? "outline outline-gray-400/80 bg-gray-500/5"
-                        : "hover:outline  hover:outline-gray-400/80 hover:bg-gray-500/5"
+                        ? "outline-1 outline-(--theme-primary) bg-gray-500/5"
+                        : "hover:outline hover:outline-gray-400/80 hover:bg-gray-500/5"
                     : ""
             }`}
         >
@@ -223,6 +225,7 @@ const ContentBlock = ({
                 }
                 theme={theme}
                 readOnly={readOnly}
+                textSizes={textSizes}
             />
 
             {!readOnly && (

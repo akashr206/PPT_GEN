@@ -22,9 +22,10 @@ import { useAutosave } from "@/hooks/use-autosave";
 import { useHistoryStore } from "@/contexts/history-context";
 
 import ViewerToolbar from "@/components/generate/ViewerToolbar";
-import SlideSettingsModal from "@/components/generate/SlideSettingsModal";
+import SlideSettingsSidebar from "@/components/generate/SlideSettingsSidebar";
 import EditWithAIModal from "@/components/generate/EditWithAIModal";
 import BlockLayoutSelectorModal from "@/components/generate/BlockLayoutSelectorModal";
+import ThemeSidebar from "@/components/generate/ThemeSidebar";
 
 import SlideViewer from "./components/SlideViewer";
 import SlideThumbnails from "./components/SlideThumbnails";
@@ -39,6 +40,7 @@ export default function PPTSlidesViewerPage({ params }) {
     // --- Editor States ---
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isSlideSettingsOpen, setIsSlideSettingsOpen] = useState(false);
+    const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
     const [isEditWithAIModalOpen, setIsEditWithAIModalOpen] = useState(false);
     const [editWithAIPrompt, setEditWithAIPrompt] = useState("");
     const [isEditWithAILoading, setIsEditWithAILoading] = useState(false);
@@ -59,9 +61,38 @@ export default function PPTSlidesViewerPage({ params }) {
         onSelect: null,
     });
 
-    // Stable callbacks for opening modals — must be useCallback so they don't
-    // create new references on every render (which would break React.memo on children)
-    const openSettings = useCallback(() => setIsSlideSettingsOpen(true), []);
+    // --- Library sidebar ---
+    const {
+        isLibraryOpen,
+        libraryActiveTab,
+        imageEditContext,
+        iconEditContext,
+        libraryIconCallback,
+        openLibrary,
+        openLibraryForImage,
+        closeLibrary,
+        handleSelectSidebarIcon,
+    } = useLibrarySidebar();
+
+    // Stable callbacks for opening sidebars and modals
+    const openSettings = useCallback(() => {
+        setIsSlideSettingsOpen(true);
+        setIsThemeModalOpen(false);
+        closeLibrary();
+    }, [closeLibrary]);
+
+    const openThemeSelector = useCallback(() => {
+        setIsThemeModalOpen(true);
+        setIsSlideSettingsOpen(false);
+        closeLibrary();
+    }, [closeLibrary]);
+    
+    const handleOpenLibrary = useCallback(() => {
+        openLibrary();
+        setIsSlideSettingsOpen(false);
+        setIsThemeModalOpen(false);
+    }, [openLibrary]);
+
     const openEditWithAI = useCallback(
         () => setIsEditWithAIModalOpen(true),
         [],
@@ -131,21 +162,51 @@ export default function PPTSlidesViewerPage({ params }) {
 
     const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX;
 
-    // --- Auto-save slides to DB on every edit (debounced) ---
-    useAutosave({ pptId, editableSlides, initialDataRef, isBusy });
+    // --- Global Text Sizes ---
+    const defaultTextSizes = { title: 2.8, subtitle: 2.0, heading: 1.8, description: 1.3 };
+    const textSizes = pptData?.textSizes || defaultTextSizes;
 
-    // --- Library sidebar ---
-    const {
-        isLibraryOpen,
-        libraryActiveTab,
-        imageEditContext,
-        iconEditContext,
-        libraryIconCallback,
-        openLibrary,
-        openLibraryForImage,
-        closeLibrary,
-        handleSelectSidebarIcon,
-    } = useLibrarySidebar();
+    const handleUpdateTextSizes = useCallback(
+        async (newSizes) => {
+            setPptData((prev) => ({ ...prev, textSizes: newSizes }));
+            try {
+                const payloadSlides = JSON.parse(JSON.stringify(editableSlidesRef.current));
+                if (payloadSlides.length > 0) {
+                    payloadSlides[0].globalTextSizes = newSizes;
+                }
+                await api.patch(`/api/ppt/${pptId}`, { slides: payloadSlides });
+            } catch (err) {
+                console.error("[TextSizes] Failed to save text sizes:", err);
+            }
+        },
+        [pptId, setPptData]
+    );
+
+    const handleThemeChange = useCallback(
+        async (newTheme) => {
+            if (isBusy) return;
+            setPptData((prev) => ({ ...prev, theme: newTheme }));
+            try {
+                await api.patch(`/api/ppt/${pptId}`, { theme: newTheme });
+                useHistoryStore
+                    .getState()
+                    .updateFirstSlide(
+                        pptId,
+                        undefined,
+                        undefined,
+                        newTheme,
+                    );
+                console.log("[Theme] Saved theme to database:", newTheme);
+            } catch (err) {
+                console.error("[Theme] Failed to save theme:", err);
+            }
+        },
+        [pptId, isBusy, setPptData]
+    );
+
+    // --- Auto-save slides to DB on every edit (debounced) ---
+    useAutosave({ pptId, editableSlides, initialDataRef, isBusy, textSizes });
+
 
     // --- Image fetching ---
     const { resolveSlideContent, handleEditImage, handleSelectSidebarImage } =
@@ -373,38 +434,15 @@ export default function PPTSlidesViewerPage({ params }) {
         const handlePPT = (e) => {
             if (!isBusy) handleDownloadAsPPT(e);
         };
-        const handleTheme = async (e) => {
-            if (isBusy) return;
-            if (e.detail?.theme) {
-                const newTheme = e.detail.theme;
-                setPptData((prev) => ({ ...prev, theme: newTheme }));
-                try {
-                    await api.patch(`/api/ppt/${pptId}`, { theme: newTheme });
-                    useHistoryStore
-                        .getState()
-                        .updateFirstSlide(
-                            pptId,
-                            undefined,
-                            undefined,
-                            newTheme,
-                        );
-                    console.log("[Theme] Saved theme to database:", newTheme);
-                } catch (err) {
-                    console.error("[Theme] Failed to save theme:", err);
-                }
-            }
-        };
 
         window.addEventListener("request-ppt-info", handleRequest);
         window.addEventListener("trigger-download-pdf", handlePDF);
         window.addEventListener("trigger-download-pptx", handlePPT);
-        window.addEventListener("trigger-change-theme", handleTheme);
 
         return () => {
             window.removeEventListener("request-ppt-info", handleRequest);
             window.removeEventListener("trigger-download-pdf", handlePDF);
             window.removeEventListener("trigger-download-pptx", handlePPT);
-            window.removeEventListener("trigger-change-theme", handleTheme);
         };
     }, [pptData, isBusy, handleDownloadAsPPT]);
 
@@ -563,7 +601,7 @@ export default function PPTSlidesViewerPage({ params }) {
     if (isLoading) {
         return (
             <div className="w-full flex-1 flex flex-col justify-center items-center p-8 min-h-[60vh]">
-                <div className="w-full max-w-[1000px] aspect-[16/9] bg-card border border-border shadow-md rounded-md p-6 flex flex-col justify-between relative overflow-hidden">
+                <div className="w-full max-w-[1000px] aspect-video bg-card border border-border shadow-md rounded-md p-6 flex flex-col justify-between relative overflow-hidden">
                     <div className="space-y-3">
                         <Skeleton className="h-5 w-20" />
                         <Skeleton className="h-7 w-3/4 max-w-[450px]" />
@@ -582,7 +620,7 @@ export default function PPTSlidesViewerPage({ params }) {
     }
 
     return (
-        <div className="w-full flex-grow flex flex-col min-h-0 select-none overflow-hidden relative">
+        <div className="w-full grow flex flex-col min-h-0 select-none overflow-hidden relative">
             <ViewerToolbar
                 isBusy={isBusy}
                 isStreamGenerating={isStreamGenerating}
@@ -591,7 +629,9 @@ export default function PPTSlidesViewerPage({ params }) {
                 onUndo={handleUndo}
                 onRedo={handleRedo}
                 onOpenSettings={openSettings}
-                onOpenLibrary={openLibrary}
+                onOpenLibrary={handleOpenLibrary}
+                onOpenThemeSelector={openThemeSelector}
+                themeName={theme}
             />
 
             {/* Main content area */}
@@ -611,6 +651,7 @@ export default function PPTSlidesViewerPage({ params }) {
                                 isFullscreen={isFullscreen}
                                 isTouchDevice={isTouchDevice}
                                 onEditWithAI={openEditWithAI}
+                                textSizes={textSizes}
                                 {...slideViewerHandlers}
                             />
                         </div>
@@ -656,17 +697,29 @@ export default function PPTSlidesViewerPage({ params }) {
                     onSelect={blockLayoutModalState.onSelect}
                     theme={pptData?.theme || "default"}
                 />
+                
+                {/* Sidebars */}
+                <SlideSettingsSidebar
+                    isOpen={isSlideSettingsOpen}
+                    onClose={() => setIsSlideSettingsOpen(false)}
+                    activeSlideType={
+                        editableSlides?.[activeSlideIndex]?.type || "normal"
+                    }
+                    onUpdateSlide={handleUpdateSlide}
+                    textSizes={textSizes}
+                    onUpdateTextSizes={handleUpdateTextSizes}
+                />
+
+                <ThemeSidebar
+                    isOpen={isThemeModalOpen}
+                    onClose={() => setIsThemeModalOpen(false)}
+                    currentTheme={theme}
+                    isBusy={isBusy}
+                    onThemeChange={handleThemeChange}
+                />
             </div>
 
             {/* Modals */}
-            <SlideSettingsModal
-                isOpen={isSlideSettingsOpen}
-                onOpenChange={setIsSlideSettingsOpen}
-                activeSlideType={
-                    editableSlides?.[activeSlideIndex]?.type || "normal"
-                }
-                onUpdateSlide={handleUpdateSlide}
-            />
 
             <EditWithAIModal
                 isOpen={isEditWithAIModalOpen}

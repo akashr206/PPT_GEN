@@ -19,6 +19,7 @@ const AnimatedItem = ({ children, index = 0, className = "", style }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.1 }}
             transition={{ delay: index * 0.15, duration: 0.5, ease: "easeOut" }}
+            id = "animated-item"
         >
             {children}
         </motion.div>

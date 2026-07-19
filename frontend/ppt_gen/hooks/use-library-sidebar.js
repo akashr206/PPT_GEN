@@ -15,15 +15,15 @@ export function useLibrarySidebar() {
     // Listen for global events from deeply nested components (e.g. EditableIcon)
     useEffect(() => {
         const handleOpenLibraryEvent = (e) => {
-            const { tab, onSelectIcon, recommendedIcons } = e.detail;
+            const { tab, onSelectIcon, recommendedIcons, contextText } = e.detail;
             setLibraryActiveTab(tab || "images");
             if (onSelectIcon) {
                 setLibraryIconCallback(() => onSelectIcon);
             } else {
                 setLibraryIconCallback(null);
             }
-            if (recommendedIcons) {
-                setIconEditContext({ recommendedIcons });
+            if (recommendedIcons || contextText) {
+                setIconEditContext({ recommendedIcons, contextText });
             } else {
                 setIconEditContext(null);
             }

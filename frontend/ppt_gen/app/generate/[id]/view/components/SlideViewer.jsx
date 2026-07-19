@@ -42,6 +42,7 @@ const SlideViewer = React.memo(function SlideViewer({
     onSplitSlide,
     onDeleteSlide,
     onEditWithAI,
+    textSizes,
 }) {
     const presentationRef = useRef(null);
 
@@ -99,7 +100,7 @@ const SlideViewer = React.memo(function SlideViewer({
         <div
             ref={presentationRef}
             data-theme={theme || resolvedSlideContent?.theme}
-            className={`w-full relative group flex items-center justify-center ${isFullscreen ? "!max-w-none bg-black w-screen h-screen" : ""}`}
+            className={`w-full relative group flex items-center justify-center ${isFullscreen ? "max-w-none! bg-black w-screen h-screen" : ""}`}
             style={
                 isFullscreen
                     ? undefined
@@ -116,7 +117,7 @@ const SlideViewer = React.memo(function SlideViewer({
                         setActiveSlideIndex((prev) => Math.max(prev - 1, 0))
                     }
                     disabled={activeSlideIndex === 0 || isBusy}
-                    className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:!opacity-0 shadow-sm backdrop-blur-sm cursor-pointer -left-4 md:-left-12"
+                    className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0! shadow-sm backdrop-blur-sm cursor-pointer -left-4 md:-left-12"
                     title="Previous Slide (Left Arrow)"
                 >
                     <ChevronLeft size={20} className="mr-0.5" />
@@ -155,6 +156,7 @@ const SlideViewer = React.memo(function SlideViewer({
                                         ...resolvedSlideContent,
                                         theme,
                                     }}
+                                    textSizes={textSizes}
                                     onUpdateSlide={
                                         isFullscreen ? undefined : onUpdateSlide
                                     }
@@ -271,7 +273,7 @@ const SlideViewer = React.memo(function SlideViewer({
                         )
                     }
                     disabled={activeSlideIndex === slideCount - 1 || isBusy}
-                    className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:!opacity-0 shadow-sm backdrop-blur-sm cursor-pointer -right-4 md:-right-12"
+                    className="absolute z-20 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 hover:bg-background border border-border text-foreground flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0! shadow-sm backdrop-blur-sm cursor-pointer -right-4 md:-right-12"
                     title="Next Slide (Right Arrow)"
                 >
                     <ChevronRight size={20} className="ml-0.5" />

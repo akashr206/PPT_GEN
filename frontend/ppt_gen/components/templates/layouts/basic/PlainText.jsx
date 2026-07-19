@@ -3,7 +3,7 @@ import { EditableElement } from "@/components/ui/EditableElement";
 import { TextItemActionMenu } from "@/components/ui/TextItemActionMenu";
 import AnimatedItem from "../../AnimatedItem";
 
-const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
+const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly, textSizes }) => {
     const items = content || [];
     
     return (
@@ -18,7 +18,7 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                     <AnimatedItem key={i} index={i} className={`relative group/item flex w-full ${alignClass}`}>
                         <EditableElement
                             as="p"
-                            className="text-[1.3cqw] leading-relaxed theme-text-muted w-full"
+                            className="theme-text-description-size leading-relaxed theme-text-muted w-full"
                             style={{ fontSize: item.descriptionFontSize ? `${item.descriptionFontSize}cqw` : undefined }}
                             value={item.description || item.header}
                             onChange={(val) => onUpdateItem(i, "description", val)}
@@ -28,7 +28,7 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                         {!readOnly && (
                             <TextItemActionMenu
                                 align={item.align || "left"}
-                                descSize={item.descriptionFontSize || 1.5}
+                                descSize={item.descriptionFontSize || textSizes?.description || 1.3}
                                 hasDesc={true}
                                 onUpdateItem={(field, val) => onUpdateItem(i, field, val)}
                                 onAddBefore={onAddItem ? () => onAddItem(i, "before") : undefined}

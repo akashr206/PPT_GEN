@@ -41,7 +41,7 @@ const CardsBasic = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, r
                         
                         <EditableElement
                             as="h3"
-                            className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary text-center px-[1.5cqw]"
+                            className="theme-font-heading font-bold theme-text-heading-size leading-tight theme-text-primary text-center px-[1.5cqw]"
                             value={item.header}
                             onChange={(val) => onUpdateItem(i, "header", val)}
                             readOnly={readOnly}
@@ -49,7 +49,7 @@ const CardsBasic = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, r
                         />
                         <EditableElement
                             as="p"
-                            className="text-[1.3cqw] leading-relaxed theme-text-muted text-center"
+                            className="theme-text-description-size leading-relaxed theme-text-muted text-center"
                             value={item.description}
                             onChange={(val) => onUpdateItem(i, "description", val)}
                             readOnly={readOnly}

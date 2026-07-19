@@ -40,29 +40,14 @@ import {
 } from "@/components/ui/dialog";
 import metadata from "@/components/templates/metadata.json";
 import UserMenu from "../user-menu";
-import { useThemes } from "@/hooks/use-themes";
 import { useSettingsStore } from "@/hooks/use-settings-store";
 
 export function Navbar() {
     const { data: session } = useSession();
-    const { customThemes } = useThemes();
     const { animationsEnabled, toggleAnimations } = useSettingsStore();
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
-
-    const themesList = [
-        ...metadata.themes,
-        ...(customThemes || []).map((t) => ({
-            id: t.id,
-            name: t.name,
-            bg: t.bg,
-            fg: t.fg,
-            primary: t.primary_color,
-            accent: t.accent,
-            desc: "Custom Theme"
-        }))
-    ];
 
     const activeTab = searchParams.get("tab") || "presentations";
 
@@ -80,9 +65,7 @@ export function Navbar() {
         appState: "",
         isBusy: false,
     });
-    const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [activeThemeTab, setActiveThemeTab] = useState("all");
 
 
     useEffect(() => {
@@ -156,29 +139,6 @@ export function Navbar() {
                         {isDetailPage &&
                             pptInfo.appState === "viewing_slides" && (
                                 <div className="hidden md:flex items-center gap-3">
-                                    {/* Theme Selector Button */}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() =>
-                                            setIsThemeModalOpen(true)
-                                        }
-                                        disabled={pptInfo.isBusy}
-                                        className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Palette
-                                            size={13}
-                                            className="text-primary"
-                                        />
-                                        <span className="capitalize">
-                                            {themesList.find(
-                                                (t) => t.id === pptInfo.theme,
-                                            )?.name ||
-                                                pptInfo.theme ||
-                                                "Theme"}
-                                        </span>
-                                    </Button>
-
                                     {/* Export Dropdown */}
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
@@ -316,32 +276,6 @@ export function Navbar() {
                                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1">
                                             Presentation Actions
                                         </span>
-
-                                        {/* Theme Selector */}
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setIsThemeModalOpen(true);
-                                                setIsMobileMenuOpen(false);
-                                            }}
-                                            disabled={pptInfo.isBusy}
-                                            className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground h-9 gap-2 px-3 rounded-md text-xs font-medium cursor-pointer"
-                                        >
-                                            <Palette
-                                                size={14}
-                                                className="text-primary"
-                                            />
-                                            <span>Theme: </span>
-                                            <span className="capitalize font-semibold">
-                                                {themesList.find(
-                                                    (t) =>
-                                                        t.id === pptInfo.theme,
-                                                )?.name ||
-                                                    pptInfo.theme ||
-                                                    "Theme"}
-                                            </span>
-                                        </Button>
 
                                         {/* Export PDF */}
                                         <Button
@@ -580,116 +514,6 @@ export function Navbar() {
                     </div>
                 </>
             )}
-
-            {/* Theme Selector Modal */}
-            <Dialog
-                open={isThemeModalOpen && !pptInfo.isBusy}
-                onOpenChange={pptInfo.isBusy ? undefined : setIsThemeModalOpen}
-            >
-                <DialogContent className="max-w-4xl sm:max-w-4xl bg-popover border-border text-popover-foreground rounded-md p-6 shadow-2xl z-50">
-                    <DialogHeader>
-                        <DialogTitle className="text-lg font-bold">
-                            Select Presentation Theme
-                        </DialogTitle>
-                        <DialogDescription className="text-xs text-muted-foreground">
-                            Choose a global visual style for all slides in this
-                            presentation.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {/* Tab Navigation */}
-                    <div className="flex border-b border-border mt-3 mb-4 gap-1">
-                        <button
-                            onClick={() => setActiveThemeTab("all")}
-                            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
-                                activeThemeTab === "all"
-                                    ? "border-primary text-primary"
-                                    : "border-transparent text-muted-foreground hover:text-foreground"
-                            }`}
-                        >
-                            All Themes
-                        </button>
-                        <button
-                            onClick={() => setActiveThemeTab("system")}
-                            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
-                                activeThemeTab === "system"
-                                    ? "border-primary text-primary"
-                                    : "border-transparent text-muted-foreground hover:text-foreground"
-                            }`}
-                        >
-                            System Themes
-                        </button>
-                        <button
-                            onClick={() => setActiveThemeTab("custom")}
-                            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
-                                activeThemeTab === "custom"
-                                    ? "border-primary text-primary"
-                                    : "border-transparent text-muted-foreground hover:text-foreground"
-                            }`}
-                        >
-                            My Themes
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 my-4 max-h-[50vh] overflow-y-auto pr-1">
-                        {themesList
-                            .filter((t) => {
-                                if (activeThemeTab === "all") return true;
-                                if (activeThemeTab === "system") return !t.desc || t.desc !== "Custom Theme";
-                                if (activeThemeTab === "custom") return t.desc === "Custom Theme";
-                                return true;
-                            })
-                            .map((t) => {
-                                const isActive = pptInfo.theme === t.id;
-
-                                return (
-                                    <button
-                                        key={t.id}
-                                        onClick={() => {
-                                            handleThemeChange(t.id);
-                                            setIsThemeModalOpen(false);
-                                        }}
-                                        className={`flex flex-col text-left p-2.5 rounded-md border transition-all text-xs cursor-pointer gap-2 ${
-                                            isActive
-                                                ? "border-primary ring-2 ring-primary/20 bg-accent/10"
-                                                : "border-border hover:border-muted-foreground/30 hover:bg-muted/10 bg-card"
-                                        }`}
-                                    >
-                                    <span className="font-semibold text-foreground capitalize text-[11px] truncate w-full px-0.5 mb-0.5">
-                                        {t.name}
-                                    </span>
-
-                                    {/* Miniature slide layout preview */}
-                                    <div
-                                        data-theme={t.id}
-                                        className="theme-container w-full aspect-[16/10] rounded-md border theme-border p-2.5 flex flex-col justify-between overflow-hidden shadow-xs relative"
-                                    >
-                                        {/* Title & Subtitle */}
-                                        <div className="space-y-0.5">
-                                            <div className="theme-heading font-bold text-[9px] tracking-tight leading-none truncate">
-                                                Title Style
-                                            </div>
-                                            <div className="theme-text-muted text-[5.5px] leading-none truncate">
-                                                Subtitle styling
-                                            </div>
-                                        </div>
-
-                                        {/* Miniature Card visualization */}
-                                        <div className="theme-card p-1 rounded-md border theme-border flex flex-col gap-0.5 mt-1.5">
-                                            <div className="theme-text-primary font-semibold text-[6px] leading-none truncate">
-                                                Card Title
-                                            </div>
-                                            <div className="theme-text-muted text-[5px] leading-none truncate">
-                                                Card content text
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </DialogContent>
-            </Dialog>
         </>
     );
 }

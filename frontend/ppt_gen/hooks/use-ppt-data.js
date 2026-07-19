@@ -95,6 +95,12 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
                 if (!active) return;
                 if (res?.data && res.data.length > 0) {
                     const presentation = res.data[0];
+                    if (presentation.slides && presentation.slides.length > 0) {
+                        const firstSlide = presentation.slides[0];
+                        if (firstSlide.globalTextSizes) {
+                            presentation.textSizes = firstSlide.globalTextSizes;
+                        }
+                    }
                     setPptData(presentation);
                     initialDataRef.current = JSON.stringify(presentation);
                     useHistoryStore.getState().addOrUpdatePresentation(presentation);
@@ -141,6 +147,12 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
                     const res = await api.get(`/api/ppt/${pptId}`);
                     if (res?.data && res.data.length > 0) {
                         const presentation = res.data[0];
+                        if (presentation.slides && presentation.slides.length > 0) {
+                            const firstSlide = presentation.slides[0];
+                            if (firstSlide.globalTextSizes) {
+                                presentation.textSizes = firstSlide.globalTextSizes;
+                            }
+                        }
                         setPptData(presentation);
                         const normalized = normalizeSlides(presentation.slides || []);
                         setEditableSlides(normalized);

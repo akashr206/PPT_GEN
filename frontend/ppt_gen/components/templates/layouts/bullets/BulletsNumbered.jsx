@@ -69,7 +69,7 @@ const BulletsNumbered = ({
                     <div className="flex flex-col min-w-0 pb-[1.5cqw]">
                         <EditableElement
                             as="h3"
-                            className="theme-font-heading font-semibold text-[1.8cqw] leading-snug theme-text-primary"
+                            className="theme-font-heading font-semibold theme-text-heading-size leading-snug theme-text-primary"
                             value={item.header}
                             onChange={(val) => onUpdateItem(i, "header", val)}
                             readOnly={readOnly}
@@ -77,7 +77,7 @@ const BulletsNumbered = ({
                         />
                         <EditableElement
                             as="p"
-                            className="text-[1.3cqw] leading-relaxed theme-text-muted mt-[0.5cqw]"
+                            className="theme-text-description-size leading-relaxed theme-text-muted mt-[0.5cqw]"
                             value={item.description}
                             onChange={(val) =>
                                 onUpdateItem(i, "description", val)

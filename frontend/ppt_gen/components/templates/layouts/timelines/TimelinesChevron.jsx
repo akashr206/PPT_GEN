@@ -53,7 +53,7 @@ const TimelinesChevron = ({ content, onUpdateItem, onDeleteItem, onAddItem, read
                                         <div className="px-[1.5cqw] text-center w-full min-w-0">
                                             <EditableElement
                                                 as="p"
-                                                className="text-[1.2cqw] leading-relaxed theme-text-muted w-full"
+                                                className="theme-text-description-size leading-relaxed theme-text-muted w-full"
                                                 value={item.description}
                                                 onChange={(val) => onUpdateItem(i, "description", val)}
                                                 readOnly={readOnly}
@@ -113,7 +113,7 @@ const TimelinesChevron = ({ content, onUpdateItem, onDeleteItem, onAddItem, read
                                         <div className="px-[1.5cqw] text-center w-full min-w-0">
                                             <EditableElement
                                                 as="p"
-                                                className="text-[1.2cqw] leading-relaxed theme-text-muted w-full"
+                                                className="theme-text-description-size leading-relaxed theme-text-muted w-full"
                                                 value={item.description}
                                                 onChange={(val) => onUpdateItem(i, "description", val)}
                                                 readOnly={readOnly}

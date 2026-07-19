@@ -3,7 +3,7 @@ import { EditableElement } from "@/components/ui/EditableElement";
 import { TextItemActionMenu } from "@/components/ui/TextItemActionMenu";
 import AnimatedItem from "../../AnimatedItem";
 
-const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly }) => {
+const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly, textSizes }) => {
     const items = content || [];
     
     return (
@@ -18,7 +18,7 @@ const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                     <AnimatedItem key={i} index={i} className={`relative group/item flex flex-col gap-[1cqw] w-full ${alignClass}`}>
                         <EditableElement
                             as="h3"
-                            className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary w-full"
+                            className="theme-font-heading font-bold theme-text-heading-size leading-tight theme-text-primary w-full"
                             style={{ fontSize: item.headerFontSize ? `${item.headerFontSize}cqw` : undefined }}
                             value={item.header}
                             onChange={(val) => onUpdateItem(i, "header", val)}
@@ -27,7 +27,7 @@ const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                         />
                         <EditableElement
                             as="p"
-                            className="text-[1.3cqw] leading-relaxed theme-text-muted w-full"
+                            className="theme-text-description-size leading-relaxed theme-text-muted w-full"
                             style={{ fontSize: item.descriptionFontSize ? `${item.descriptionFontSize}cqw` : undefined }}
                             value={item.description}
                             onChange={(val) => onUpdateItem(i, "description", val)}
@@ -37,8 +37,8 @@ const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                         {!readOnly && (
                             <TextItemActionMenu
                                 align={item.align || "left"}
-                                headerSize={item.headerFontSize || 2.2}
-                                descSize={item.descriptionFontSize || 1.5}
+                                headerSize={item.headerFontSize || textSizes?.heading || 1.8}
+                                descSize={item.descriptionFontSize || textSizes?.description || 1.3}
                                 hasHeader={true}
                                 hasDesc={true}
                                 onUpdateItem={(field, val) => onUpdateItem(i, field, val)}

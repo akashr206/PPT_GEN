@@ -43,7 +43,7 @@ const BulletsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, 
                         <div className="flex flex-col gap-[1cqw] flex-1 min-w-0 pr-[2cqw]">
                             <EditableElement
                                 as="h3"
-                                className="theme-font-heading font-bold text-[1.8cqw] leading-tight theme-text-primary"
+                                className="theme-font-heading font-bold theme-text-heading-size leading-tight theme-text-primary"
                                 value={item.header}
                                 onChange={(val) => onUpdateItem(i, "header", val)}
                                 readOnly={readOnly}
@@ -51,7 +51,7 @@ const BulletsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, 
                             />
                             <EditableElement
                                 as="p"
-                                className="text-[1.3cqw] leading-relaxed theme-text-muted"
+                                className="theme-text-description-size leading-relaxed theme-text-muted"
                                 value={item.description}
                                 onChange={(val) => onUpdateItem(i, "description", val)}
                                 readOnly={readOnly}
