@@ -1,6 +1,6 @@
 import { Router } from "express";
 import Joi from "joi";
-import { generatePPT, getStatus, getPPTById, getAllPPTs, deletePPT, updateTemplate, searchImages, searchIcons, streamPPT, convertPPT, editSlide } from "../controllers/ppt.js";
+import { generatePPT, getStatus, getPPTById, getAllPPTs, deletePPT, updateTemplate, searchImages, searchIcons, streamPPT, convertPPT, editSlide, toggleShare } from "../controllers/ppt.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import { validateSchema } from "../middleware/validate.js";
 import { apiLimiter, generateLimiter } from "../middleware/rateLimiter.js";
@@ -43,6 +43,7 @@ router.use(apiLimiter);
 // /api/ppt/ppt_id - DELETE: deletes the ppt of sent id
 // /api/ppt/ppt_id - PATCH: Updates theme or slides array
 // /api/ppt/status/ppt_id: Gets status of that ppt_id
+// /api/ppt/ppt_id/share - POST: Updates sharing status
 
 router.post("/", generateLimiter, validateSchema(generateSchema, 'body'), generatePPT);
 router.post("/edit-slide", generateLimiter, validateSchema(editSlideSchema, 'body'), editSlide);
@@ -55,6 +56,6 @@ router.get("/:ppt_id", getPPTById);
 router.delete("/:ppt_id", deletePPT);
 router.patch("/:ppt_id", updateTemplate);
 router.get("/status/:ppt_id", getStatus);
-
+router.post("/:ppt_id/share", toggleShare);
 
 export default router;

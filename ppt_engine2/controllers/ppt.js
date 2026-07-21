@@ -3,7 +3,7 @@ import partialJsonParser from "partial-json-parser";
 import { pptSystemPrompt, editSlideSystemPrompt } from "../utils/prompts.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import { nanoid } from "nanoid";
-import { initPPT, updateStatus, addPPTContent, readStatus, deletePPTById, getUserPpts, updateTheme, updateSlides, fetchPPTById } from "../services/ppt.js";
+import { initPPT, updateStatus, addPPTContent, readStatus, deletePPTById, getUserPpts, updateTheme, updateSlides, fetchPPTById, updateShareStatus, getSharedPPTById } from "../services/ppt.js";
 import parseLLMJson from "../utils/parseLLM.js";
 import { insertIconsToContent, searchIconsByKeywords } from "../services/insertIcons.js";
 import { searchPexelsImages } from "../services/insertImage.js";
@@ -355,5 +355,40 @@ Presentation Context:
     } catch (error) {
         console.error("Edit slide failed:", error);
         return sendError(res, "Failed to edit slide with AI", error.message, 500);
+    }
+};
+
+export const toggleShare = async (req, res) => {
+    const { ppt_id } = req.params;
+    const { is_shared } = req.body;
+    try {
+        // First verify ownership
+        const pptList = await fetchPPTById({ ppt_id });
+        if (!pptList || pptList.length === 0) {
+            return sendError(res, "Presentation not found", null, 404);
+        }
+        if (pptList[0].user_id !== req.user.userId) {
+            return sendError(res, "Unauthorized", null, 403);
+        }
+        
+        await updateShareStatus({ ppt_id, is_shared: !!is_shared });
+        return sendSuccess(res, { is_shared: !!is_shared }, "Sharing status updated successfully");
+    } catch (error) {
+        console.error("Toggle share failed:", error);
+        return sendError(res, "Failed to update sharing status", error.message, 500);
+    }
+};
+
+export const getSharedPPT = async (req, res) => {
+    const { ppt_id } = req.params;
+    try {
+        const ppt = await getSharedPPTById({ ppt_id });
+        if (!ppt) {
+            return sendError(res, "Presentation not found or not shared", null, 404);
+        }
+        return sendSuccess(res, ppt, "Shared presentation retrieved successfully");
+    } catch (error) {
+        console.error("Get shared PPT failed:", error);
+        return sendError(res, "Presentation not found or not shared", error.message, 404);
     }
 };

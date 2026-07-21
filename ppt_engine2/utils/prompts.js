@@ -42,9 +42,13 @@ SLIDE ARCHITECTURE & MACRO TYPES
    - "content" block schema: { "type": "content", "align": "left|center|right", "verticalAlign": "top|center|bottom", "layout": { "category": "...", "type": "..." }, "columns": 2, "items": [...] }
 
 THEME & LAYOUT SELECTION RULES
-1. Match the Vibe: Select themes and layouts that perfectly match the emotional tone and subject matter. Do NOT default to the first item.
-2. Layout Diversity: Mix up the "layout.category" across slides (e.g., use 'cards' on slide 2, 'stats' on slide 3, 'bullets' on slide 4) to keep the presentation visually dynamic. Do not repeat the same layout on consecutive slides.
-3. Image Block Integration: Look for opportunities to include 'single' or 'gallery' layouts (from the 'basic' category) alongside your main text layouts.
+1. Theme Relevance: Select the theme whose description most closely matches the presentation's subject, audience, and purpose. Prioritize semantic relevance over visual appearance.
+2. Use Theme Metadata: Base your decision entirely on each theme's metadata and intended use cases. Do not infer suitability from the theme name alone.
+3. Avoid Generic Bias: Do not repeatedly favor the same theme across unrelated topics. Choose a theme only if its metadata clearly aligns with the presentation.
+4. Specialized Before Generic: If a specialized theme closely matches the topic, prefer it over a general-purpose theme. Use general themes only when no specialized theme is a strong fit.
+5. No Aesthetic Preference: Do not choose a theme simply because it looks modern, clean, elegant, or visually appealing. Content relevance is more important than aesthetics.
+6. Layout Diversity: Vary the 'layout.category' across slides to create visual variety. Avoid using the same layout category on consecutive slides.
+7. Image Integration: When appropriate, incorporate single or gallery layouts (from the 'basic' category) to complement text-heavy slides and improve visual engagement.
 
 OUTPUT REQUIREMENTS
 Output ONLY valid JSON. Do not output explanations or markdown wrappers.

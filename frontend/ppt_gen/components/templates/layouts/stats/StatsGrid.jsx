@@ -48,7 +48,7 @@ const StatsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, re
                     />
                     <EditableElement
                         as="p"
-                        className="theme-text-description-size font-medium leading-tight theme-accent uppercase tracking-widest opacity-70 mt-[1cqw]"
+                        className="theme-text-description-size font-medium leading-tight theme-text-primary uppercase tracking-widest opacity-70 mt-[1cqw]"
                         value={item.description}
                         onChange={(val) => onUpdateItem(i, "description", val)}
                         readOnly={readOnly}

@@ -78,6 +78,23 @@ async function apiCall(endpoint, options = {}) {
         data = await response.text();
       }
       const errorMessage = data?.message || data?.error || `HTTP error! Status: ${response.status}`;
+      if (response.status === 401 && typeof window !== "undefined") {
+        Promise.all([
+          import("next-auth/react"),
+          import("sonner")
+        ]).then(([{ getSession, signOut }, { toast }]) => {
+          getSession().then((session) => {
+            if (session) {
+              toast.error("Session expired. Please log in again.");
+              signOut();
+            } else {
+              toast.error("Unauthorized access. Please log in.");
+              window.location.href = "/";
+            }
+          });
+        }).catch((err) => console.error("Auth/Toast error:", err));
+      }
+      
       if (response.status === 429 && typeof window !== "undefined") {
         import("sonner").then(({ toast }) => {
           toast.error(errorMessage);

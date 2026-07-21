@@ -53,7 +53,7 @@ const TimelinesChevron = ({ content, onUpdateItem, onDeleteItem, onAddItem, read
                                         <div className="px-[1.5cqw] text-center w-full min-w-0">
                                             <EditableElement
                                                 as="p"
-                                                className="theme-text-description-size leading-relaxed theme-text-muted w-full"
+                                                className="theme-text-description-size leading-relaxed theme-text-muted w-full text-center"
                                                 value={item.description}
                                                 onChange={(val) => onUpdateItem(i, "description", val)}
                                                 readOnly={readOnly}
@@ -61,8 +61,8 @@ const TimelinesChevron = ({ content, onUpdateItem, onDeleteItem, onAddItem, read
                                             />
                                         </div>
                                         <div className="flex flex-col items-center mt-[0.5cqw] shrink-0">
-                                            <svg className="w-[0.2cqw] h-[3cqw] overflow-visible" style={{ color: "var(--theme-primary)", opacity: 0.4 }} stroke="currentColor" strokeWidth="2" strokeDasharray="3,3">
-                                                <line x1="0" y1="0" x2="0" y2="100%" />
+                                            <svg className="w-[1cqw] h-[3cqw] overflow-visible" style={{ color: "var(--theme-primary)", opacity: 0.4 }} stroke="currentColor" strokeWidth="2" strokeDasharray="3,3">
+                                                <line x1="50%" y1="0" x2="50%" y2="100%" />
                                             </svg>
                                         </div>
                                     </>
@@ -80,7 +80,7 @@ const TimelinesChevron = ({ content, onUpdateItem, onDeleteItem, onAddItem, read
                                             ? "M 0 0 L 85 0 L 100 20 L 85 40 L 0 40 Z" 
                                             : "M 0 0 L 85 0 L 100 20 L 85 40 L 0 40 L 15 20 Z"
                                         }
-                                        fill={isEven ? "var(--theme-primary)" : "var(--theme-secondary)"}
+                                        fill={isEven ? "var(--theme-primary)" : "var(--theme-bg-alt)"}
                                         className="transition-colors duration-300"
                                     />
                                 </svg>
@@ -106,14 +106,14 @@ const TimelinesChevron = ({ content, onUpdateItem, onDeleteItem, onAddItem, read
                                 {isEven ? (
                                     <>
                                         <div className="flex flex-col items-center mb-[0.5cqw] shrink-0">
-                                            <svg className="w-[0.2cqw] h-[3cqw] overflow-visible" style={{ color: "var(--theme-primary)", opacity: 0.4 }} stroke="currentColor" strokeWidth="2" strokeDasharray="3,3">
-                                                <line x1="0" y1="0" x2="0" y2="100%" />
+                                            <svg className="w-[1cqw] h-[3cqw] overflow-visible" style={{ color: "var(--theme-primary)", opacity: 0.4 }} stroke="currentColor" strokeWidth="2" strokeDasharray="3,3">
+                                                <line x1="50%" y1="0" x2="50%" y2="100%" />
                                             </svg>
                                         </div>
                                         <div className="px-[1.5cqw] text-center w-full min-w-0">
                                             <EditableElement
                                                 as="p"
-                                                className="theme-text-description-size leading-relaxed theme-text-muted w-full"
+                                                className="theme-text-description-size leading-relaxed theme-text-muted w-full text-center"
                                                 value={item.description}
                                                 onChange={(val) => onUpdateItem(i, "description", val)}
                                                 readOnly={readOnly}

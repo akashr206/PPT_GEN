@@ -17,11 +17,8 @@ export default function CustomThemesStyles() {
     --theme-fg: ${theme.fg};
     --theme-fg-muted: ${theme.fg_muted};
     --theme-primary: ${theme.primary_color};
-    --theme-secondary: ${theme.secondary};
-    --theme-accent: ${theme.accent};
     --theme-card-bg: ${theme.card_bg};
     --theme-card-border: ${theme.card_border};
-    --theme-bullet: ${theme.bullet};
     --theme-font-heading: ${theme.font_heading};
     --theme-font-body: ${theme.font_body};
 }`;

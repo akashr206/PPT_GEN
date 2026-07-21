@@ -27,49 +27,7 @@ const FONTS_LIST = [
     { name: "Roboto (Sans-serif)", value: '"Roboto", sans-serif' }
 ];
 
-const PREVIEW_LAYOUTS = [
-    // TITLE
-    { name: "Title: Asymmetric", category: "title", type: "asymmetric" },
-    { name: "Title: Main", category: "title", type: "main" },
-    { name: "Title: Split", category: "title", type: "split" },
-    { name: "Title: Image", category: "title", type: "image" },
-    // AGENDA
-    { name: "Agenda: Split", category: "agenda", type: "split" },
-    { name: "Agenda: List", category: "agenda", type: "list" },
-    // BULLETS
-    { name: "Bullets: Big", category: "bullets", type: "big" },
-    { name: "Bullets: Standard", category: "bullets", type: "standard" },
-    { name: "Bullets: Grid", category: "bullets", type: "grid" },
-    { name: "Bullets: Numbered", category: "bullets", type: "numbered" },
-    // CARDS
-    { name: "Cards: Simple", category: "cards", type: "simple" },
-    { name: "Cards: Left Accent", category: "cards", type: "leftAccent" },
-    { name: "Cards: Numbered", category: "cards", type: "numbered" },
-    { name: "Cards: Filled", category: "cards", type: "filled" },
-    // STATS
-    { name: "Stats: Grid", category: "stats", type: "grid" },
-    { name: "Stats: Callout", category: "stats", type: "callout" },
-    // TIMELINES
-    { name: "Timeline: Horizontal", category: "timelines", type: "horizontal" },
-    { name: "Timeline: Chevron", category: "timelines", type: "chevron" },
-    { name: "Timeline: Vertical", category: "timelines", type: "vertical" },
-    { name: "Timeline: Alternating", category: "timelines", type: "alternating" },
-    // ICONS
-    { name: "Icons: Grid", category: "icons", type: "grid" },
-    { name: "Icons: Row", category: "icons", type: "row" },
-    { name: "Icons: List", category: "icons", type: "list" },
-    // IMAGES
-    { name: "Images: Split", category: "images", type: "split" },
-    { name: "Images: Grid", category: "images", type: "grid" },
-    // TABLE
-    { name: "Table: Striped", category: "table", type: "striped" },
-    { name: "Table: Bordered", category: "table", type: "bordered" },
-    // CLOSING
-    { name: "Closing: Thank You", category: "closing", type: "thankyou" },
-    { name: "Closing: Q&A", category: "closing", type: "qa" },
-    { name: "Closing: Contact", category: "closing", type: "contact" }
-];
-
+import { LayoutSelectorDropdown } from "./components/LayoutSelectorDropdown";
 const getMockContent = (category) => {
     switch (category) {
         case "title":
@@ -241,11 +199,8 @@ function ThemeGeneratorContent() {
     const [fg, setFg] = useState("#1f2937");
     const [fgMuted, setFgMuted] = useState("#4b5563");
     const [primaryColor, setPrimaryColor] = useState("#3b82f6");
-    const [secondary, setSecondary] = useState("#f3f4f6");
-    const [accent, setAccent] = useState("#8b5cf6");
     const [cardBg, setCardBg] = useState("#ffffff");
     const [cardBorder, setCardBorder] = useState("#e5e7eb");
-    const [bullet, setBullet] = useState("#3b82f6");
     const [fontHeading, setFontHeading] = useState('"Inter", sans-serif');
     const [fontBody, setFontBody] = useState('"Inter", sans-serif');
 
@@ -264,11 +219,8 @@ function ThemeGeneratorContent() {
     const debouncedSetFg = React.useMemo(() => debounce(setFg, 150), []);
     const debouncedSetFgMuted = React.useMemo(() => debounce(setFgMuted, 150), []);
     const debouncedSetPrimaryColor = React.useMemo(() => debounce(setPrimaryColor, 150), []);
-    const debouncedSetSecondary = React.useMemo(() => debounce(setSecondary, 150), []);
-    const debouncedSetAccent = React.useMemo(() => debounce(setAccent, 150), []);
     const debouncedSetCardBg = React.useMemo(() => debounce(setCardBg, 150), []);
     const debouncedSetCardBorder = React.useMemo(() => debounce(setCardBorder, 150), []);
-    const debouncedSetBullet = React.useMemo(() => debounce(setBullet, 150), []);
 
     // Instant style update handler (writes directly to preview container element style properties)
     const handleInstantStyleUpdate = React.useCallback((varName, value) => {
@@ -279,11 +231,8 @@ function ThemeGeneratorContent() {
                 fg: "--theme-fg",
                 fgMuted: "--theme-fg-muted",
                 primaryColor: "--theme-primary",
-                secondary: "--theme-secondary",
-                accent: "--theme-accent",
                 cardBg: "--theme-card-bg",
                 cardBorder: "--theme-card-border",
-                bullet: "--theme-bullet",
             };
             const customVarName = cssMap[varName] || `--theme-${varName}`;
             previewContainerRef.current.style.setProperty(customVarName, value);
@@ -301,11 +250,8 @@ function ThemeGeneratorContent() {
                 setFg(theme.fg);
                 setFgMuted(theme.fg_muted);
                 setPrimaryColor(theme.primary_color);
-                setSecondary(theme.secondary);
-                setAccent(theme.accent);
                 setCardBg(theme.card_bg);
                 setCardBorder(theme.card_border);
-                setBullet(theme.bullet);
                 setFontHeading(theme.font_heading);
                 setFontBody(theme.font_body);
                 setHasLoadedTheme(true);
@@ -332,11 +278,8 @@ function ThemeGeneratorContent() {
             fg,
             fg_muted: fgMuted,
             primary_color: primaryColor,
-            secondary,
-            accent,
             card_bg: cardBg,
             card_border: cardBorder,
-            bullet,
             font_heading: fontHeading,
             font_body: fontBody
         };
@@ -355,11 +298,24 @@ function ThemeGeneratorContent() {
     // Memoize the layout structure of the slide preview to prevent JSX rebuilds
     const memoizedSlide = React.useMemo(() => {
         const mockContent = getMockContent(layoutCategory);
+        const isHeaderlessLayout = layoutCategory === "title" || layoutCategory === "closing";
+
         return (
             <Slide 
                 slide_content={{
-                    ...mockContent,
-                    layout: { category: layoutCategory, type: layoutType }
+                    type: "normal",
+                    header: isHeaderlessLayout ? null : {
+                        id: "preview-header",
+                        type: "header",
+                        title: mockContent.title || "Preview Title",
+                        subtitle: mockContent.subtitle || "Preview Subtitle",
+                    },
+                    contentTree: {
+                        id: "preview-block",
+                        type: "leaf",
+                        layout: { category: layoutCategory, type: layoutType },
+                        ...mockContent
+                    }
                 }}
                 theme="editing-theme"
             />
@@ -476,11 +432,8 @@ function ThemeGeneratorContent() {
                                 <ColorSelector label="Primary Accent" name="primaryColor" value={primaryColor} onChange={debouncedSetPrimaryColor} onInstantStyleUpdate={handleInstantStyleUpdate} />
                                 <ColorSelector label="Text (Foreground)" name="fg" value={fg} onChange={debouncedSetFg} onInstantStyleUpdate={handleInstantStyleUpdate} />
                                 <ColorSelector label="Muted Text" name="fgMuted" value={fgMuted} onChange={debouncedSetFgMuted} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Secondary (Badge Bg)" name="secondary" value={secondary} onChange={debouncedSetSecondary} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Accent Highlight" name="accent" value={accent} onChange={debouncedSetAccent} onInstantStyleUpdate={handleInstantStyleUpdate} />
                                 <ColorSelector label="Card Background" name="cardBg" value={cardBg} onChange={debouncedSetCardBg} onInstantStyleUpdate={handleInstantStyleUpdate} />
                                 <ColorSelector label="Card Border" name="cardBorder" value={cardBorder} onChange={debouncedSetCardBorder} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Bullet Point Color" name="bullet" value={bullet} onChange={debouncedSetBullet} onInstantStyleUpdate={handleInstantStyleUpdate} />
                             </div>
                         </div>
 
@@ -508,31 +461,14 @@ function ThemeGeneratorContent() {
                         
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground font-medium">Layout:</span>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className="h-8 text-xs bg-background border-input text-foreground font-normal px-3 rounded-md cursor-pointer border hover:bg-accent/50 min-w-[160px] justify-between"
-                                    >
-                                        <span>{PREVIEW_LAYOUTS.find(l => l.category === layoutCategory && l.type === layoutType)?.name || "Numbered Cards"}</span>
-                                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground opacity-60 ml-2" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-48 max-h-60 overflow-y-auto bg-popover text-popover-foreground border border-border rounded-md shadow-md p-1 z-30">
-                                    {PREVIEW_LAYOUTS.map((layout) => (
-                                        <DropdownMenuItem
-                                            key={layout.name}
-                                            onClick={() => {
-                                                setLayoutCategory(layout.category);
-                                                setLayoutType(layout.type);
-                                            }}
-                                            className="text-xs px-2 py-1.5 cursor-pointer rounded-sm hover:bg-accent hover:text-accent-foreground"
-                                        >
-                                            {layout.name}
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            <LayoutSelectorDropdown
+                                category={layoutCategory}
+                                type={layoutType}
+                                onSelect={(cat, typ) => {
+                                    setLayoutCategory(cat);
+                                    setLayoutType(typ);
+                                }}
+                            />
                         </div>
                     </div>
 
@@ -544,15 +480,12 @@ function ThemeGeneratorContent() {
                             "--theme-fg": fg,
                             "--theme-fg-muted": fgMuted,
                             "--theme-primary": primaryColor,
-                            "--theme-secondary": secondary,
-                            "--theme-accent": accent,
                             "--theme-card-bg": cardBg,
                             "--theme-card-border": cardBorder,
-                            "--theme-bullet": bullet,
                             "--theme-font-heading": fontHeading,
                             "--theme-font-body": fontBody,
                         }}
-                        className="w-full rounded-md overflow-hidden pointer-events-none max-w-[1000px] @container"
+                        className="w-full rounded-md overflow-hidden pointer-events-none max-w-[1000px] border shadow @container"
                     >
                         {memoizedSlide}
                     </div>

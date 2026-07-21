@@ -26,6 +26,7 @@ import SlideSettingsSidebar from "@/components/generate/SlideSettingsSidebar";
 import EditWithAIModal from "@/components/generate/EditWithAIModal";
 import BlockLayoutSelectorModal from "@/components/generate/BlockLayoutSelectorModal";
 import ThemeSidebar from "@/components/generate/ThemeSidebar";
+import ShareModal from "@/components/generate/ShareModal";
 
 import SlideViewer from "./components/SlideViewer";
 import SlideThumbnails from "./components/SlideThumbnails";
@@ -44,6 +45,8 @@ export default function PPTSlidesViewerPage({ params }) {
     const [isEditWithAIModalOpen, setIsEditWithAIModalOpen] = useState(false);
     const [editWithAIPrompt, setEditWithAIPrompt] = useState("");
     const [isEditWithAILoading, setIsEditWithAILoading] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isShareLoading, setIsShareLoading] = useState(false);
     const [isTouchDevice] = useState(() => {
         return (
             typeof window !== "undefined" &&
@@ -97,6 +100,20 @@ export default function PPTSlidesViewerPage({ params }) {
         () => setIsEditWithAIModalOpen(true),
         [],
     );
+
+    const openShareModal = useCallback(() => {
+        setIsShareModalOpen(true);
+        setIsSlideSettingsOpen(false);
+        setIsThemeModalOpen(false);
+        closeLibrary();
+    }, [closeLibrary]);
+
+    useEffect(() => {
+        const handleOpenShare = () => openShareModal();
+        window.addEventListener("trigger-share-modal", handleOpenShare);
+        return () => window.removeEventListener("trigger-share-modal", handleOpenShare);
+    }, [openShareModal]);
+
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -161,6 +178,20 @@ export default function PPTSlidesViewerPage({ params }) {
     });
 
     const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX;
+
+    const handleToggleShare = useCallback(async (checked) => {
+        setIsShareLoading(true);
+        try {
+            await api.post(`/api/ppt/${pptId}/share`, { is_shared: checked });
+            setPptData((prev) => ({ ...prev, is_shared: checked }));
+            toast.success(checked ? "Share link enabled!" : "Share link disabled.");
+        } catch (err) {
+            toast.error(err.message || "Failed to update sharing status.");
+            console.error("Toggle share error:", err);
+        } finally {
+            setIsShareLoading(false);
+        }
+    }, [pptId, setPptData]);
 
     // --- Global Text Sizes ---
     const defaultTextSizes = { title: 2.8, subtitle: 2.0, heading: 1.8, description: 1.3 };
@@ -728,6 +759,15 @@ export default function PPTSlidesViewerPage({ params }) {
                 setPrompt={setEditWithAIPrompt}
                 isLoading={isEditWithAILoading}
                 onApply={handleEditSlideWithAI}
+            />
+
+            <ShareModal
+                isOpen={isShareModalOpen}
+                onOpenChange={setIsShareModalOpen}
+                isShared={!!pptData?.is_shared}
+                onToggleShare={handleToggleShare}
+                isLoading={isShareLoading}
+                shareUrl={typeof window !== "undefined" ? `${window.location.origin}/share/${pptId}` : ""}
             />
 
             {/* Off-screen export frames (only mounted during export) */}
