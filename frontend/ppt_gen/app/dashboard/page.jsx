@@ -56,7 +56,7 @@ function DashboardPageContent() {
 
     if (authStatus === "loading") {
         return (
-            <div className="flex h-screen items-center justify-center bg-[#050505] text-white">
+            <div className="flex h-screen items-center justify-center bg-background text-foreground">
                 <Loader2 className="animate-spin" size={30} />
             </div>
         );
@@ -392,7 +392,7 @@ export default function DashboardPage() {
     return (
         <Suspense
             fallback={
-                <div className="flex h-screen items-center justify-center bg-[#050505] text-white">
+                <div className="flex h-screen items-center justify-center bg-background text-foreground">
                     <Loader2 className="animate-spin" size={30} />
                 </div>
             }

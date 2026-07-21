@@ -154,8 +154,18 @@ const TableBasic = ({ content, block, onUpdateBlock, onUpdateItem, onDeleteItem,
 
     const gridTemplateColumns = tableColumns.map(c => `${c.width}fr`).join(" ");
 
+    let vAlignClass = "justify-center";
+    let cellVAlignClass = "items-center";
+    if (block?.verticalAlign === "top") {
+        vAlignClass = "justify-start";
+        cellVAlignClass = "items-start";
+    } else if (block?.verticalAlign === "bottom") {
+        vAlignClass = "justify-end";
+        cellVAlignClass = "items-end";
+    }
+
     return (
-        <div className="w-full flex-1 flex flex-col justify-start">
+        <div className={`w-full flex-1 flex flex-col ${vAlignClass}`}>
             <div
                 ref={tableRef}
                 className="w-full overflow-hidden rounded-[0.5cqw] border theme-border-color theme-bg-card shadow-sm flex flex-col relative"
@@ -372,7 +382,7 @@ const TableBasic = ({ content, block, onUpdateBlock, onUpdateItem, onDeleteItem,
                                     return (
                                         <div
                                             key={col.id}
-                                            className="relative p-[1cqw] flex items-start group/cell"
+                                            className={`relative p-[1cqw] flex ${cellVAlignClass} group/cell`}
                                         >
                                             {cIdx > 0 && (
                                                 <>

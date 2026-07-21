@@ -166,17 +166,17 @@ export const FocusPointSelector = ({ value = "center", imageUrl, onChange, onLiv
                     {/* Visual Preview Container */}
                     <div 
                         ref={previewRef}
-                        className="relative w-full aspect-video bg-muted border border-border rounded-sm overflow-hidden cursor-crosshair select-none"
+                        className="relative w-full bg-muted border border-border rounded-sm overflow-hidden cursor-crosshair select-none"
                         onMouseDown={handleDragStart}
                     >
                         {imageUrl ? (
                             <img 
                                 src={imageUrl} 
                                 alt="Focus preview" 
-                                className="w-full h-full object-cover pointer-events-none" 
+                                className="w-full h-auto block pointer-events-none" 
                             />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-zinc-800 text-zinc-500 text-[10px]">
+                            <div className="w-full aspect-video flex items-center justify-center bg-zinc-800 text-zinc-500 text-[10px]">
                                 No Image
                             </div>
                         )}

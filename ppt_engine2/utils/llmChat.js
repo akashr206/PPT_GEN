@@ -127,15 +127,16 @@ async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "st
         reader.releaseLock();
     }
 }
+
 async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "standard") {
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {
             "api-key": process.env.MIMO_API_KEY,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            model: "mimo-v2.5-pro",
+            model: "mimo-v2.5",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: prompt }
@@ -153,7 +154,8 @@ async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "sta
         }),
         signal
     });
-
+    
+    
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);

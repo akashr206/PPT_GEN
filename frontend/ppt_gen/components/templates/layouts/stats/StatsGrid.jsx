@@ -9,7 +9,7 @@ const StatsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, re
     const actualCols = Math.min(columns || 2, Math.max(1, items.length));
     
     return (
-        <div className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-[4cqw]">
+        <div className="w-full flex flex-row flex-wrap gap-x-[2cqw] gap-y-[4cqw]">
             {items.length === 0 && !readOnly && onAddItem && (
                 <button
                     onClick={() => onAddItem(0, "before")}
@@ -48,7 +48,7 @@ const StatsGrid = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, re
                     />
                     <EditableElement
                         as="p"
-                        className="theme-text-description-size font-medium leading-tight theme-accent uppercase tracking-widest opacity-70 mt-[1cqw]"
+                        className="theme-text-description-size font-medium leading-tight theme-text-primary uppercase tracking-widest opacity-70 mt-[1cqw]"
                         value={item.description}
                         onChange={(val) => onUpdateItem(i, "description", val)}
                         readOnly={readOnly}

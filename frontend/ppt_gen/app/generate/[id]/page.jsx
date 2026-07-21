@@ -16,7 +16,7 @@ export default function PPTDetailPage({ params }) {
     }, [pptId, router]);
 
     return (
-        <div className="flex h-screen items-center justify-center bg-[#050505] text-white">
+        <div className="flex h-screen items-center justify-center bg-background text-foreground">
             <Loader2 className="animate-spin text-primary" size={30} />
         </div>
     );

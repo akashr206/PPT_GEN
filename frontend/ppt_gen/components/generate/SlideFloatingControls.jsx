@@ -56,7 +56,7 @@ const SlideFloatingControls = React.memo(({
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                        <p>Edit slide with AI</p>
+                        <p>Edit slide with AI (5 credits)</p>
                     </TooltipContent>
                 </Tooltip>
                 <Tooltip>

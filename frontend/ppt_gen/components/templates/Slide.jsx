@@ -63,6 +63,7 @@ const Slide = ({
     slideIndex,
     textSizes,
 }) => {
+    slide_content = slide_content || {};
     const macroType = slide_content.type || "normal";
     const blocks = slide_content.blocks || [];
 

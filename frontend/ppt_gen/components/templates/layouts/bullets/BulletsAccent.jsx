@@ -18,7 +18,7 @@ const BulletsAccent = ({
 
     return (
         <div
-            className="w-full flex flex-row flex-wrap gap-[3cqw]"
+            className="w-full flex flex-row flex-wrap gap-[1.3cqw]"
         >
             {/* Add before first item when empty */}
             {!readOnly && onAddItem && items.length === 0 && (
@@ -62,9 +62,9 @@ const BulletsAccent = ({
                     )}
                     
                     {/* Accent Line */}
-                    <div className="w-full h-[0.15cqw] theme-bg-primary rounded-full mb-[1cqw] shrink-0" />
+                    <div className="w-full h-[0.15cqw] theme-bg-primary rounded-full mb-[0.5cqw] shrink-0" />
                     
-                    <div className="flex flex-col min-w-0 pb-[1cqw]">
+                    <div className="flex flex-col min-w-0 pb-[0.5cqw]">
                         <EditableElement
                             as="h3"
                             className="theme-font-heading font-semibold theme-text-heading-size leading-snug theme-text-primary"
@@ -75,7 +75,7 @@ const BulletsAccent = ({
                         />
                         <EditableElement
                             as="p"
-                            className="theme-text-description-size leading-relaxed theme-text-muted mt-[0.6cqw]"
+                            className="theme-text-description-size leading-relaxed theme-text-muted mt-[0.4cqw]"
                             value={item.description}
                             onChange={(val) =>
                                 onUpdateItem(i, "description", val)

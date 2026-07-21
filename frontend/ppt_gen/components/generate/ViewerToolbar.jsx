@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Undo, Redo, SlidersHorizontal, FolderOpen, Diamond, Palette } from "lucide-react";
+import { Undo, Redo, SlidersHorizontal, FolderOpen, Diamond, Palette, Share2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -56,19 +56,19 @@ const ViewerToolbar = React.memo(({
                     <Button
                         variant="outline"
                         onClick={onOpenSettings}
-                        className="cursor-pointer rounded-sm text-xs"
+                        className="cursor-pointer rounded-sm text-xs border-border"
                     >
-                        <SlidersHorizontal size={14} />
+                        <SlidersHorizontal size={14} className="mr-1" />
                         <span>Slide Settings</span>
                     </Button>
 
                     <Button
                         variant="outline"
                         onClick={onOpenLibrary}
-                        className="cursor-pointer rounded-sm text-xs"
+                        className="cursor-pointer rounded-sm text-xs border-border"
                     >
-                        <FolderOpen size={14} />
-                        <span>Open Library</span>
+                        <FolderOpen size={14} className="mr-1" />
+                        <span>Library</span>
                     </Button>
                 </div>
                 <DropdownMenu>

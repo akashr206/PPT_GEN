@@ -18,6 +18,8 @@ import {
     Image,
     Layout,
     Sparkles,
+    Share2,
+    Coins,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/generate/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -41,6 +43,8 @@ import {
 import metadata from "@/components/templates/metadata.json";
 import UserMenu from "../user-menu";
 import { useSettingsStore } from "@/hooks/use-settings-store";
+import api from "@/lib/api";
+import { CreditsModal } from "@/components/CreditsModal";
 
 export function Navbar() {
     const { data: session } = useSession();
@@ -66,6 +70,7 @@ export function Navbar() {
         isBusy: false,
     });
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
 
     useEffect(() => {
@@ -106,6 +111,10 @@ export function Navbar() {
 
     const handlePresentClick = () => {
         window.dispatchEvent(new CustomEvent("trigger-present"));
+    };
+
+    const handleShareClick = () => {
+        window.dispatchEvent(new CustomEvent("trigger-share-modal"));
     };
 
     return (
@@ -174,6 +183,16 @@ export function Navbar() {
                                     </DropdownMenu>
 
                                     <div className="flex items-center border border-border/70 rounded-md overflow-hidden bg-background h-8">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleShareClick}
+                                            disabled={pptInfo.isBusy}
+                                            className="text-foreground hover:bg-accent hover:text-accent-foreground h-full gap-1.5 flex items-center px-3 rounded-none text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-r border-border/70"
+                                        >
+                                            <Share2 size={13} className="text-primary" />
+                                            <span className="hidden sm:inline">Share</span>
+                                        </Button>
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -313,24 +332,38 @@ export function Navbar() {
                                             <span>Download as PPTX</span>
                                         </Button>
 
-                                        {/* Present */}
-                                        <div className="flex items-center w-full border border-border rounded-md overflow-hidden bg-background h-9">
+                                        {/* Present & Share */}
+                                        <div className="flex flex-col w-full border border-border rounded-md overflow-hidden bg-background">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => {
-                                                    handlePresentClick();
+                                                    handleShareClick();
                                                     setIsMobileMenuOpen(false);
                                                 }}
                                                 disabled={pptInfo.isBusy}
-                                                className="flex-1 justify-start h-full gap-2 px-3 rounded-none text-xs font-medium cursor-pointer border-r border-border"
+                                                className="flex-1 justify-start h-9 gap-2 px-3 rounded-none text-xs font-medium cursor-pointer border-b border-border"
                                             >
-                                                <Play
-                                                    size={14}
-                                                    className="fill-current text-primary"
-                                                />
-                                                <span>Present</span>
+                                                <Share2 size={14} className="text-primary" />
+                                                <span>Share</span>
                                             </Button>
+                                            <div className="flex items-center h-9">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        handlePresentClick();
+                                                        setIsMobileMenuOpen(false);
+                                                    }}
+                                                    disabled={pptInfo.isBusy}
+                                                    className="flex-1 justify-start h-full gap-2 px-3 rounded-none text-xs font-medium cursor-pointer border-r border-border"
+                                                >
+                                                    <Play
+                                                        size={14}
+                                                        className="fill-current text-primary"
+                                                    />
+                                                    <span>Present</span>
+                                                </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -341,6 +374,7 @@ export function Navbar() {
                                             >
                                                 <Sparkles size={14} className={animationsEnabled ? "text-primary fill-primary/25" : "text-muted-foreground"} />
                                             </Button>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -514,6 +548,9 @@ export function Navbar() {
                     </div>
                 </>
             )}
+            
+            {/* Credits Modal */}
+            <CreditsModal />
         </>
     );
 }

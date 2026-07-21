@@ -122,3 +122,28 @@ export const fetchPPTById = async ({ ppt_id }) => {
     }
     return data;
 }
+
+export const updateShareStatus = async ({ ppt_id, is_shared }) => {
+    const { data, error } = await supabase
+        .from('ppts')
+        .update({ is_shared })
+        .eq('id', ppt_id)
+        .select();
+    if (error) {
+        throw error;
+    }
+    return data;
+}
+
+export const getSharedPPTById = async ({ ppt_id }) => {
+    const { data, error } = await supabase
+        .from('ppts')
+        .select('id, title, theme, slides, created_at, user_id, is_shared')
+        .eq('id', ppt_id)
+        .eq('is_shared', true)
+        .single();
+    if (error) {
+        throw error;
+    }
+    return data;
+}

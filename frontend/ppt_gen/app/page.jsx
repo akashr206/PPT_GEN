@@ -8,11 +8,11 @@ import {
     Monitor,
     Smartphone,
     Palette,
-    Mic,
-    ChevronDown,
     Plus,
     LogOut,
     LayoutDashboard,
+    Volume2,
+    VolumeX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -24,7 +24,6 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import api from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -40,6 +39,7 @@ export default function LandingPage() {
     const router = useRouter();
     const [prompt, setPrompt] = useState("");
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -65,7 +65,7 @@ export default function LandingPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 4.5, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute top-1/3 left-[-20%] w-[50%] h-[60%] bg-gradient-to-r from-violet-600/40 to-blue-600/40 blur-[140px] rounded-full pointer-events-none z-0 mix-blend-screen transform -rotate-12"
+                className="fixed top-1/3 left-[-20%] w-[50%] h-[60%] bg-gradient-to-r from-violet-600/40 to-blue-600/40 blur-[140px] rounded-full pointer-events-none z-0 mix-blend-screen transform -rotate-12"
             />
             <motion.div
                 initial={{ scale: 0 }}
@@ -75,7 +75,7 @@ export default function LandingPage() {
                     ease: [0.16, 1, 0.3, 1],
                     delay: 0.2,
                 }}
-                className="absolute top-1/2 -right-[20%] w-[60%] h-[70%] bg-gradient-to-l from-violet-600/30 to-blue-600/30 blur-[150px] rounded-full pointer-events-none z-0 mix-blend-screen transform rotate-12"
+                className="fixed top-1/2 -right-[20%] w-[60%] h-[70%] bg-gradient-to-l from-violet-600/30 to-blue-600/30 blur-[150px] rounded-full pointer-events-none z-0 mix-blend-screen transform rotate-12"
             />
 
             <nav className="relative z-99 flex items-center justify-between p-6 max-w-[1400px] w-full mx-auto">
@@ -154,9 +154,7 @@ export default function LandingPage() {
                         </div>
                     ) : (
                         <Button
-                            onClick={() =>
-                                signIn("google", { callbackUrl: "/dashboard" })
-                            }
+                            onClick={() => setShowLoginModal(true)}
                             className="rounded-full bg-white text-black hover:bg-white/90 px-6 font-medium cursor-pointer"
                         >
                             Sign In
@@ -165,9 +163,9 @@ export default function LandingPage() {
                 </div>
             </nav>
 
-            <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-5xl mx-auto">
+            <main className="relative z-10 min-h-[100svh] flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-5xl mx-auto">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] font-medium tracking-tight mb-6 text-white leading-[1.1] max-w-4xl mx-auto">
-                    Presentations at the speed of AI
+                    The next generation of presentation design
                 </h1>
 
                 <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto font-normal mb-12">
@@ -211,6 +209,100 @@ export default function LandingPage() {
                     </form>
                 </div>
             </main>
+
+            {/* Video Showcase Section */}
+            <section className="relative z-10 w-full max-w-6xl mx-auto px-4 mt-12 mb-32">
+                <div className="relative rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-black/40 backdrop-blur-md">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/10 via-transparent to-blue-500/10 pointer-events-none" />
+                    <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                    
+                    <div className="p-2 md:p-4 group/video">
+                        <div className="relative rounded-2xl overflow-hidden aspect-video bg-[#0c0c12]">
+                            <video 
+                                src="/broadside-ai-info.webm" 
+                                className="w-full h-full object-cover"
+                                autoPlay 
+                                muted={isMuted}
+                                loop 
+                                playsInline 
+                                controls={false}
+                            />
+                            <button
+                                onClick={() => setIsMuted(!isMuted)}
+                                className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover/video:opacity-100"
+                            >
+                                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bento Grid Features Section */}
+                <div className="mt-24 grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 max-w-5xl mx-auto text-left">
+                    
+                    {/* Large Main Feature (Spans 2 cols, 2 rows) */}
+                    <div className="md:col-span-2 md:row-span-2 p-8 rounded-[2rem] bg-gradient-to-br from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all flex flex-col justify-end relative overflow-hidden group">
+                        <div className="absolute top-8 right-8 w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                            <Sparkles size={24} />
+                        </div>
+                        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px] group-hover:bg-blue-500/30 transition-all" />
+                        <div className="relative z-10 mt-32">
+                            <h3 className="text-3xl font-semibold text-white mb-4 tracking-tight">AI-Powered Creation</h3>
+                            <p className="text-white/60 text-lg leading-relaxed">Turn any text prompt or raw idea into a fully structured, beautifully designed presentation in a matter of seconds. Let the AI do the heavy lifting.</p>
+                        </div>
+                    </div>
+
+                    {/* Top Right Feature (Spans 2 cols, 1 row) */}
+                    <div className="md:col-span-2 p-8 rounded-[2rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between group">
+                        <div className="flex justify-between items-start mb-12">
+                            <h3 className="text-xl font-semibold text-white tracking-tight">Stunning Designs</h3>
+                            <div className="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center">
+                                <Palette size={20} />
+                            </div>
+                        </div>
+                        <p className="text-white/60 leading-relaxed">Access premium themes and dynamic layouts that automatically adapt to your content instantly, ensuring pixel-perfect slides every time.</p>
+                    </div>
+
+                    {/* Bottom Right Features (1 col, 1 row each) */}
+                    <div className="p-8 rounded-[2rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-12">
+                            <Monitor size={20} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-white mb-2">Real-time Editing</h3>
+                            <p className="text-white/60 text-sm leading-relaxed">Fine-tune text, icons, and colors instantly.</p>
+                        </div>
+                    </div>
+                    
+                    <div className="p-8 rounded-[2rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-12">
+                            <Smartphone size={20} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-white mb-2">Export Anywhere</h3>
+                            <p className="text-white/60 text-sm leading-relaxed">Download as PPTX, PDF or present directly.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="relative z-10 w-full border-t border-white/10 bg-black/20 backdrop-blur-lg py-12 mt-auto">
+                <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-2">
+                        <img src="/logo.png" alt="Broadside AI" className="w-6 h-6 invert opacity-80" />
+                        <span className="text-white/80 font-medium tracking-tight">Broadside AI</span>
+                    </div>
+                    <div className="flex items-center gap-6 text-sm text-white/50">
+                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <a href="mailto:akashr6514@gmail.com" className="hover:text-white transition-colors">Contact</a>
+                    </div>
+                    <p className="text-white/40 text-sm">© {new Date().getFullYear()} Broadside AI. All rights reserved.</p>
+                </div>
+            </footer>
+
 
             <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
                 <DialogContent
@@ -268,6 +360,14 @@ export default function LandingPage() {
                         >
                             Cancel
                         </Button>
+                        
+                        <p className="text-center text-[11px] text-zinc-500 mt-4 leading-relaxed">
+                            By continuing, you agree to our{" "}
+                            <Link href="/terms" className="text-zinc-300 hover:text-white underline underline-offset-2">
+                                Terms of Service
+                            </Link>{" "}
+                            and Privacy Policy.
+                        </p>
                     </div>
                 </DialogContent>
             </Dialog>

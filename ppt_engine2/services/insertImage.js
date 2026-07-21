@@ -24,7 +24,7 @@ export const searchPexelsImages = async (query) => {
     const q = cleanQuery(query);
     if (!q) return [];
 
-    const url = `https://api.pexels.com/v1/search?query=${q}&per_page=15`;
+    const url = `https://api.pexels.com/v1/search?query=${q}&per_page=25`;
 
     try {
         let response = await fetch(url, {
@@ -48,7 +48,7 @@ export const searchPexelsImages = async (query) => {
         }
 
         const data = await response.json();
-        
+
         if (data && data.photos && Array.isArray(data.photos)) {
             return data.photos.map(photo => ({
                 alt: photo.alt || '',

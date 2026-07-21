@@ -1,12 +1,13 @@
 import { Router } from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
-import { getUserController, addUserController } from "../controllers/user.js";
+import { getUserController, addUserController, getUserCreditsController } from "../controllers/user.js";
 import authSecretVerification from "../middleware/authSecretVerification.js";
 import { sendError, sendSuccess } from "../utils/response.js";
 import jwt from "jsonwebtoken"
 const router = Router();
 
 router.get("/", authMiddleware, getUserController)
+router.get("/credits", authMiddleware, getUserCreditsController)
 router.post("/", authSecretVerification, addUserController)
 
 router.post("/dev-login", (req, res, next) => {

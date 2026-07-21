@@ -625,10 +625,10 @@ export function useSlideEditor(initialPptData, isBusy) {
         const newSlide = {
             type: "normal",
             header: {
-                id: "h1",
+                id: `header_${Date.now()}`,
                 type: "header",
-                title: "New Slide",
-                subtitle: "Add description...",
+                title: "Click to edit title",
+                subtitle: "Add a compelling subtitle or key takeaway",
                 align: "left"
             },
             contentTree: {
@@ -636,10 +636,11 @@ export function useSlideEditor(initialPptData, isBusy) {
                 type: "leaf",
                 blockType: "content",
                 align: "left",
-                layout: { category: "bullets", type: "standard" },
+                layout: { category: "bullets", type: "simple" },
                 items: [
-                    { header: "Point 1", description: "Details about this point" },
-                    { header: "Point 2", description: "Details about this point" },
+                    { header: "First key point", description: "Add supporting details or metrics here" },
+                    { header: "Second key point", description: "Expand on the concept with clear evidence" },
+                    { header: "Third key point", description: "Conclude with an actionable takeaway" }
                 ]
             }
         };

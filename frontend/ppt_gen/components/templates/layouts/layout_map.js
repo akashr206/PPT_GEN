@@ -4,7 +4,9 @@ import BulletsNumbered from "./bullets/BulletsNumbered";
 import BulletsAccent from "./bullets/BulletsAccent";
 
 import CardsBasic from "./cards/CardsBasic";
-import CardsImage from "./cards/CardsImage";
+import CardsOutline from "./cards/CardsOutline";
+import CardsNumbered from "./cards/CardsNumbered";
+import CardsAccent from "./cards/CardsAccent";
 
 import ImagesSingle from "./basic/ImagesSingle";
 import ImagesGallery from "./basic/ImagesGallery";
@@ -35,7 +37,9 @@ export const layout_map = {
     },
     "cards": {
         "basic": CardsBasic,
-        "image": CardsImage,
+        "outline": CardsOutline,
+        "numbered": CardsNumbered,
+        "accent": CardsAccent,
     },
     "icons": {
         "list": IconsList,

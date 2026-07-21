@@ -47,6 +47,7 @@ export function useImageFetcher({
     const [iconLoading, setIconLoading] = useState({});
     const fetchQueueRef = useRef(new Set());
     const lastQueryRef = useRef({}); // { [itemKey]: lastSearchedQuery }
+    const fetchTimeoutRef = useRef({});
 
     const searchImagesStore = useMediaStore((state) => state.searchImages);
 
@@ -214,11 +215,28 @@ export function useImageFetcher({
             if (MACRO_IMAGE_TYPES.includes(slide.type)) {
                 const sKey = `slide_${sIndex}`;
                 if (isRealUrl(slide.image)) return;
-                if (fetchQueueRef.current.has(sKey)) return;
                 const query = slide.imageDescription || slide.image;
                 if (!query) return;
-                fetchQueueRef.current.add(sKey);
-                fetchImage(sKey, query);
+                
+                const isFetching = imageLoading[sKey];
+                const isTimeoutPending = !!fetchTimeoutRef.current[sKey];
+                const queryChanged = lastQueryRef.current[sKey] !== query;
+                
+                if (!isFetching) {
+                    if (queryChanged) {
+                        lastQueryRef.current[sKey] = query;
+                        if (fetchTimeoutRef.current[sKey]) clearTimeout(fetchTimeoutRef.current[sKey]);
+                        fetchTimeoutRef.current[sKey] = setTimeout(() => {
+                            fetchTimeoutRef.current[sKey] = null;
+                            fetchImage(sKey, query);
+                        }, 1000);
+                    } else if (!isTimeoutPending) {
+                        fetchTimeoutRef.current[sKey] = setTimeout(() => {
+                            fetchTimeoutRef.current[sKey] = null;
+                            fetchImage(sKey, query);
+                        }, 100);
+                    }
+                }
                 return;
             }
 
@@ -231,6 +249,7 @@ export function useImageFetcher({
 
                     // 1. Fetch relevant images if layout requires them
                     const isImageCategory =
+                        (cat === "basic" && (type === "single" || type === "gallery")) ||
                         cat === "images" ||
                         cat === "image" ||
                         ((cat === "cards" || cat === "card") && type === "image");
@@ -240,17 +259,28 @@ export function useImageFetcher({
                             const hasUrl = isRealUrl(item.image);
                             const query = item.imageDescription || item.header || "";
                             if (query) {
-                                // Initialize lastQueryRef on load if image is already a URL
                                 if (hasUrl && !lastQueryRef.current[itemKey]) {
                                     lastQueryRef.current[itemKey] = query;
                                 }
-                                // Fetch only if there's no URL. Don't auto-update if the user changes text to prevent overriding manually set images.
                                 const shouldFetch = !hasUrl;
-                                const queueKey = `${itemKey}_img_${query}`;
-                                if (shouldFetch && !fetchQueueRef.current.has(queueKey)) {
-                                    fetchQueueRef.current.add(queueKey);
-                                    lastQueryRef.current[itemKey] = query;
-                                    fetchImage(itemKey, query);
+                                const isFetching = imageLoading[itemKey];
+                                const isTimeoutPending = !!fetchTimeoutRef.current[itemKey];
+                                const queryChanged = lastQueryRef.current[itemKey] !== query;
+                                
+                                if (shouldFetch && !isFetching) {
+                                    if (queryChanged) {
+                                        lastQueryRef.current[itemKey] = query;
+                                        if (fetchTimeoutRef.current[itemKey]) clearTimeout(fetchTimeoutRef.current[itemKey]);
+                                        fetchTimeoutRef.current[itemKey] = setTimeout(() => {
+                                            fetchTimeoutRef.current[itemKey] = null;
+                                            fetchImage(itemKey, query);
+                                        }, 1000);
+                                    } else if (!isTimeoutPending) {
+                                        fetchTimeoutRef.current[itemKey] = setTimeout(() => {
+                                            fetchTimeoutRef.current[itemKey] = null;
+                                            fetchImage(itemKey, query);
+                                        }, 100);
+                                    }
                                 }
                             }
                         });
@@ -262,17 +292,28 @@ export function useImageFetcher({
                             const itemKey = `slide_${sIndex}_block_${node.id}_item_${iIndex}_icon`;
                             const query = item.iconKeywords || item.header || "";
                             if (query) {
-                                // Initialize lastQueryRef on load if icon is already set
                                 if (item.icon && !lastQueryRef.current[itemKey]) {
                                     lastQueryRef.current[itemKey] = query;
                                 }
-                                // Fetch only if there's no icon. Don't auto-update if the user changes text to prevent overriding manually set icons.
                                 const shouldFetch = !item.icon;
-                                const queueKey = `${itemKey}_ico_${query}`;
-                                if (shouldFetch && !fetchQueueRef.current.has(queueKey)) {
-                                    fetchQueueRef.current.add(queueKey);
-                                    lastQueryRef.current[itemKey] = query;
-                                    fetchIcon(itemKey, query);
+                                const isFetching = iconLoading[itemKey];
+                                const isTimeoutPending = !!fetchTimeoutRef.current[itemKey];
+                                const queryChanged = lastQueryRef.current[itemKey] !== query;
+                                
+                                if (shouldFetch && !isFetching) {
+                                    if (queryChanged) {
+                                        lastQueryRef.current[itemKey] = query;
+                                         if (fetchTimeoutRef.current[itemKey]) clearTimeout(fetchTimeoutRef.current[itemKey]);
+                                        fetchTimeoutRef.current[itemKey] = setTimeout(() => {
+                                            fetchTimeoutRef.current[itemKey] = null;
+                                            fetchIcon(itemKey, query);
+                                        }, 1000);
+                                    } else if (!isTimeoutPending) {
+                                        fetchTimeoutRef.current[itemKey] = setTimeout(() => {
+                                            fetchTimeoutRef.current[itemKey] = null;
+                                            fetchIcon(itemKey, query);
+                                        }, 100);
+                                    }
                                 }
                             }
                         });

@@ -289,15 +289,27 @@ export default function SlideThumbnails({
                             </div>
                         )}
                     </div>
-                    <InsertSlideTrigger
-                        index={idx + 1}
-                        handleAddSlide={handleAddSlide}
-                        isBusy={isBusy}
-                        isTouchDevice={isTouchDevice}
-                        activeSlideIndex={activeSlideIndex}
-                    />
+                    {idx < editableSlides.length - 1 && (
+                        <InsertSlideTrigger
+                            index={idx + 1}
+                            handleAddSlide={handleAddSlide}
+                            isBusy={isBusy}
+                            isTouchDevice={isTouchDevice}
+                            activeSlideIndex={activeSlideIndex}
+                        />
+                    )}
                 </React.Fragment>
             ))}
+            
+            <button
+                onClick={() => !isBusy && handleAddSlide(editableSlides.length)}
+                disabled={isBusy}
+                className="relative flex flex-col items-center justify-center w-[120px] aspect-video rounded-md border-2 border-dashed border-border/60 bg-muted/10 text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5 shrink-0 transition-all cursor-pointer group/add disabled:cursor-not-allowed disabled:opacity-50 ml-1"
+                title="Add New Slide"
+            >
+                <Plus className="w-5 h-5 mb-1 group-hover/add:scale-125 transition-transform duration-300" />
+                <span className="text-[10px] font-semibold tracking-wide uppercase opacity-80 group-hover/add:opacity-100">New Slide</span>
+            </button>
         </div>
     );
 }

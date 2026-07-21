@@ -6,6 +6,7 @@ import pptRouter from './routes/ppt.js';
 import userRouter from './routes/user.js';
 import libraryRouter from "./routes/library.js";
 import themeRouter from "./routes/theme.js";
+import shareRouter from "./routes/share.js";
 import multer from 'multer';
 configDotenv();
 
@@ -25,6 +26,7 @@ app.use('/api/ppt', pptRouter);
 app.use('/api/user', userRouter);
 app.use('/api/library', libraryRouter);
 app.use('/api/themes', themeRouter);
+app.use('/api/share', shareRouter);
 
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) {

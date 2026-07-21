@@ -118,6 +118,15 @@ export default function BlockLayoutSelectorModal({
     theme = "default",
 }) {
     const [isSidebar, setIsSidebar] = useState(false);
+    const [localCategory, setLocalCategory] = useState(currentCategory);
+    const [localType, setLocalType] = useState(currentType);
+
+    useEffect(() => {
+        if (isOpen) {
+            setLocalCategory(currentCategory);
+            setLocalType(currentType);
+        }
+    }, [isOpen, currentCategory, currentType]);
 
     useEffect(() => {
         const checkScreen = () => {
@@ -164,7 +173,7 @@ export default function BlockLayoutSelectorModal({
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {section.layouts.map((layout) => {
                                     const isSelected =
-                                        currentCategory === section.id && currentType === layout.id;
+                                        localCategory === section.id && localType === layout.id;
 
                                     const previewItems = (blockData?.items && blockData.items.length > 0)
                                         ? blockData.items
@@ -174,6 +183,8 @@ export default function BlockLayoutSelectorModal({
                                         <button
                                             key={layout.id}
                                             onClick={() => {
+                                                setLocalCategory(section.id);
+                                                setLocalType(layout.id);
                                                 onSelect(section.id, layout.id);
                                                 // Do NOT call onClose() here in sidebar mode to enable live preview!
                                             }}
@@ -245,7 +256,7 @@ export default function BlockLayoutSelectorModal({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {section.layouts.map((layout) => {
                                     const isSelected =
-                                        currentCategory === section.id && currentType === layout.id;
+                                        localCategory === section.id && localType === layout.id;
 
                                     const previewItems = (blockData?.items && blockData.items.length > 0)
                                         ? blockData.items
@@ -255,6 +266,8 @@ export default function BlockLayoutSelectorModal({
                                         <button
                                             key={layout.id}
                                             onClick={() => {
+                                                setLocalCategory(section.id);
+                                                setLocalType(layout.id);
                                                 onSelect(section.id, layout.id);
                                                 onClose(); // Close on click for modal view
                                             }}

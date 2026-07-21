@@ -3,20 +3,33 @@ import partialJsonParser from "partial-json-parser";
 import { pptSystemPrompt, editSlideSystemPrompt } from "../utils/prompts.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 import { nanoid } from "nanoid";
-import { initPPT, updateStatus, addPPTContent, readStatus, deletePPTById, getUserPpts, updateTheme, updateSlides, fetchPPTById } from "../services/ppt.js";
+import { initPPT, updateStatus, addPPTContent, readStatus, deletePPTById, getUserPpts, updateTheme, updateSlides, fetchPPTById, updateShareStatus, getSharedPPTById } from "../services/ppt.js";
 import parseLLMJson from "../utils/parseLLM.js";
 import { insertIconsToContent, searchIconsByKeywords } from "../services/insertIcons.js";
 import { searchPexelsImages } from "../services/insertImage.js";
 import fs from "fs";
 import path from "path";
 import { convertHtmlToPptx } from "../engine/converter.js";
+import { getUserCredits, updateCredits } from "../services/user.js";
 
 export const generatePPT = async (req, res) => {
     const { prompt, tone, slidesCount, layoutStyle, thinking } = req.body;
 
     const ppt_id = nanoid(10);
 
+    let creditsToDeduct = 20;
+    if (thinking) creditsToDeduct += 5;
+    if (parseInt(slidesCount) > 10) creditsToDeduct += 5;
+
     try {
+        const currentCredits = await getUserCredits({ user_id: req.user.userId });
+        if (currentCredits < creditsToDeduct) {
+            return sendError(res, "Not enough credits", null, 402);
+        }
+
+        // Pre-deduct credits
+        await updateCredits({ user_id: req.user.userId, amount_to_add: -creditsToDeduct });
+
         await initPPT({ ppt_id, userId: req.user.userId, });
 
         sendSuccess(res, { ppt_id }, "PPT generation started");
@@ -41,6 +54,15 @@ export const generatePPT = async (req, res) => {
                 console.log(`PPT ${ppt_id} generated successfully`);
             } catch (error) {
                 console.error(`PPT ${ppt_id} generation failed:`, error);
+
+                if (error.name !== "AbortError") {
+                    try {
+                        console.log(`[Credits] Refund ${creditsToDeduct} credits due to failure`);
+                        await updateCredits({ user_id: req.user.userId, amount_to_add: creditsToDeduct });
+                    } catch (refundError) {
+                        console.error("Failed to refund credits:", refundError);
+                    }
+                }
 
                 try {
                     await updateStatus({ ppt_id, status: "FAILED" });
@@ -88,8 +110,37 @@ export const streamPPT = async (req, res) => {
         activeGenerations.delete(ppt_id);
     }
 
+    // Check if PPT already exists to prevent double charging on reconnects
+    let isNewGeneration = false;
+    try {
+        const existingPpt = await fetchPPTById({ ppt_id });
+        if (!existingPpt || existingPpt.length === 0) {
+            isNewGeneration = true;
+        }
+    } catch (err) {
+        console.error("Error checking existing PPT:", err);
+    }
+
+    if (isNewGeneration) {
+        let creditsToDeduct = 20;
+        if (thinking === "true" || thinking === "advanced") creditsToDeduct += 5;
+        if (parseInt(slidesCount) === 15) creditsToDeduct += 5;
+
+        try {
+            const currentCredits = await getUserCredits({ user_id: req.user.userId });
+            if (currentCredits < creditsToDeduct) {
+                return sendError(res, "Not enough credits", null, 402);
+            }
+            // Pre-deduct credits
+            await updateCredits({ user_id: req.user.userId, amount_to_add: -creditsToDeduct });
+        } catch (err) {
+            console.error("Failed to process credits:", err);
+            return sendError(res, "Failed to verify credits", null, 500);
+        }
+    }
+
     const abortController = new AbortController();
-    activeGenerations.set(ppt_id, { abortController, res });
+    activeGenerations.set(ppt_id, { abortController, res, isNewGeneration, creditsDeducted: isNewGeneration ? 20 + (thinking === "true" || thinking === "advanced" ? 5 : 0) + (parseInt(slidesCount) === 15 ? 5 : 0) : 0 });
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -162,13 +213,22 @@ export const streamPPT = async (req, res) => {
             }
         } else {
             // Standard error
+            const current = activeGenerations.get(ppt_id);
+            if (current && current.res === res && current.creditsDeducted > 0) {
+                try {
+                    console.log(`[Credits] Refund ${current.creditsDeducted} credits due to streaming failure for PPT ${ppt_id}`);
+                    await updateCredits({ user_id: req.user.userId, amount_to_add: current.creditsDeducted });
+                } catch (refundError) {
+                    console.error("Failed to refund credits:", refundError);
+                }
+            }
+
             try {
                 await updateStatus({ ppt_id, status: "FAILED" });
             } catch (dbError) {
                 console.error("Failed to update PPT status to FAILED in DB:", dbError);
             }
             // Clear from activeGenerations
-            const current = activeGenerations.get(ppt_id);
             if (current && current.res === res) {
                 activeGenerations.delete(ppt_id);
             }
@@ -333,8 +393,15 @@ export const convertPPT = async (req, res) => {
 export const editSlide = async (req, res) => {
     const { slide, prompt, presentationTitle, slideTitles, slideIndex } = req.body;
 
-
     try {
+        const currentCredits = await getUserCredits({ user_id: req.user.userId });
+        if (currentCredits < 5) {
+            return sendError(res, "Not enough credits", null, 402);
+        }
+
+        // Pre-deduct 5 credits
+        await updateCredits({ user_id: req.user.userId, amount_to_add: -5 });
+
         const contextInfo = `
 Presentation Context:
 - Topic/Title: ${presentationTitle || 'N/A'}
@@ -354,6 +421,49 @@ Presentation Context:
         return sendSuccess(res, parsedSlide, "Slide edited successfully");
     } catch (error) {
         console.error("Edit slide failed:", error);
+        
+        try {
+            console.log(`[Credits] Refund 5 credits due to edit slide failure`);
+            await updateCredits({ user_id: req.user.userId, amount_to_add: 5 });
+        } catch (refundError) {
+            console.error("Failed to refund credits:", refundError);
+        }
+
         return sendError(res, "Failed to edit slide with AI", error.message, 500);
+    }
+};
+
+export const toggleShare = async (req, res) => {
+    const { ppt_id } = req.params;
+    const { is_shared } = req.body;
+    try {
+        // First verify ownership
+        const pptList = await fetchPPTById({ ppt_id });
+        if (!pptList || pptList.length === 0) {
+            return sendError(res, "Presentation not found", null, 404);
+        }
+        if (pptList[0].user_id !== req.user.userId) {
+            return sendError(res, "Unauthorized", null, 403);
+        }
+        
+        await updateShareStatus({ ppt_id, is_shared: !!is_shared });
+        return sendSuccess(res, { is_shared: !!is_shared }, "Sharing status updated successfully");
+    } catch (error) {
+        console.error("Toggle share failed:", error);
+        return sendError(res, "Failed to update sharing status", error.message, 500);
+    }
+};
+
+export const getSharedPPT = async (req, res) => {
+    const { ppt_id } = req.params;
+    try {
+        const ppt = await getSharedPPTById({ ppt_id });
+        if (!ppt) {
+            return sendError(res, "Presentation not found or not shared", null, 404);
+        }
+        return sendSuccess(res, ppt, "Shared presentation retrieved successfully");
+    } catch (error) {
+        console.error("Get shared PPT failed:", error);
+        return sendError(res, "Presentation not found or not shared", error.message, 404);
     }
 };

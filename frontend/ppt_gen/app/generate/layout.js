@@ -22,13 +22,13 @@ export default function GenerateLayout({ children }) {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 4.5, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute top-1/4 -left-[10%] w-[50%] h-[50%] bg-gradient-to-r from-violet-600/30 to-blue-600/30 blur-[130px] rounded-full pointer-events-none z-0 mix-blend-screen transform -rotate-12 dark:opacity-70 opacity-40"
+          className="absolute top-1/4 -left-[10%] w-[50%] h-[50%] bg-gradient-to-r from-violet-600/30 to-blue-600/30 blur-[130px] rounded-full pointer-events-none z-0 mix-blend-multiply dark:mix-blend-screen transform -rotate-12 dark:opacity-70 opacity-40"
         />
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 4.5, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="absolute bottom-1/4 -right-[10%] w-[50%] h-[50%] bg-gradient-to-l from-violet-600/25 to-blue-600/25 blur-[140px] rounded-full pointer-events-none z-0 mix-blend-screen transform rotate-12 dark:opacity-70 opacity-40"
+          className="absolute bottom-1/4 -right-[10%] w-[50%] h-[50%] bg-gradient-to-l from-violet-600/25 to-blue-600/25 blur-[140px] rounded-full pointer-events-none z-0 mix-blend-multiply dark:mix-blend-screen transform rotate-12 dark:opacity-70 opacity-40"
         />
 
         <div className="flex-1 min-h-0 flex relative z-10 pt-14">
