@@ -8,7 +8,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Info } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const EditWithAIModal = React.memo(({ 
     isOpen, 
@@ -30,11 +36,25 @@ const EditWithAIModal = React.memo(({
         >
             <DialogContent className="max-w-md bg-popover border-border text-popover-foreground rounded-md p-6 shadow-2xl z-50">
                 <DialogHeader className="shrink-0 mb-4">
-                    <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-                        <span>Edit Slide with AI</span>
+                    <DialogTitle className="text-lg font-bold flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                            <span>Edit Slide with AI</span>
+                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="p-1 text-muted-foreground hover:text-foreground transition-colors cursor-help rounded-full hover:bg-muted/50">
+                                        <Info className="w-4 h-4" />
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                    <p>Editing with AI costs 5 credits per edit</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </DialogTitle>
-                    <DialogDescription className="text-xs text-muted-foreground">
+                    <DialogDescription className="text-xs text-muted-foreground pt-1">
                         Describe how you want to modify this slide. You can
                         ask the AI to rewrite text, add/remove points, or
                         adjust layout styling.

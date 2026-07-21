@@ -100,6 +100,10 @@ async function apiCall(endpoint, options = {}) {
           toast.error(errorMessage);
         }).catch((err) => console.error("Toast error:", err));
       }
+
+      if (response.status === 402 && typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("insufficient-credits"));
+      }
       throw new APIError(errorMessage, response.status, data);
     }
 
@@ -113,6 +117,11 @@ async function apiCall(endpoint, options = {}) {
       data = await response.json();
     } else {
       data = await response.text();
+    }
+
+    // Trigger credit refresh on successful PPT generation or edits
+    if (response.ok && ["POST", "PATCH", "PUT"].includes(config.method) && url.includes("/ppt") && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("update-credits"));
     }
 
     return data;

@@ -249,6 +249,7 @@ export function useImageFetcher({
 
                     // 1. Fetch relevant images if layout requires them
                     const isImageCategory =
+                        (cat === "basic" && (type === "single" || type === "gallery")) ||
                         cat === "images" ||
                         cat === "image" ||
                         ((cat === "cards" || cat === "card") && type === "image");
@@ -302,7 +303,7 @@ export function useImageFetcher({
                                 if (shouldFetch && !isFetching) {
                                     if (queryChanged) {
                                         lastQueryRef.current[itemKey] = query;
-                                        if (fetchTimeoutRef.current[itemKey]) clearTimeout(fetchTimeoutRef.current[itemKey]);
+                                         if (fetchTimeoutRef.current[itemKey]) clearTimeout(fetchTimeoutRef.current[itemKey]);
                                         fetchTimeoutRef.current[itemKey] = setTimeout(() => {
                                             fetchTimeoutRef.current[itemKey] = null;
                                             fetchIcon(itemKey, query);

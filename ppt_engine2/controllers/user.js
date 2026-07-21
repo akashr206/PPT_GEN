@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { getUser, addUser, getUserByEmail } from "../services/user.js";
+import { getUser, addUser, getUserByEmail, getUserCredits } from "../services/user.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 
 
@@ -32,5 +32,15 @@ export const addUserController = async (req, res) => {
     } catch (error) {
         console.error(error);
         return sendError(res, "Error occurred while adding user", error, 500);
+    }
+}
+
+export const getUserCreditsController = async (req, res) => {
+    try {
+        const credits = await getUserCredits({ user_id: req.user.userId });
+        return sendSuccess(res, { credits });
+    } catch (error) {
+        console.error("Fetch credits error:", error);
+        return sendError(res, "Error occurred while fetching credits", error, 500);
     }
 }

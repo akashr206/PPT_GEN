@@ -65,7 +65,7 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
         if (!isStreamGenerating) return;
         const handleBeforeUnload = (e) => {
             e.preventDefault();
-            e.returnValue = "Reloading will abort the generation. Are you sure you want to leave?";
+            e.returnValue = "Reloading will abort the generation and deducted credits will not be refunded. Are you sure you want to leave?";
             return e.returnValue;
         };
         window.addEventListener("beforeunload", handleBeforeUnload);
@@ -196,6 +196,11 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
                     headers: { Authorization: `Bearer ${token}` },
                     signal: abortController.signal,
                 });
+
+                if (response.status === 402) {
+                    window.dispatchEvent(new CustomEvent("insufficient-credits", { detail: { isManual: false } }));
+                    throw new Error("Insufficient credits");
+                }
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);

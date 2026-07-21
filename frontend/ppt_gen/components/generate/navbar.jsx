@@ -19,6 +19,7 @@ import {
     Layout,
     Sparkles,
     Share2,
+    Coins,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/generate/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,8 @@ import {
 import metadata from "@/components/templates/metadata.json";
 import UserMenu from "../user-menu";
 import { useSettingsStore } from "@/hooks/use-settings-store";
+import api from "@/lib/api";
+import { CreditsModal } from "@/components/CreditsModal";
 
 export function Navbar() {
     const { data: session } = useSession();
@@ -67,6 +70,7 @@ export function Navbar() {
         isBusy: false,
     });
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
 
     useEffect(() => {
@@ -544,6 +548,9 @@ export function Navbar() {
                     </div>
                 </>
             )}
+            
+            {/* Credits Modal */}
+            <CreditsModal />
         </>
     );
 }

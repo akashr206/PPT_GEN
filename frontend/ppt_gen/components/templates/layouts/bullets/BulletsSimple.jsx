@@ -20,7 +20,7 @@ const BulletsSimple = ({
 
     return (
         <div
-            className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-[0cqw]"
+            className="w-full flex flex-row flex-wrap gap-x-[2cqw] gap-y-[0cqw]"
         >
 
             {items.map((item, i) => (

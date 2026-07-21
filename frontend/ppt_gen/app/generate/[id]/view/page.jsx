@@ -535,7 +535,7 @@ export default function PPTSlidesViewerPage({ params }) {
                                     if (data && data.length > 0) {
                                         item.image = data[0].imageURL;
                                     }
-                                } else if (!item.image && (node.layout?.category === "images" || node.layout?.category === "image" || node.layout?.type === "image")) {
+                                } else if (!item.image && (node.layout?.category === "images" || node.layout?.category === "image" || node.layout?.type === "image" || (node.layout?.category === "basic" && (node.layout?.type === "gallery" || node.layout?.type === "single")))) {
                                     const query = item.imageDescription || item.header || "placeholder";
                                     const data = await searchImages(query);
                                     if (data && data.length > 0) {

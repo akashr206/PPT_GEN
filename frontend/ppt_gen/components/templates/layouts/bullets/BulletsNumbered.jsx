@@ -18,7 +18,7 @@ const BulletsNumbered = ({
 
     return (
         <div
-            className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-0"
+            className="w-full flex flex-row flex-wrap gap-x-[2cqw] gap-y-0"
         >
             {/* Add before first item when empty */}
             {!readOnly && onAddItem && items.length === 0 && (

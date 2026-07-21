@@ -27,9 +27,10 @@ CONTENT & DENSITY RULES (CRITICAL FOR AESTHETICS)
 4. Density through Items: To fill a slide beautifully, generally use a SINGLE text-based "content" block populated with the correct number of items.
 5. MIXED MEDIA BLOCKS (HIGHLY ENCOURAGED): We STRONGLY encourage you to combine multiple blocks on a single slide by pairing text layouts with image layouts. For example, pair a text layout (like 'bullets', 'cards', or 'icons') with an image layout (like category: 'basic', type: 'single' or 'gallery'). This creates a stunning, balanced aesthetic. Please do this frequently!
 6. Avoid Block Splintering: Do NOT spawn 3 or 4 separate text-based "content" blocks on a single slide. This fractures the spatial grid. Stick to 1 robust text block, optionally paired with 1 image block.
-7. Title Slide (CRITICAL): For the FIRST slide (Title), you MUST make it visually striking by using an image layout (e.g., "split-left-image", or "split-right-image"). DO NOT use a "header" block on the Title Slide! Instead, use exactly ONE "content" block with a clean text layout (e.g., category: "basic", type: "large") to present the title, subtitle and other information you want to convey. Use the 'headerFontSize' (e.g., 5.0) and 'descriptionFontSize' (e.g., 2.0) item fields to ensure the text is BIG and prominent.
-8. Closing Slide (CRITICAL): For the LAST slide (Closing), you must make it perfectly centered and elegant. DO NOT use a "header" block! Use EXACTLY ONE "content" block in its "blocks" array with a clean text layout (e.g., category: "basic", type: "large") and "align": "center". DO NOT split the screen with multiple blocks on the closing slide. Use the 'headerFontSize' (e.g., 6.0) and 'descriptionFontSize' (e.g., 2.5) item fields to ensure the concluding text is BIG and memorable.
+7. Title Slide (CRITICAL): For the FIRST slide (Title), you MUST make it visually striking and VARY the layout style! You can use "split-left-image", "split-right-image", "top-image-banner", or a "normal" slide paired with a stunning image block (like a gallery). DO NOT use a "header" block on the Title Slide! Instead, use a "content" block with a clean text layout (e.g., category: "basic", type: "large") to present the title and subtitle. Use the 'headerFontSize' (e.g., 5.0) and 'descriptionFontSize' (e.g., 2.0) item fields to ensure the text is BIG and prominent.
+8. Closing Slide (CRITICAL): For the LAST slide (Closing), VARY the design! You can make it perfectly centered and elegant on a "normal" slide, OR use "split-left-image", "split-right-image", or "top-image-banner" for a striking visual finish. DO NOT use a "header" block! Use a "content" block with a clean text layout (e.g., category: "basic", type: "large") and make the text BIG and memorable. Ensure 'align' matches your chosen layout perfectly.
 9. [CRITICAL] Always return an even number of items unless a specific count is requested or appropriate for the layout.
+10. [CRITICAL] Image Pairing on Normal Slides: When using text, bullet, or card layouts on a 'normal' slide, strongly prefer pairing them with a complementary image block (category: 'basic', type: 'single' or 'gallery'). Standalone text blocks on normal slides lack visual contrast and look unappealing. 
 
 SLIDE ARCHITECTURE & MACRO TYPES
 1. Every slide must specify a "type" (e.g., normal, split-left-image, top-image-banner, full-image, closing).
@@ -116,13 +117,20 @@ Your task is to modify a single presentation slide JSON object based on the user
 You must return ONLY the updated slide as a valid JSON object matching the metadata schema rules.
 
 Template Metadata:
-${encode(metadata)}
+\${encode(metadata)}
 
 RULES:
-1. Ensure the output is a single valid JSON object representing the slide.
+1. OUTPUT FORMAT: Ensure the output is a single valid JSON object representing the slide. Output ONLY valid JSON, no explanations, no markdown block wraps (no \`\`\`json).
 2. ADAPT THE LAYOUT CATEGORY AND TYPE: If the user request implies a different layout style (e.g. statistics, timeline, cards, list, icons, tables, etc.), you MUST change the "layout.category" and "layout.type" inside the target content block to match that style.
 3. ADAPT SLIDE TYPE: You may change the macro "type" of the slide (e.g., from normal to split-left-image) if the user asks for an image layout. Remember to add "image" and "imageSize" (25-75).
-4. MAX BLOCKS: Maximum 4 content blocks + 1 header block. Every slide (except 'full-image') MUST have exactly 1 "header" block to serve as the slide title.
-5. OUTLINE CONTEXT WARNING: You are provided with the list of other slide titles in the deck. This outline is strictly for context.
-6. Output ONLY valid JSON, no explanations, no markdown block wraps (no \`\`\`json).
+4. CONTENT DENSITY & AESTHETICS:
+   - Provide rich, meaningful information. A slide should never feel empty or sparse.
+   - Balance the number of items against the length of the descriptions so text never overflows the slide.
+   - For "normal" slides, safely accommodate up to 6 items.
+   - For split/image layouts, limit to 3-4 items max to prevent overflowing.
+5. BLOCK SPLINTERING: Do NOT spawn 3 or 4 separate text-based "content" blocks on a single slide. Stick to 1 robust text block, optionally paired with 1 image block.
+6. MIXED MEDIA: We STRONGLY encourage combining a text layout block with an image layout block (e.g. category: 'basic', type: 'single' or 'gallery') to create stunning aesthetics if the user request supports it.
+7. HEADERS: Every slide (except 'full-image' and 'closing') MUST have exactly 1 "header" block to serve as the slide title.
+8. [CRITICAL] Always return an even number of items unless a specific count is requested or appropriate for the layout.
+9. OUTLINE CONTEXT WARNING: You are provided with the list of other slide titles in the deck. This outline is strictly for context.
 `;
