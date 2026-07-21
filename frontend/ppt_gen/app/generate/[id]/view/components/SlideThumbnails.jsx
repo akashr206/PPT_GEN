@@ -74,6 +74,7 @@ export default function SlideThumbnails({
     handleAddSlide,
     handleDeleteSlide,
     handleMoveSlide,
+    readOnly = false,
 }) {
     const previewScrollRef = useRef(null);
     const [draggingIndex, setDraggingIndex] = useState(null);
@@ -182,20 +183,22 @@ export default function SlideThumbnails({
     return (
         <div
             ref={previewScrollRef}
-            className="mt-3 w-full max-w-[1000px] shrink-0 overflow-x-auto flex gap-1 py-2 px-2.5 scrollbar-thin scrollbar-thumb-muted justify-start items-center"
+            className="mt-3 w-full max-w-[1000px] shrink-0 overflow-x-auto flex gap-1.5 py-2 px-2.5 scrollbar-thin scrollbar-thumb-muted justify-center items-center"
         >
-            <InsertSlideTrigger
-                index={0}
-                handleAddSlide={handleAddSlide}
-                isBusy={isBusy}
-                isTouchDevice={isTouchDevice}
-                activeSlideIndex={activeSlideIndex}
-            />
+            {!readOnly && (
+                <InsertSlideTrigger
+                    index={0}
+                    handleAddSlide={handleAddSlide}
+                    isBusy={isBusy}
+                    isTouchDevice={isTouchDevice}
+                    activeSlideIndex={activeSlideIndex}
+                />
+            )}
             {editableSlides.map((slide, idx) => (
                 <React.Fragment key={idx}>
                     <div
                         onClick={() => !isBusy && setActiveSlideIndex(idx)}
-                        draggable={!isBusy}
+                        draggable={!isBusy && !readOnly}
                         onDragStart={(e) => handleDragStart(e, idx)}
                         onDragOver={(e) => handleDragOver(e, idx)}
                         onDragLeave={(e) => handleDragLeave(e, idx)}
@@ -230,7 +233,7 @@ export default function SlideThumbnails({
                         </div>
 
                         {/* Hover/Touch Control Panel Overlay */}
-                        {!isBusy && (
+                        {!isBusy && !readOnly && (
                             <div
                                 className={`absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center gap-1 transition-opacity duration-200 z-10 ${
                                     activeSlideIndex === idx
@@ -289,7 +292,7 @@ export default function SlideThumbnails({
                             </div>
                         )}
                     </div>
-                    {idx < editableSlides.length - 1 && (
+                    {!readOnly && idx < editableSlides.length - 1 && (
                         <InsertSlideTrigger
                             index={idx + 1}
                             handleAddSlide={handleAddSlide}
@@ -301,15 +304,17 @@ export default function SlideThumbnails({
                 </React.Fragment>
             ))}
             
-            <button
-                onClick={() => !isBusy && handleAddSlide(editableSlides.length)}
-                disabled={isBusy}
-                className="relative flex flex-col items-center justify-center w-[120px] aspect-video rounded-md border-2 border-dashed border-border/60 bg-muted/10 text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5 shrink-0 transition-all cursor-pointer group/add disabled:cursor-not-allowed disabled:opacity-50 ml-1"
-                title="Add New Slide"
-            >
-                <Plus className="w-5 h-5 mb-1 group-hover/add:scale-125 transition-transform duration-300" />
-                <span className="text-[10px] font-semibold tracking-wide uppercase opacity-80 group-hover/add:opacity-100">New Slide</span>
-            </button>
+            {!readOnly && (
+                <button
+                    onClick={() => !isBusy && handleAddSlide(editableSlides.length)}
+                    disabled={isBusy}
+                    className="relative flex flex-col items-center justify-center w-[120px] aspect-video rounded-md border-2 border-dashed border-border/60 bg-muted/10 text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5 shrink-0 transition-all cursor-pointer group/add disabled:cursor-not-allowed disabled:opacity-50 ml-1"
+                    title="Add New Slide"
+                >
+                    <Plus className="w-5 h-5 mb-1 group-hover/add:scale-125 transition-transform duration-300" />
+                    <span className="text-[10px] font-semibold tracking-wide uppercase opacity-80 group-hover/add:opacity-100">New Slide</span>
+                </button>
+            )}
         </div>
     );
 }

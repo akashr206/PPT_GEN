@@ -24,144 +24,68 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Slide from "@/components/templates/Slide";
+import { normalizeSlides } from "@/hooks/use-slide-editor";
+import metadata from "@/components/templates/metadata.json";
 
-const SYSTEM_THEMES = [
+const PREVIEW_SLIDE = normalizeSlides([
     {
-        id: "default",
-        name: "Modern Light",
-        bg: "#ffffff",
-        primary: "#3b82f6",
-        fg: "#1f2937",
-        accent: "#8b5cf6",
-        desc: "Clean modern design with blue highlights",
-    },
-    {
-        id: "dark",
-        name: "Dark Mode",
-        bg: "#111827",
-        primary: "#60a5fa",
-        fg: "#f9fafb",
-        accent: "#a78bfa",
-        desc: "Sleek low-light experience with soft blue accent",
-    },
-    {
-        id: "corporate",
-        name: "Corporate",
-        bg: "#f8fafc",
-        primary: "#0369a1",
-        fg: "#0f172a",
-        accent: "#0284c7",
-        desc: "Professional Slate theme with deep ocean blues",
-    },
-    {
-        id: "creative",
-        name: "Creative",
-        bg: "#fff1f2",
-        primary: "#f43f5e",
-        fg: "#4c1d95",
-        accent: "#ec4899",
-        desc: "Vibrant and warm rose colors for bold content",
-    },
-    {
-        id: "elegant",
-        name: "Elegant",
-        bg: "#fafaf9",
-        primary: "#78716c",
-        fg: "#44403c",
-        accent: "#a8a29e",
-        desc: "Stately warm stone motif with classic serif headings",
-    },
-    {
-        id: "playful",
-        name: "Playful",
-        bg: "#fefce8",
-        primary: "#eab308",
-        fg: "#3f6212",
-        accent: "#fb923c",
-        desc: "Cheerfully bright yellow theme with Quicksand typography",
-    },
-    {
-        id: "nature",
-        name: "Nature",
-        bg: "#f4f6f0",
-        primary: "#2d5a3c",
-        fg: "#1c2e24",
-        accent: "#8fa882",
-        desc: "Calm and organic forest tones with classic serifs",
-    },
-    {
-        id: "sunset",
-        name: "Sunset",
-        bg: "#fdf8f5",
-        primary: "#ea580c",
-        fg: "#451a03",
-        accent: "#f97316",
-        desc: "Warm clay and peach hues reminiscent of a sunset",
-    },
-    {
-        id: "ocean",
-        name: "Ocean",
-        bg: "#f0f7fa",
-        primary: "#0284c7",
-        fg: "#0c4a6e",
-        accent: "#06b6d4",
-        desc: "Fresh sea breeze blues and deep teal accents",
-    },
-    {
-        id: "minimalist",
-        name: "Minimalist",
-        bg: "#ffffff",
-        primary: "#111827",
-        fg: "#111827",
-        accent: "#374151",
-        desc: "Stark black & white with luxury serif typefaces",
-    },
-    {
-        id: "lavender",
-        name: "Lavender",
-        bg: "#faf9fe",
-        primary: "#6366f1",
-        fg: "#1e1b4b",
-        accent: "#d946ef",
-        desc: "Sophisticated and tech-forward violet tones",
-    },
-    {
-        id: "dracula",
-        name: "Dracula",
-        bg: "#1e1e2e",
-        primary: "#cba6f7",
-        fg: "#f8f8f2",
-        accent: "#f5c2e7",
-        desc: "Cozy cyber orchid aesthetics for developers",
-    },
-    {
-        id: "nord-dark",
-        name: "Nord Dark",
-        bg: "#2e3440",
-        primary: "#88c0d0",
-        fg: "#eceff4",
-        accent: "#81a1c1",
-        desc: "Arctic cold ice blue theme with clean structure",
-    },
-    {
-        id: "forest-dark",
-        name: "Forest Dark",
-        bg: "#0f1715",
-        primary: "#52b788",
-        fg: "#e6ede9",
-        accent: "#74c69d",
-        desc: "Restorative deep forest green dark theme",
-    },
-    {
-        id: "luxury-dark",
-        name: "Luxury Dark",
-        bg: "#141414",
-        primary: "#d4af37",
-        fg: "#f5f5f0",
-        accent: "#c5a880",
-        desc: "Premium obsidian black theme with gold highlights",
-    },
-];
+        type: "normal",
+        header: {
+            id: "header_1",
+            type: "header",
+            title: "Defining Brand Identity",
+            subtitle: "Harmonized color palettes and responsive design systems.",
+            align: "left"
+        },
+        contentTree: {
+            id: "block_1",
+            type: "leaf",
+            blockType: "content",
+            layout: { category: "cards", type: "numbered" },
+            items: [
+                {
+                    header: "Color Hierarchy",
+                    description: "Establish clear visual rules for text, accents, and backgrounds.",
+                },
+                {
+                    header: "Typography Pairing",
+                    description: "Select expressive headings paired with clean body fonts.",
+                },
+                {
+                    header: "Adaptive Layouts",
+                    description: "Structured components designed for seamless presentation flow.",
+                },
+            ]
+        }
+    }
+])[0];
+
+const THEME_COLORS = {
+    "default": { bg: "#ffffff", primary: "#3b82f6", fg: "#1f2937", accent: "#8b5cf6" },
+    "dark": { bg: "#111827", primary: "#60a5fa", fg: "#f9fafb", accent: "#a78bfa" },
+    "corporate": { bg: "#f8fafc", primary: "#0369a1", fg: "#0f172a", accent: "#0284c7" },
+    "creative": { bg: "#fff1f2", primary: "#f43f5e", fg: "#4c1d95", accent: "#ec4899" },
+    "elegant": { bg: "#fafaf9", primary: "#78716c", fg: "#44403c", accent: "#a8a29e" },
+    "playful": { bg: "#fefce8", primary: "#eab308", fg: "#3f6212", accent: "#fb923c" },
+    "nature": { bg: "#f4f6f0", primary: "#2d5a3c", fg: "#1c2e24", accent: "#8fa882" },
+    "sunset": { bg: "#fdf8f5", primary: "#ea580c", fg: "#451a03", accent: "#f97316" },
+    "ocean": { bg: "#f0f7fa", primary: "#0284c7", fg: "#0c4a6e", accent: "#06b6d4" },
+    "minimalist": { bg: "#ffffff", primary: "#111827", fg: "#111827", accent: "#374151" },
+    "lavender": { bg: "#faf9fe", primary: "#6366f1", fg: "#1e1b4b", accent: "#d946ef" },
+    "dracula": { bg: "#1e1e2e", primary: "#cba6f7", fg: "#f8f8f2", accent: "#f5c2e7" },
+    "nord-dark": { bg: "#2e3440", primary: "#88c0d0", fg: "#eceff4", accent: "#81a1c1" },
+    "forest-dark": { bg: "#0f1715", primary: "#52b788", fg: "#e6ede9", accent: "#74c69d" },
+    "luxury-dark": { bg: "#141414", primary: "#d4af37", fg: "#f5f5f0", accent: "#c5a880" }
+};
+
+const SYSTEM_THEMES = metadata.themes.map(theme => ({
+    ...theme,
+    desc: theme.description,
+    bg: THEME_COLORS[theme.id]?.bg || "#ffffff",
+    primary: THEME_COLORS[theme.id]?.primary || "#3b82f6",
+    fg: THEME_COLORS[theme.id]?.fg || "#1f2937",
+    accent: THEME_COLORS[theme.id]?.accent || "#8b5cf6",
+}));
 
 export default function ThemesTab() {
     const { customThemes, isLoading, deleteTheme } = useThemes();
@@ -360,42 +284,7 @@ export default function ThemesTab() {
                     <div className="w-full flex items-center justify-center mt-6">
                         <div className="w-full max-w-[800px] pointer-events-none">
                             <Slide
-                                slide_content={{
-                                    title: "Defining Your Brand Identity",
-                                    subtitle:
-                                        "Create harmonized designs dynamically compile-ready for slide decks.",
-                                    items: [
-                                        {
-                                            header: "Define color hierarchy",
-                                            description:
-                                                "Establish visual guidelines for text, borders, and backgrounds.",
-                                        },
-                                        {
-                                            header: "Typography pairing",
-                                            description:
-                                                "Select classic heading and body fonts matching your brand.",
-                                        },
-                                        {
-                                            header: "Generate layouts",
-                                            description:
-                                                "Assemble custom slide structures responsive to all screen sizes.",
-                                        },
-                                        {
-                                            header: "Lorem Ipsum",
-                                            description:
-                                                "Lorem Ipsum dolor sit amet, consectetur adipiscing elit.",
-                                        },
-                                        {
-                                            header: "Lorem Ipsum",
-                                            description:
-                                                "Lorem Ipsum dolor sit amet, consectetur adipiscing elit.",
-                                        },
-                                    ],
-                                    layout: {
-                                        category: "card",
-                                        type: "numbered",
-                                    },
-                                }}
+                                slide_content={PREVIEW_SLIDE}
                                 theme={
                                     typeof selectedTheme === "string"
                                         ? selectedTheme
