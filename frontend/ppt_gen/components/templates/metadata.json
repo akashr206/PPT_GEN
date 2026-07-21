@@ -95,22 +95,12 @@
         {
             "id": "top-image-banner",
             "name": "Top Image Banner",
-            "description": "Top image banner. Requires 'image' string and 'imageSize' number (height percentage 25-75)."
+            "description": "Top image banner. Requires 'image' string and 'imageSize' number (height percentage 20 - 30)."
         },
         {
             "id": "full-image",
             "name": "Full Image",
             "description": "Full bleed background image. NO blocks allowed in this slide type."
-        },
-        {
-            "id": "agenda",
-            "name": "Agenda Slide",
-            "description": "Dedicated agenda format."
-        },
-        {
-            "id": "closing",
-            "name": "Closing Slide",
-            "description": "Dedicated closing format."
         }
     ],
     "layoutCategories": {
@@ -123,34 +113,46 @@
                 "items",
                 "columns"
             ],
-            "itemFields": [
-                "header",
-                "description"
-            ],
             "types": [
                 {
                     "id": "simple",
                     "name": "Simple List",
                     "description": "A classic vertical list of items, splitting into a 2-column layout when there are more than 4 items. Best for general text outlines and comprehensive summaries.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 },
                 {
                     "id": "grid",
                     "name": "Bullets Grid",
                     "description": "A structured grid of bullet items with headers and descriptions. Best for comparisons or scanning multiple parallel points at a glance.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 },
                 {
                     "id": "numbered",
                     "name": "Numbered List",
                     "description": "A sequential list with prominent numbers instead of basic bullets. Best for step-by-step processes or top N lists.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 },
                 {
                     "id": "accent",
                     "name": "Accent Bullets",
                     "description": "A refined list where items are highlighted with horizontal accent bars.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 }
             ],
             "constraints": {
@@ -167,27 +169,21 @@
                 "items",
                 "columns"
             ],
-            "itemFields": [
-                "header",
-                "description"
-            ],
             "types": [
                 {
                     "id": "basic",
                     "name": "Basic Cards",
                     "description": "Clean border-based card grid for showcasing features or items side-by-side cleanly.",
-                    "supportsColumns": true
-                },
-                {
-                    "id": "image",
-                    "name": "Image Cards",
-                    "description": "Cards with a top placeholder area. Best for highlighting categorizations that need visual representation.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 }
             ],
             "constraints": {
                 "maxItems": 6,
-                "recommendedItems": "2 to 4"
+                "recommendedItems": "3 to 6"
             }
         },
         "icons": {
@@ -199,29 +195,39 @@
                 "items",
                 "columns"
             ],
-            "itemFields": [
-                "header",
-                "description",
-                "iconKeywords"
-            ],
             "types": [
                 {
                     "id": "list",
                     "name": "Icons List",
                     "description": "A vertical list of items prominently featuring an icon on the left. Best for detailing specific features or steps.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description",
+                        "iconKeywords"
+                    ]
                 },
                 {
                     "id": "grid",
                     "name": "Icons Grid",
                     "description": "A structured grid of items prominently featuring a large icon for each. Best for visualizing abstract features or high-level business capabilities.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description",
+                        "iconKeywords"
+                    ]
                 },
                 {
                     "id": "card",
                     "name": "Icons Card",
                     "description": "A structured grid of items prominently featuring a large icon for each. Best for visualizing abstract features or high-level business capabilities.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description",
+                        "iconKeywords"
+                    ]
                 }
             ],
             "constraints": {
@@ -238,21 +244,25 @@
                 "items",
                 "columns"
             ],
-            "itemFields": [
-                "header",
-                "description"
-            ],
             "types": [
                 {
                     "id": "highlight",
                     "name": "Stat Highlight",
-                    "description": "Emphasizes a single massive key metric with a detailed text callout description. Best for highlighting a monumental breakthrough metric."
+                    "description": "Emphasizes a single massive key metric with a detailed text callout description. Best for highlighting a monumental breakthrough metric.",
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 },
                 {
                     "id": "grid",
                     "name": "Stats Grid",
                     "description": "Grid display of big numbers and their descriptions. Best for dashboard summaries and showing multiple performance KPIs at once.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 }
             ],
             "constraints": {
@@ -268,25 +278,33 @@
                 "subtitle",
                 "items"
             ],
-            "itemFields": [
-                "header",
-                "description"
-            ],
             "types": [
                 {
                     "id": "vertical",
                     "name": "Vertical Timeline",
-                    "description": "A vertical timeline track with nodes alternating left and right, complete with connector lines."
+                    "description": "A vertical timeline track with nodes alternating left and right, complete with connector lines.",
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 },
                 {
                     "id": "horizontal",
                     "name": "Horizontal Timeline",
-                    "description": "A horizontal timeline track with nodes alternating top and bottom, perfect for broad horizontal milestones."
+                    "description": "A horizontal timeline track with nodes alternating top and bottom, perfect for broad horizontal milestones.",
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 },
                 {
                     "id": "chevron",
                     "name": "Chevron Timeline",
-                    "description": "A horizontal sequence of connected chevron arrows with description text alternating top and bottom."
+                    "description": "A horizontal sequence of connected chevron arrows with description text alternating top and bottom.",
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 }
             ],
             "constraints": {
@@ -304,48 +322,71 @@
                 "verticalAlign",
                 "columns"
             ],
-            "itemFields": [
-                "header",
-                "description",
-                "align",
-                "headerFontSize",
-                "descriptionFontSize",
-                "image",
-                "imageDescription",
-                "imageFocus",
-                "imageFit"
-            ],
             "types": [
                 {
                     "id": "large",
                     "name": "Large Text",
-                    "description": "Large text perfect for main slide titles or big statements."
+                    "description": "Large text perfect for main slide titles or big statements.",
+                    "itemFields": [
+                        "header",
+                        "description",
+                        "align",
+                        "headerFontSize",
+                        "descriptionFontSize"
+                    ]
                 },
                 {
                     "id": "plain",
                     "name": "Plain Text",
-                    "description": "A clean, simple text paragraph layout for long-form descriptions or quotes."
+                    "description": "A clean, simple text paragraph layout for long-form descriptions or quotes.",
+                    "itemFields": [
+                        "description",
+                        "align",
+                        "descriptionFontSize"
+                    ]
                 },
                 {
                     "id": "single",
                     "name": "Single Image",
-                    "description": "A single prominent image occupying maximum space, suitable for high-impact visual slides."
+                    "description": "A single prominent image occupying maximum space, suitable for high-impact visual slides.",
+                    "itemFields": [
+                        "image",
+                        "imageDescription",
+                        "imageFocus",
+                        "imageFit"
+                    ]
                 },
                 {
                     "id": "gallery",
                     "name": "Image Gallery",
                     "description": "A dynamic grid gallery displaying multiple images beautifully.",
-                    "supportsColumns": true
+                    "supportsColumns": true,
+                    "itemFields": [
+                        "image",
+                        "imageDescription",
+                        "imageFocus",
+                        "imageFit"
+                    ]
                 },
                 {
                     "id": "table",
                     "name": "Table",
-                    "description": "A clean 2-column table layout perfect for comparing categories with their detailed descriptions."
+                    "description": "A flexible table layout. The block MUST include 'tableColumns' array (e.g., [{id: 'col1', label: 'Header 1', width: 1}, {id: 'col2', label: 'Header 2', width: 2}]). Each item MUST include a 'cells' object mapping column IDs to text (e.g., {cells: {col1: 'Data 1', col2: 'Data 2'}}).",
+                    "blockFields": [
+                        "tableColumns"
+                    ],
+                    "itemFields": [
+                        "cells"
+                    ]
                 },
                 {
                     "id": "code",
                     "name": "Code Block",
-                    "description": "A preformatted code block for displaying source code."
+                    "description": "A preformatted code block for displaying source code.",
+                    "itemFields": [
+                        "header",
+                        "description"
+                    ]
                 }
             ],
             "constraints": {

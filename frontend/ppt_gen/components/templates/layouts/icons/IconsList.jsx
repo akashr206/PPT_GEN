@@ -10,7 +10,7 @@ const IconsList = ({ content, columns, onUpdateItem, onDeleteItem, onAddItem, re
     const actualCols = Math.min(columns || 1, Math.max(1, items.length));
 
     return (
-        <div className="w-full flex flex-row flex-wrap gap-x-[4cqw] gap-y-[0cqw]">
+        <div className="w-full flex flex-row flex-wrap gap-x-[1cqw] gap-y-[0cqw]">
             {items.length === 0 && !readOnly && onAddItem && (
                 <button
                     onClick={() => onAddItem(0, "before")}

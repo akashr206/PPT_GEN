@@ -138,7 +138,7 @@ export function usePptData({ pptId, setPptData, setEditableSlides, setActiveSlid
 
         const handleComplete = () => {
             if (!active) return;
-            console.log("[Stream] Complete event received.");
+            console.log("[Stream] Complete.");
             setIsStreamGenerating(false);
             clearQueryParams();
 

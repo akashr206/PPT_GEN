@@ -8,7 +8,7 @@ const StatsHighlight = ({ content, onUpdateItem, readOnly }) => {
     const item = items[0] || {};
     
     return (
-        <div className="w-full flex flex-col items-center justify-center p-[4cqw] text-center gap-[2cqw]">
+        <div className="w-full flex flex-col items-center justify-center p-[2.5cqw] text-center gap-[2cqw]">
             <EditableElement
                 as="h1"
                 className="font-black text-[12cqw] leading-none theme-text-primary tracking-tighter"
@@ -20,7 +20,7 @@ const StatsHighlight = ({ content, onUpdateItem, readOnly }) => {
             <div className="w-[10cqw] h-[0.5cqw] bg-[--theme-card-border] rounded-full" />
             <EditableElement
                 as="p"
-                className="text-[2cqw] font-medium leading-relaxed theme-text-muted max-w-[80%]"
+                className="text-[2cqw] font-medium w-full leading-relaxed theme-text-muted"
                 value={item.description}
                 onChange={(val) => onUpdateItem(0, "description", val)}
                 readOnly={readOnly}
