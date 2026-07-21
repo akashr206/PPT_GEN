@@ -167,7 +167,7 @@ export default function LandingPage() {
 
             <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-5xl mx-auto">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] font-medium tracking-tight mb-6 text-white leading-[1.1] max-w-4xl mx-auto">
-                    Presentations at the speed of AI
+                    The next generation of presentation design
                 </h1>
 
                 <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto font-normal mb-12">

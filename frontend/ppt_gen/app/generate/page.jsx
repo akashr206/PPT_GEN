@@ -46,7 +46,7 @@ function GeneratePageContent() {
 
     if (status === "loading") {
         return (
-            <div className="flex h-screen w-screen items-center justify-center bg-[#050505] text-white">
+            <div className="flex h-screen w-screen items-center justify-center bg-background text-foreground">
                 <Loader2 className="animate-spin" size={30} />
             </div>
         );
@@ -56,10 +56,29 @@ function GeneratePageContent() {
         return null;
     }
 
-    const handleGenerate = (e) => {
+    const handleGenerate = async (e) => {
         e.preventDefault();
-        if (!prompt.trim()) return;
+        if (!prompt.trim() || isGenerating) return;
         setIsGenerating(true);
+
+        const requiredCredits = 20 + (Number(slides) === 15 ? 5 : 0) + (thinking === "extended" ? 5 : 0);
+
+        try {
+            const data = await api.get("/api/user/credits");
+            const userCredits = data?.data?.credits ?? 0;
+
+            if (userCredits < requiredCredits) {
+                setIsGenerating(false);
+                window.dispatchEvent(
+                    new CustomEvent("insufficient-credits", {
+                        detail: { isManual: false, credits: userCredits }
+                    })
+                );
+                return;
+            }
+        } catch (err) {
+            console.error("Failed to verify credits before generation:", err);
+        }
 
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let pptId = "";

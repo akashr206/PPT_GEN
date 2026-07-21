@@ -154,6 +154,27 @@
                     "description": "Clean border-based card grid for showcasing features or items side-by-side cleanly.",
                     "supportsColumns": true,
                     "itemFields": ["header", "description"]
+                },
+                {
+                    "id": "outline",
+                    "name": "Outline Cards",
+                    "description": "Stylish card layout with subtle top accent bars and outlined borders. Best for highlight lists or structured features.",
+                    "supportsColumns": true,
+                    "itemFields": ["header", "description"]
+                },
+                {
+                    "id": "numbered",
+                    "name": "Numbered Cards",
+                    "description": "Card grid featuring prominent step/sequence numbers in each card header. Best for multi-step processes, key takeaways, phases, or numbered feature sets.",
+                    "supportsColumns": true,
+                    "itemFields": ["header", "description"]
+                },
+                {
+                    "id": "accent",
+                    "name": "Accent Cards",
+                    "description": "Card layout with distinct header banner backgrounds and clean accent divider lines. Best for grouping distinct concepts, categorized topics, or highlighted features.",
+                    "supportsColumns": true,
+                    "itemFields": ["header", "description"]
                 }
             ],
             "constraints": {
