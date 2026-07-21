@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, use, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { normalizeSlides } from "@/hooks/use-slide-editor";
 import { useImageFetcher } from "@/hooks/use-image-fetcher";
 import SlideViewer from "@/app/generate/[id]/view/components/SlideViewer";
-import { Diamond } from "lucide-react";
+import SlideThumbnails from "@/app/generate/[id]/view/components/SlideThumbnails";
 
 export default function SharedPresentationViewer({ params }) {
     const unwrappedParams = use(params);
@@ -143,35 +145,76 @@ export default function SharedPresentationViewer({ params }) {
 
     return (
         <div className="w-full h-screen flex flex-col bg-background/50 select-none overflow-hidden relative">
-            {/* Simple Top Bar */}
-            <div className="w-full h-12 relative bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 flex items-center justify-between px-6 z-20 shrink-0">
-                <div className="font-semibold text-sm truncate max-w-sm">
-                    {pptData?.title || "Shared Presentation"}
+            {/* Top Bar with Logo & CTA */}
+            <div className="w-full h-14 relative bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 flex items-center justify-between px-4 sm:px-6 z-20 shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                    <Link
+                        href="/"
+                        className="font-semibold text-sm tracking-tight flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity"
+                    >
+                        <img
+                            src="/logo.png"
+                            alt="Broadside AI"
+                            className="h-5 w-5 object-contain dark:invert"
+                        />
+                        <span className="font-bold hidden sm:inline text-foreground">Broadside AI</span>
+                    </Link>
+
+                    <span className="text-border text-sm font-light hidden sm:inline">|</span>
+
+                    <div className="font-medium text-xs sm:text-sm text-muted-foreground truncate max-w-[200px] sm:max-w-md">
+                        {pptData?.title || "Shared Presentation"}
+                    </div>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                    Slide {activeSlideIndex + 1} of {editableSlides.length}
+
+                <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-xs text-muted-foreground hidden md:block">
+                        Slide {activeSlideIndex + 1} of {editableSlides.length}
+                    </div>
+
+                    <Link href="/">
+                        <Button
+                            size="sm"
+                            className="rounded-md  border border-white/15 font-semibold text-xs shadow-xs relative overflow-hidden px-4 py-2  transition-all cursor-pointer"
+                        >
+                            {/* Internal Aurora Light Element */}
+                            <div className="absolute -bottom-1 inset-x-0 h-1/2 bg-gradient-to-r bg-blue-500/50 blur-xs rounded-full pointer-events-none" />
+                            
+                            <span className="relative z-10">
+                                Create yours
+                            </span>
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
-            <div className="w-full flex-1 flex flex-row min-h-0 relative overflow-hidden">
-                <div className="flex-1 flex flex-col items-center justify-center p-2 min-h-0 overflow-y-auto">
-                    <div className="flex-1 flex flex-col items-center justify-between md:justify-center w-full h-full p-2 sm:p-4 relative min-h-0">
-                        <div className="w-full flex-1 flex flex-col items-center justify-center min-h-0 gap-3">
-                            <SlideViewer
-                                editableSlides={editableSlides}
-                                activeSlideIndex={activeSlideIndex}
-                                setActiveSlideIndex={setActiveSlideIndex}
-                                resolvedSlideContent={resolvedContent}
-                                theme={theme}
-                                isBusy={false}
-                                isStreamGenerating={false}
-                                isFullscreen={isFullscreen}
-                                isTouchDevice={isTouchDevice}
-                                textSizes={textSizes}
-                                readOnly={true}
-                                {...slideViewerHandlers}
-                            />
-                        </div>
+            <div className="w-full flex-1 flex flex-col min-h-0 relative overflow-hidden">
+                <div className="flex-1 flex flex-col items-center justify-between p-2 sm:p-4 min-h-0 overflow-y-auto">
+                    <div className="w-full max-w-[1000px] flex-1 flex flex-col items-center justify-center min-h-0">
+                        <SlideViewer
+                            editableSlides={editableSlides}
+                            activeSlideIndex={activeSlideIndex}
+                            setActiveSlideIndex={setActiveSlideIndex}
+                            resolvedSlideContent={resolvedContent}
+                            theme={theme}
+                            isBusy={false}
+                            isStreamGenerating={false}
+                            isFullscreen={isFullscreen}
+                            isTouchDevice={isTouchDevice}
+                            textSizes={textSizes}
+                            readOnly={true}
+                            {...slideViewerHandlers}
+                        />
+
+                        <SlideThumbnails
+                            editableSlides={editableSlides}
+                            activeSlideIndex={activeSlideIndex}
+                            setActiveSlideIndex={setActiveSlideIndex}
+                            isBusy={false}
+                            theme={theme}
+                            resolveSlideContent={resolveSlideContent}
+                            readOnly={true}
+                        />
                     </div>
                 </div>
             </div>

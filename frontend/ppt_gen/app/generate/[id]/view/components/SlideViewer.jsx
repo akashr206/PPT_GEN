@@ -43,6 +43,7 @@ const SlideViewer = React.memo(function SlideViewer({
     onDeleteSlide,
     onEditWithAI,
     textSizes,
+    readOnly = false,
 }) {
     const presentationRef = useRef(null);
 
@@ -131,7 +132,7 @@ const SlideViewer = React.memo(function SlideViewer({
                     isFullscreen
                         ? "max-h-screen max-w-[calc(100vh*16/9)]"
                         : "shadow-xl rounded-lg max-md:rounded-md overflow-hidden ring-1 ring-border/20"
-                }`}
+                } ${readOnly ? "pointer-events-none select-none" : ""}`}
             >
                 {activeSlide ? (
                     <PresentationContext.Provider
@@ -219,7 +220,7 @@ const SlideViewer = React.memo(function SlideViewer({
             </div>
 
             {/* Floating controls */}
-            {!isFullscreen && activeSlide && (
+            {!isFullscreen && activeSlide && !readOnly && (
                 <SlideFloatingControls
                     isTouchDevice={isTouchDevice}
                     isBusy={isBusy}

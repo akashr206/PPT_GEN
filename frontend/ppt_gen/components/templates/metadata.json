@@ -3,77 +3,77 @@
         {
             "id": "default",
             "name": "Modern Light",
-            "description": "Best for general-purpose presentations, startups, product demos, research, education, technology, and professional topics. Clean, light design with blue accents and Inter typography."
+            "description": "Clean modern design with blue highlights"
         },
         {
             "id": "dark",
-            "name": "Modern Dark",
-            "description": "Best for technology, software, AI, engineering, developer tools, product launches, and modern business presentations. Vibrant dark design with blue/indigo accents and Inter typography."
+            "name": "Dark Mode",
+            "description": "Sleek low-light experience with soft blue accent"
         },
         {
             "id": "corporate",
             "name": "Corporate",
-            "description": "Best for business, finance, consulting, sales, marketing, enterprise reports, strategy, and executive presentations. Professional light design with slate/sky blue accents and Roboto typography."
+            "description": "Professional Slate theme with deep ocean blues"
         },
         {
             "id": "minimalist",
             "name": "Minimalist",
-            "description": "Best for research papers, academic conferences, technical documentation, architecture, product design, and presentations requiring maximum clarity. Stark monochrome black & white design with Playfair Display/Inter typography."
+            "description": "Stark black & white with luxury serif typefaces"
         },
         {
             "id": "creative",
             "name": "Creative",
-            "description": "Best for design portfolios, branding, advertising, media, art, fashion, creative agencies, and innovation pitches. Colorful pink/rose background with deep violet accents and Outfit typography."
+            "description": "Vibrant and warm rose colors for bold content"
         },
         {
             "id": "elegant",
             "name": "Elegant",
-            "description": "Best for literature, history, culture, architecture, academic presentations, ceremonies, and refined storytelling. Sophisticated warm grey design with Merriweather headings and Inter body."
+            "description": "Stately warm stone motif with classic serif headings"
         },
         {
             "id": "lavender",
             "name": "Lavender",
-            "description": "Best for healthcare, psychology, education, women-focused initiatives, wellness, startups, modern products, and creative business presentations. Modern lavender geometric design with Poppins typography."
+            "description": "Sophisticated and tech-forward violet tones"
         },
         {
             "id": "nature",
             "name": "Nature",
-            "description": "Best for nature, wildlife, environment, sustainability, agriculture, climate, ecology, travel, and outdoor topics. Calming earthy green and cream design with Lora headings and Inter body."
+            "description": "Calm and organic forest tones with classic serifs"
         },
         {
             "id": "ocean",
             "name": "Ocean",
-            "description": "Best for marine science, water conservation, healthcare, biotechnology, clean energy, environmental studies, and calming professional presentations. Fresh sea breeze blue design with Outfit/Inter typography."
+            "description": "Fresh sea breeze blues and deep teal accents"
         },
         {
             "id": "sunset",
             "name": "Sunset",
-            "description": "Best for travel, lifestyle, wellness, hospitality, food, tourism, inspirational talks, and personal storytelling. Warm orange/clay peach design with Outfit/Inter typography."
+            "description": "Warm clay and peach hues reminiscent of a sunset"
         },
         {
             "id": "playful",
             "name": "Playful",
-            "description": "Best for children's education, school projects, games, entertainment, fun events, workshops, and lighthearted presentations. Fun, warm yellow design with orange accents and Quicksand typography."
+            "description": "Cheerfully bright yellow theme with Quicksand typography"
         },
         {
             "id": "dracula",
             "name": "Dracula",
-            "description": "Best for AI, cybersecurity, programming, gaming, blockchain, software engineering, hacking, developer conferences, and futuristic technology presentations. Dark aesthetic featuring deep purples, pastel pinks, and neon mauve highlights."
+            "description": "Cozy cyber orchid aesthetics for developers"
         },
         {
             "id": "nord-dark",
             "name": "Nord Dark",
-            "description": "Best for cloud computing, DevOps, engineering, open-source projects, infrastructure, data science, technical documentation, and developer presentations. Clean arctic-inspired dark slate theme with icy blue highlights and crisp layout."
+            "description": "Arctic cold ice blue theme with clean structure"
         },
         {
             "id": "forest-dark",
             "name": "Forest Dark",
-            "description": "Best for sustainability, conservation, forestry, agriculture, biodiversity, environmental research, renewable energy, and eco-friendly initiatives. Restorative deep forest green theme with mint green and soft sage accents."
+            "description": "Restorative deep forest green dark theme"
         },
         {
             "id": "luxury-dark",
             "name": "Luxury Dark",
-            "description": "Best for premium brands, luxury products, high-end real estate, fashion, jewelry, executive presentations, exclusive services, and investor pitches. Sophisticated obsidian black theme with elegant gold, bronze details and serif typography."
+            "description": "Premium obsidian black theme with gold highlights"
         }
     ],
     "slideTypes": [
