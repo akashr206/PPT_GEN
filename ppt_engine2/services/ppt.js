@@ -88,10 +88,14 @@ export const readStatus = async ({ ppt_id }) => {
     return data;
 }
 
-export const updateSlides = async ({ ppt_id, slides }) => {
+export const updateSlides = async ({ ppt_id, slides, slides_count }) => {
+    const updatePayload = { slides };
+    if (slides_count !== undefined) {
+        updatePayload.slides_count = slides_count;
+    }
     const { data, error } = await supabase
         .from('ppts')
-        .update({ slides })
+        .update(updatePayload)
         .eq('id', ppt_id)
     if (error) {
         throw error;

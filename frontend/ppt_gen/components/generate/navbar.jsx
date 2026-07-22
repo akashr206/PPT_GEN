@@ -33,17 +33,8 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import metadata from "@/components/templates/metadata.json";
 import UserMenu from "../user-menu";
 import { useSettingsStore } from "@/hooks/use-settings-store";
-import api from "@/lib/api";
 import { CreditsModal } from "@/components/CreditsModal";
 
 export function Navbar() {
@@ -71,8 +62,6 @@ export function Navbar() {
     });
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-
-
     useEffect(() => {
         if (!isDetailPage) return;
 
@@ -99,14 +88,6 @@ export function Navbar() {
 
     const handleDownloadPPT = () => {
         window.dispatchEvent(new CustomEvent("trigger-download-pptx"));
-    };
-
-    const handleThemeChange = (themeName) => {
-        window.dispatchEvent(
-            new CustomEvent("trigger-change-theme", {
-                detail: { theme: themeName },
-            }),
-        );
     };
 
     const handlePresentClick = () => {
@@ -148,41 +129,41 @@ export function Navbar() {
                         {isDetailPage &&
                             pptInfo.appState === "viewing_slides" && (
                                 <div className="hidden md:flex items-center gap-3">
-                                    {/* Export Dropdown */}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                disabled={pptInfo.isBusy}
-                                                className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <Download size={13} />
-                                                <span>Export</span>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent
-                                            align="end"
-                                            className="min-w-[180px] bg-popover border-border text-popover-foreground rounded-md p-1.5 shadow-2xl z-50"
-                                        >
-                                            <DropdownMenuItem
-                                                onClick={handleDownloadPDF}
-                                                className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
-                                            >
-                                                <FileText size={14} />
-                                                <span>Download as PDF</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={handleDownloadPPT}
-                                                className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
-                                            >
-                                                <Presentation size={14} />
-                                                <span>Download as PPTX</span>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
                                     <div className="flex items-center border border-border/70 rounded-md overflow-hidden bg-background h-8">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={pptInfo.isBusy}
+                                                    className="border-border rounded-r-none! border-r-0 text-foreground hover:bg-accent hover:text-accent-foreground h-8 gap-1.5 flex items-center px-3 rounded-md text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    <Download size={13} />
+                                                    <span>Export</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent
+                                                align="end"
+                                                className="min-w-[180px] bg-popover border-border text-popover-foreground rounded-md p-1.5 shadow-2xl z-50"
+                                            >
+                                                <DropdownMenuItem
+                                                    onClick={handleDownloadPDF}
+                                                    className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
+                                                >
+                                                    <FileText size={14} />
+                                                    <span>Download as PDF</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={handleDownloadPPT}
+                                                    className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
+                                                >
+                                                    <Presentation size={14} />
+                                                    <span>
+                                                        Download as PPTX
+                                                    </span>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -190,15 +171,20 @@ export function Navbar() {
                                             disabled={pptInfo.isBusy}
                                             className="text-foreground hover:bg-accent hover:text-accent-foreground h-full gap-1.5 flex items-center px-3 rounded-none text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-r border-border/70"
                                         >
-                                            <Share2 size={13} className="text-primary" />
-                                            <span className="hidden sm:inline">Share</span>
+                                            <Share2
+                                                size={13}
+                                                className="text-primary"
+                                            />
+                                            <span className="hidden sm:inline">
+                                                Share
+                                            </span>
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             onClick={handlePresentClick}
                                             disabled={pptInfo.isBusy}
-                                            className="text-foreground hover:bg-accent hover:text-accent-foreground h-full gap-1.5 flex items-center px-3 rounded-none text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-r border-border/70"
+                                            className="text-foreground hover:bg-accent border-l-0 hover:text-accent-foreground h-full gap-1.5 flex items-center px-3 rounded-none text-xs font-medium shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-r border-border/70"
                                         >
                                             <Play
                                                 size={13}
@@ -213,10 +199,21 @@ export function Navbar() {
                                             size="sm"
                                             onClick={() => toggleAnimations()}
                                             disabled={pptInfo.isBusy}
-                                            className={`text-foreground hover:bg-accent hover:text-accent-foreground h-full w-8 p-0 flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${animationsEnabled ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'text-muted-foreground'}`}
-                                            title={animationsEnabled ? "Disable presentation animations" : "Enable presentation animations"}
+                                            className={`text-foreground rounded-l-none hover:bg-accent hover:text-accent-foreground h-full w-8 p-0 flex items-center justify-center shrink-0 cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${animationsEnabled ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground"}`}
+                                            title={
+                                                animationsEnabled
+                                                    ? "Disable presentation animations"
+                                                    : "Enable presentation animations"
+                                            }
                                         >
-                                            <Sparkles size={13} className={animationsEnabled ? "text-primary fill-primary/25" : "text-muted-foreground"} />
+                                            <Sparkles
+                                                size={13}
+                                                className={
+                                                    animationsEnabled
+                                                        ? "text-primary fill-primary/25"
+                                                        : "text-muted-foreground"
+                                                }
+                                            />
                                         </Button>
                                     </div>
 
@@ -344,7 +341,10 @@ export function Navbar() {
                                                 disabled={pptInfo.isBusy}
                                                 className="flex-1 justify-start h-9 gap-2 px-3 rounded-none text-xs font-medium cursor-pointer border-b border-border"
                                             >
-                                                <Share2 size={14} className="text-primary" />
+                                                <Share2
+                                                    size={14}
+                                                    className="text-primary"
+                                                />
                                                 <span>Share</span>
                                             </Button>
                                             <div className="flex items-center h-9">
@@ -353,7 +353,9 @@ export function Navbar() {
                                                     size="sm"
                                                     onClick={() => {
                                                         handlePresentClick();
-                                                        setIsMobileMenuOpen(false);
+                                                        setIsMobileMenuOpen(
+                                                            false,
+                                                        );
                                                     }}
                                                     disabled={pptInfo.isBusy}
                                                     className="flex-1 justify-start h-full gap-2 px-3 rounded-none text-xs font-medium cursor-pointer border-r border-border"
@@ -364,16 +366,29 @@ export function Navbar() {
                                                     />
                                                     <span>Present</span>
                                                 </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => toggleAnimations()}
-                                                disabled={pptInfo.isBusy}
-                                                className={`w-10 h-full p-0 flex items-center justify-center cursor-pointer ${animationsEnabled ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'text-muted-foreground'}`}
-                                                title={animationsEnabled ? "Disable presentation animations" : "Enable presentation animations"}
-                                            >
-                                                <Sparkles size={14} className={animationsEnabled ? "text-primary fill-primary/25" : "text-muted-foreground"} />
-                                            </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        toggleAnimations()
+                                                    }
+                                                    disabled={pptInfo.isBusy}
+                                                    className={`w-10 h-full p-0 flex items-center justify-center cursor-pointer ${animationsEnabled ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground"}`}
+                                                    title={
+                                                        animationsEnabled
+                                                            ? "Disable presentation animations"
+                                                            : "Enable presentation animations"
+                                                    }
+                                                >
+                                                    <Sparkles
+                                                        size={14}
+                                                        className={
+                                                            animationsEnabled
+                                                                ? "text-primary fill-primary/25"
+                                                                : "text-muted-foreground"
+                                                        }
+                                                    />
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>
@@ -548,7 +563,7 @@ export function Navbar() {
                     </div>
                 </>
             )}
-            
+
             {/* Credits Modal */}
             <CreditsModal />
         </>

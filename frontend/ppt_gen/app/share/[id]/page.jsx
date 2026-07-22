@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, use, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { Play } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -144,7 +145,7 @@ export default function SharedPresentationViewer({ params }) {
     };
 
     return (
-        <div className="w-full h-screen flex flex-col bg-background/50 select-none overflow-hidden relative">
+        <div className="w-full h-screen h-[100dvh] flex flex-col bg-background/50 select-none overflow-hidden relative">
             {/* Top Bar with Logo & CTA */}
             <div className="w-full h-14 relative bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-black/5 dark:border-white/10 flex items-center justify-between px-4 sm:px-6 z-20 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
@@ -172,6 +173,16 @@ export default function SharedPresentationViewer({ params }) {
                         Slide {activeSlideIndex + 1} of {editableSlides.length}
                     </div>
 
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.dispatchEvent(new CustomEvent("trigger-present"))}
+                        className="rounded-md border border-border font-semibold text-xs gap-1.5 px-3 py-1.5 transition-all cursor-pointer hover:bg-accent"
+                    >
+                        <Play size={13} className="fill-current text-primary" />
+                        <span className="hidden sm:inline">Present</span>
+                    </Button>
+
                     <Link href="/">
                         <Button
                             size="sm"
@@ -189,13 +200,14 @@ export default function SharedPresentationViewer({ params }) {
             </div>
 
             <div className="w-full flex-1 flex flex-col min-h-0 relative overflow-hidden">
-                <div className="flex-1 flex flex-col items-center justify-between p-2 sm:p-4 min-h-0 overflow-y-auto">
-                    <div className="w-full max-w-[1000px] flex-1 flex flex-col items-center justify-center min-h-0">
+                <div className="flex-1 flex flex-col items-center justify-between p-2 sm:p-4 pb-3 sm:pb-4 min-h-0 overflow-hidden">
+                    <div className="w-full max-w-[1200px] flex-1 flex flex-col items-center justify-center min-h-0 z-10 max-sm:px-0 px-4 md:px-12">
                         <SlideViewer
                             editableSlides={editableSlides}
                             activeSlideIndex={activeSlideIndex}
                             setActiveSlideIndex={setActiveSlideIndex}
                             resolvedSlideContent={resolvedContent}
+                            resolveSlideContent={resolveSlideContent}
                             theme={theme}
                             isBusy={false}
                             isStreamGenerating={false}
@@ -205,17 +217,17 @@ export default function SharedPresentationViewer({ params }) {
                             readOnly={true}
                             {...slideViewerHandlers}
                         />
-
-                        <SlideThumbnails
-                            editableSlides={editableSlides}
-                            activeSlideIndex={activeSlideIndex}
-                            setActiveSlideIndex={setActiveSlideIndex}
-                            isBusy={false}
-                            theme={theme}
-                            resolveSlideContent={resolveSlideContent}
-                            readOnly={true}
-                        />
                     </div>
+
+                    <SlideThumbnails
+                        editableSlides={editableSlides}
+                        activeSlideIndex={activeSlideIndex}
+                        setActiveSlideIndex={setActiveSlideIndex}
+                        isBusy={false}
+                        theme={theme}
+                        resolveSlideContent={resolveSlideContent}
+                        readOnly={true}
+                    />
                 </div>
             </div>
         </div>

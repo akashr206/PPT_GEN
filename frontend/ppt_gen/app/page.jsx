@@ -163,13 +163,13 @@ export default function LandingPage() {
                 </div>
             </nav>
 
-            <main className="relative z-10 min-h-[100svh] flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-5xl mx-auto">
+            <main className="relative z-10 min-h-[100vh] flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-5xl mx-auto">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] font-medium tracking-tight mb-6 text-white leading-[1.1] max-w-4xl mx-auto">
-                    The next generation of presentation design
+                    The Next Generation of Presentation Design
                 </h1>
 
                 <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto font-normal mb-12">
-                    Transform ideas into beautiful pitch decks and presentations
+                    Transform ideas into beautiful presentations
                 </p>
 
                 <div className="w-full max-w-4xl mx-auto">
@@ -241,7 +241,7 @@ export default function LandingPage() {
                 <div className="mt-24 grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 max-w-5xl mx-auto text-left">
                     
                     {/* Large Main Feature (Spans 2 cols, 2 rows) */}
-                    <div className="md:col-span-2 md:row-span-2 p-8 rounded-[2rem] bg-gradient-to-br from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all flex flex-col justify-end relative overflow-hidden group">
+                    <div className="md:col-span-2 md:row-span-2 p-8 rounded-[1rem] bg-gradient-to-br from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all flex flex-col justify-end relative overflow-hidden group">
                         <div className="absolute top-8 right-8 w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
                             <Sparkles size={24} />
                         </div>
@@ -253,7 +253,7 @@ export default function LandingPage() {
                     </div>
 
                     {/* Top Right Feature (Spans 2 cols, 1 row) */}
-                    <div className="md:col-span-2 p-8 rounded-[2rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between group">
+                    <div className="md:col-span-2 p-8 rounded-[1rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between group">
                         <div className="flex justify-between items-start mb-12">
                             <h3 className="text-xl font-semibold text-white tracking-tight">Stunning Designs</h3>
                             <div className="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center">
@@ -264,7 +264,7 @@ export default function LandingPage() {
                     </div>
 
                     {/* Bottom Right Features (1 col, 1 row each) */}
-                    <div className="p-8 rounded-[2rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
+                    <div className="p-8 rounded-[1rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-12">
                             <Monitor size={20} />
                         </div>
@@ -274,7 +274,7 @@ export default function LandingPage() {
                         </div>
                     </div>
                     
-                    <div className="p-8 rounded-[2rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
+                    <div className="p-8 rounded-[1rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
                         <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-12">
                             <Smartphone size={20} />
                         </div>
@@ -313,7 +313,7 @@ export default function LandingPage() {
                         <img
                             src="/logo.png"
                             alt="Broadside AI Logo"
-                            className="w-14 h-14 object-contain dark:invert"
+                            className="w-14 h-14 object-contain invert"
                         />
                         <DialogTitle className="text-xl font-bold text-white tracking-tight">
                             Sign in to Broadside AI

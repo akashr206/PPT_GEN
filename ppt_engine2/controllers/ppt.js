@@ -124,7 +124,7 @@ export const streamPPT = async (req, res) => {
     if (isNewGeneration) {
         let creditsToDeduct = 20;
         if (thinking === "true" || thinking === "advanced") creditsToDeduct += 5;
-        if (parseInt(slidesCount) === 15) creditsToDeduct += 5;
+        if (parseInt(slidesCount) > 10) creditsToDeduct += 5; // deduct 5 extra if number of slides is > 10
 
         try {
             const currentCredits = await getUserCredits({ user_id: req.user.userId });
@@ -167,7 +167,7 @@ export const streamPPT = async (req, res) => {
 
         const fullPrompt = `${prompt.trim()}\nTone: ${tone}\n Text content preference: ${layoutStyle || 'balanced'}\n User name: ${req.user?.name || 'User'}`.trim();
         const newSysPrompt = pptSystemPrompt +
-            `\nStrictly output exactly ${slidesCount} slides. Do not generate more or fewer slides under any circumstance.`;
+            `\n[CRITICAL] Strictly output exactly ${slidesCount} slides. Do not generate more or fewer slides under any circumstance.`;
 
         // Pass the abort signal and thinking config to chatStream
         await chatStream(newSysPrompt, fullPrompt, (token) => {
@@ -324,7 +324,15 @@ export const updateTemplate = async (req, res) => {
             await updateTheme({ ppt_id, theme });
         }
         if (slides) {
-            await updateSlides({ ppt_id, slides });
+            const pptData = await fetchPPTById({ ppt_id });
+            const currentSlidesCount = pptData[0]?.slides_count;
+            const newSlidesCount = Array.isArray(slides) ? slides.length : undefined;
+
+            if (newSlidesCount !== undefined && newSlidesCount !== currentSlidesCount) {
+                await updateSlides({ ppt_id, slides, slides_count: newSlidesCount });
+            } else {
+                await updateSlides({ ppt_id, slides });
+            }
         }
         sendSuccess(res, {}, "PPT updated successfully");
     } catch (error) {
@@ -421,7 +429,7 @@ Presentation Context:
         return sendSuccess(res, parsedSlide, "Slide edited successfully");
     } catch (error) {
         console.error("Edit slide failed:", error);
-        
+
         try {
             console.log(`[Credits] Refund 5 credits due to edit slide failure`);
             await updateCredits({ user_id: req.user.userId, amount_to_add: 5 });
@@ -445,7 +453,7 @@ export const toggleShare = async (req, res) => {
         if (pptList[0].user_id !== req.user.userId) {
             return sendError(res, "Unauthorized", null, 403);
         }
-        
+
         await updateShareStatus({ ppt_id, is_shared: !!is_shared });
         return sendSuccess(res, { is_shared: !!is_shared }, "Sharing status updated successfully");
     } catch (error) {

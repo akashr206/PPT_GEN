@@ -4,7 +4,7 @@ import React from "react";
 import { useThemes } from "@/hooks/use-themes";
 
 export default function CustomThemesStyles() {
-    const { customThemes } = useThemes();
+    const { customThemes } = useThemes({ fetchOnMount: false });
 
     if (!customThemes || customThemes.length === 0) return null;
 

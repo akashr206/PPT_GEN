@@ -31,6 +31,10 @@ const editSlideSchema = Joi.object({
     slideIndex: Joi.number().allow(null).optional()
 });
 
+// Public media search routes (rate limited)
+router.get("/images/search", apiLimiter, searchImages);
+router.get("/icons/search", apiLimiter, searchIcons);
+
 router.use(authMiddleware);
 router.use(apiLimiter);
 // /api/ppt/ - POST: generates ppt content
@@ -48,8 +52,6 @@ router.use(apiLimiter);
 router.post("/", generateLimiter, validateSchema(generateSchema, 'body'), generatePPT);
 router.post("/edit-slide", generateLimiter, validateSchema(editSlideSchema, 'body'), editSlide);
 router.get("/", getAllPPTs);
-router.get("/images/search", searchImages);
-router.get("/icons/search", searchIcons);
 router.get("/stream/:ppt_id", generateLimiter, validateSchema(streamSchema, 'query'), streamPPT);
 router.post("/convert", convertPPT);
 router.get("/:ppt_id", getPPTById);

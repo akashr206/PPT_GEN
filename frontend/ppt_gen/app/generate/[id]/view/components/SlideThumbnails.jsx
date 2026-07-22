@@ -89,6 +89,26 @@ export default function SlideThumbnails({
     }, []);
 
     useEffect(() => {
+        const container = previewScrollRef.current;
+        if (!container) return;
+        const activeThumb = container.querySelector(
+            `[data-slide-index="${activeSlideIndex}"]`
+        );
+        if (activeThumb) {
+            const containerWidth = container.clientWidth;
+            const thumbOffsetLeft = activeThumb.offsetLeft;
+            const thumbWidth = activeThumb.offsetWidth;
+            const targetScrollLeft =
+                thumbOffsetLeft - containerWidth / 2 + thumbWidth / 2;
+
+            container.scrollTo({
+                left: Math.max(0, targetScrollLeft),
+                behavior: "smooth",
+            });
+        }
+    }, [activeSlideIndex]);
+
+    useEffect(() => {
         const el = previewScrollRef.current;
         if (!el) return;
 
@@ -183,138 +203,141 @@ export default function SlideThumbnails({
     return (
         <div
             ref={previewScrollRef}
-            className="mt-3 w-full max-w-[1000px] shrink-0 overflow-x-auto flex gap-1.5 py-2 px-2.5 scrollbar-thin scrollbar-thumb-muted justify-center items-center"
+            className="mt-3 w-full max-w-[1000px] shrink-0 overflow-x-auto scrollbar-thin scrollbar-thumb-muted"
         >
-            {!readOnly && (
-                <InsertSlideTrigger
-                    index={0}
-                    handleAddSlide={handleAddSlide}
-                    isBusy={isBusy}
-                    isTouchDevice={isTouchDevice}
-                    activeSlideIndex={activeSlideIndex}
-                />
-            )}
-            {editableSlides.map((slide, idx) => (
-                <React.Fragment key={idx}>
-                    <div
-                        onClick={() => !isBusy && setActiveSlideIndex(idx)}
-                        draggable={!isBusy && !readOnly}
-                        onDragStart={(e) => handleDragStart(e, idx)}
-                        onDragOver={(e) => handleDragOver(e, idx)}
-                        onDragLeave={(e) => handleDragLeave(e, idx)}
-                        onDragEnd={handleDragEnd}
-                        onDrop={(e) => handleDrop(e, idx)}
-                        className={`relative flex w-[120px] aspect-video rounded-md overflow-hidden border-2 text-left shrink-0 transition-all cursor-pointer group/thumb select-none ${
-                            activeSlideIndex === idx
-                                ? "border-primary ring-2 ring-primary/20 shadow-md opacity-100"
-                                : "border-border hover:border-muted-foreground/30 opacity-70 hover:opacity-100"
-                        } ${isBusy ? "cursor-not-allowed opacity-50" : ""} ${
-                            draggedOverIndex === idx
-                                ? "border-amber-400 scale-[1.03] shadow-lg ring-2 ring-amber-400/20"
-                                : ""
-                        } ${
-                            draggingIndex === idx
-                                ? "opacity-30 border-dashed"
-                                : ""
-                        }`}
-                    >
-                        <div className="w-full h-full pointer-events-none select-none">
-                            <Slide
-                                slide_content={{
-                                    ...resolveSlideContent(slide, idx),
-                                    theme: theme,
-                                }}
-                            />
-                        </div>
-
-                        {/* Index Badge */}
-                        <div className="absolute bottom-1 right-1.5 bg-black/60 backdrop-blur-xs text-[9px] font-bold text-white px-1.5 py-0.5 rounded-md z-20">
-                            {idx + 1}
-                        </div>
-
-                        {/* Hover/Touch Control Panel Overlay */}
-                        {!isBusy && !readOnly && (
-                            <div
-                                className={`absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center gap-1 transition-opacity duration-200 z-10 ${
-                                    activeSlideIndex === idx
-                                        ? "opacity-100"
-                                        : "opacity-0 pointer-events-none"
-                                }`}
-                            >
-                                {/* Grip Drag Handle (only show on non-touch devices since dragging is touch-native or different) */}
-                                {!isTouchDevice && (
-                                    <div
-                                        className="h-6 w-6 rounded bg-black/50 hover:bg-black/75 text-white flex items-center justify-center cursor-grab active:cursor-grabbing transition-colors"
-                                        title="Drag to reorder"
-                                    >
-                                        <GripVertical size={11} />
-                                    </div>
-                                )}
-
-                                {/* Move Left Button */}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleMoveSlide(idx, idx - 1);
+            <div className="flex gap-1.5 items-center min-w-full w-max justify-center px-2.5 py-2">
+                {!readOnly && (
+                    <InsertSlideTrigger
+                        index={0}
+                        handleAddSlide={handleAddSlide}
+                        isBusy={isBusy}
+                        isTouchDevice={isTouchDevice}
+                        activeSlideIndex={activeSlideIndex}
+                    />
+                )}
+                {editableSlides.map((slide, idx) => (
+                    <React.Fragment key={idx}>
+                        <div
+                            data-slide-index={idx}
+                            onClick={() => !isBusy && setActiveSlideIndex(idx)}
+                            draggable={!isBusy && !readOnly}
+                            onDragStart={(e) => handleDragStart(e, idx)}
+                            onDragOver={(e) => handleDragOver(e, idx)}
+                            onDragLeave={(e) => handleDragLeave(e, idx)}
+                            onDragEnd={handleDragEnd}
+                            onDrop={(e) => handleDrop(e, idx)}
+                            className={`relative flex w-[120px] aspect-video rounded-md overflow-hidden border-2 text-left shrink-0 transition-all cursor-pointer group/thumb select-none ${
+                                activeSlideIndex === idx
+                                    ? "border-primary ring-2 ring-primary/20 shadow-md opacity-100"
+                                    : "border-border hover:border-muted-foreground/30 opacity-70 hover:opacity-100"
+                            } ${isBusy ? "cursor-not-allowed opacity-50" : ""} ${
+                                draggedOverIndex === idx
+                                    ? "border-amber-400 scale-[1.03] shadow-lg ring-2 ring-amber-400/20"
+                                    : ""
+                            } ${
+                                draggingIndex === idx
+                                    ? "opacity-30 border-dashed"
+                                    : ""
+                            }`}
+                        >
+                            <div className="w-full h-full pointer-events-none select-none">
+                                <Slide
+                                    slide_content={{
+                                        ...resolveSlideContent(slide, idx),
+                                        theme: theme,
                                     }}
-                                    disabled={idx === 0}
-                                    className="h-6 w-6 rounded bg-black/50 hover:bg-black/75 disabled:opacity-30 disabled:hover:bg-black/50 text-white flex items-center justify-center cursor-pointer transition-colors disabled:cursor-not-allowed"
-                                    title="Move Left"
-                                >
-                                    <ArrowLeft size={11} />
-                                </button>
-
-                                {/* Move Right Button */}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleMoveSlide(idx, idx + 1);
-                                    }}
-                                    disabled={idx === editableSlides.length - 1}
-                                    className="h-6 w-6 rounded bg-black/50 hover:bg-black/75 disabled:opacity-30 disabled:hover:bg-black/50 text-white flex items-center justify-center cursor-pointer transition-colors disabled:cursor-not-allowed"
-                                    title="Move Right"
-                                >
-                                    <ArrowRight size={11} />
-                                </button>
-
-                                {/* Delete Slide Button */}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteSlide(idx);
-                                    }}
-                                    disabled={editableSlides.length <= 1}
-                                    className="h-6 w-6 rounded bg-red-600/80 hover:bg-red-600 disabled:opacity-30 disabled:hover:bg-red-600/80 text-white flex items-center justify-center cursor-pointer transition-colors disabled:cursor-not-allowed"
-                                    title="Delete Slide"
-                                >
-                                    <Trash2 size={11} />
-                                </button>
+                                />
                             </div>
+
+                            {/* Index Badge */}
+                            <div className="absolute bottom-1 right-1.5 bg-black/60 backdrop-blur-xs text-[9px] font-bold text-white px-1.5 py-0.5 rounded-md z-20">
+                                {idx + 1}
+                            </div>
+
+                            {/* Hover/Touch Control Panel Overlay */}
+                            {!isBusy && !readOnly && (
+                                <div
+                                    className={`absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center gap-1 transition-opacity duration-200 z-10 ${
+                                        activeSlideIndex === idx
+                                            ? "opacity-100"
+                                            : "opacity-0 pointer-events-none"
+                                    }`}
+                                >
+                                    {/* Grip Drag Handle (only show on non-touch devices since dragging is touch-native or different) */}
+                                    {!isTouchDevice && (
+                                        <div
+                                            className="h-6 w-6 rounded bg-black/50 hover:bg-black/75 text-white flex items-center justify-center cursor-grab active:cursor-grabbing transition-colors"
+                                            title="Drag to reorder"
+                                        >
+                                            <GripVertical size={11} />
+                                        </div>
+                                    )}
+
+                                    {/* Move Left Button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleMoveSlide(idx, idx - 1);
+                                        }}
+                                        disabled={idx === 0}
+                                        className="h-6 w-6 rounded bg-black/50 hover:bg-black/75 disabled:opacity-30 disabled:hover:bg-black/50 text-white flex items-center justify-center cursor-pointer transition-colors disabled:cursor-not-allowed"
+                                        title="Move Left"
+                                    >
+                                        <ArrowLeft size={11} />
+                                    </button>
+
+                                    {/* Move Right Button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleMoveSlide(idx, idx + 1);
+                                        }}
+                                        disabled={idx === editableSlides.length - 1}
+                                        className="h-6 w-6 rounded bg-black/50 hover:bg-black/75 disabled:opacity-30 disabled:hover:bg-black/50 text-white flex items-center justify-center cursor-pointer transition-colors disabled:cursor-not-allowed"
+                                        title="Move Right"
+                                    >
+                                        <ArrowRight size={11} />
+                                    </button>
+
+                                    {/* Delete Slide Button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteSlide(idx);
+                                        }}
+                                        disabled={editableSlides.length <= 1}
+                                        className="h-6 w-6 rounded bg-red-600/80 hover:bg-red-600 disabled:opacity-30 disabled:hover:bg-red-600/80 text-white flex items-center justify-center cursor-pointer transition-colors disabled:cursor-not-allowed"
+                                        title="Delete Slide"
+                                    >
+                                        <Trash2 size={11} />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        {!readOnly && idx < editableSlides.length - 1 && (
+                            <InsertSlideTrigger
+                                index={idx + 1}
+                                handleAddSlide={handleAddSlide}
+                                isBusy={isBusy}
+                                isTouchDevice={isTouchDevice}
+                                activeSlideIndex={activeSlideIndex}
+                            />
                         )}
-                    </div>
-                    {!readOnly && idx < editableSlides.length - 1 && (
-                        <InsertSlideTrigger
-                            index={idx + 1}
-                            handleAddSlide={handleAddSlide}
-                            isBusy={isBusy}
-                            isTouchDevice={isTouchDevice}
-                            activeSlideIndex={activeSlideIndex}
-                        />
-                    )}
-                </React.Fragment>
-            ))}
-            
-            {!readOnly && (
-                <button
-                    onClick={() => !isBusy && handleAddSlide(editableSlides.length)}
-                    disabled={isBusy}
-                    className="relative flex flex-col items-center justify-center w-[120px] aspect-video rounded-md border-2 border-dashed border-border/60 bg-muted/10 text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5 shrink-0 transition-all cursor-pointer group/add disabled:cursor-not-allowed disabled:opacity-50 ml-1"
-                    title="Add New Slide"
-                >
-                    <Plus className="w-5 h-5 mb-1 group-hover/add:scale-125 transition-transform duration-300" />
-                    <span className="text-[10px] font-semibold tracking-wide uppercase opacity-80 group-hover/add:opacity-100">New Slide</span>
-                </button>
-            )}
+                    </React.Fragment>
+                ))}
+                
+                {!readOnly && (
+                    <button
+                        onClick={() => !isBusy && handleAddSlide(editableSlides.length)}
+                        disabled={isBusy}
+                        className="relative flex flex-col items-center justify-center w-[120px] aspect-video rounded-md border-2 border-dashed border-border/60 bg-muted/10 text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary/5 shrink-0 transition-all cursor-pointer group/add disabled:cursor-not-allowed disabled:opacity-50 ml-1"
+                        title="Add New Slide"
+                    >
+                        <Plus className="w-5 h-5 mb-1 group-hover/add:scale-125 transition-transform duration-300" />
+                        <span className="text-[10px] font-semibold tracking-wide uppercase opacity-80 group-hover/add:opacity-100">New Slide</span>
+                    </button>
+                )}
+            </div>
         </div>
     );
 }
