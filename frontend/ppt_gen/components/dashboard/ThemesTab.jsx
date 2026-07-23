@@ -93,7 +93,7 @@ export default function ThemesTab() {
     const [themeToDelete, setThemeToDelete] = useState(null);
 
     return (
-        <div className="flex flex-col gap-8 w-full">
+        <div className="flex flex-col gap-8 border p-4 backdrop-blur-xl rounded-lg w-full">
             {/* Custom Themes Section */}
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-center border-b border-border/40 pb-2">

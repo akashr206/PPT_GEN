@@ -200,3 +200,9 @@
 .animate-spin-pause {
     animation: spin-pause 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
+
+.bg-grid-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.838) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+

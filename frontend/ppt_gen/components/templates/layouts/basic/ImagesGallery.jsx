@@ -61,7 +61,7 @@ const ImagesGallery = ({
                             </div>
                         )}
                         
-                        <div className="w-full h-[22cqw] relative overflow-hidden rounded-[1cqw]">
+                        <div className="w-full h-[19cqw] relative overflow-hidden rounded-[1cqw]">
                             <ItemImage
                                 imageUrl={item.image}
                                 imagePrompt={item.imageDescription}

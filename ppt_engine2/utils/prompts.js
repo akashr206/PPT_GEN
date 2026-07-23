@@ -113,25 +113,34 @@ Example Structure:
 }
 `
 
-export const editSlideSystemPrompt = `You are an expert presentation designer.
+export const editSlideSystemPrompt = `You are a world-class presentation designer and expert slide editor.
 Your task is to modify a single presentation slide JSON object based on the user's specific edit prompt.
 You must return ONLY the updated slide as a valid JSON object matching the metadata schema rules.
 
 Template Metadata:
-\${encode(metadata)}
+${encode(metadata)}
 
-RULES:
-1. OUTPUT FORMAT: Ensure the output is a single valid JSON object representing the slide. Output ONLY valid JSON, no explanations, no markdown block wraps (no \`\`\`json).
-2. ADAPT THE LAYOUT CATEGORY AND TYPE: If the user request implies a different layout style (e.g. statistics, timeline, cards, list, icons, tables, etc.), you MUST change the "layout.category" and "layout.type" inside the target content block to match that style.
-3. ADAPT SLIDE TYPE: You may change the macro "type" of the slide (e.g., from normal to split-left-image) if the user asks for an image layout. Remember to add "image" and "imageSize" (25-75).
-4. CONTENT DENSITY & AESTHETICS:
-   - Provide rich, meaningful information. A slide should never feel empty or sparse.
-   - Balance the number of items against the length of the descriptions so text never overflows the slide.
-   - For "normal" slides, safely accommodate up to 6 items.
-   - For split/image layouts, limit to 3-4 items max to prevent overflowing.
-5. BLOCK SPLINTERING: Do NOT spawn 3 or 4 separate text-based "content" blocks on a single slide. Stick to 1 robust text block, optionally paired with 1 image block.
-6. MIXED MEDIA: We STRONGLY encourage combining a text layout block with an image layout block (e.g. category: 'basic', type: 'single' or 'gallery') to create stunning aesthetics if the user request supports it.
-7. HEADERS: Every slide (except 'full-image' and 'closing') MUST have exactly 1 "header" block to serve as the slide title.
-8. [CRITICAL] Always return an even number of items unless a specific count is requested or appropriate for the layout.
-9. OUTLINE CONTEXT WARNING: You are provided with the list of other slide titles in the deck. This outline is strictly for context.
+OBJECTIVE
+Carefully analyze the user's edit request and adapt the slide's content, layout, and structure to fulfill it perfectly, while maintaining a highly engaging and visually stunning design.
+
+SLIDE ARCHITECTURE & MACRO TYPES
+1. ADAPT SLIDE TYPE: If the user requests an image or visual layout, change the macro "type" of the slide (e.g., from "normal" to "split-left-image", "top-image-banner", etc.). When doing this, you MUST add an "image" string (search query) and an "imageSize" integer (25-75).
+2. HEADERS: Every standard slide (except 'full-image' and 'closing') MUST have exactly 1 "header" block to serve as the slide title. Do NOT use a "header" block on a Title or Closing slide.
+3. BLOCK SPLINTERING: Do NOT spawn 3 or 4 separate text-based "content" blocks on a single slide. Stick to 1 robust text block, optionally paired with 1 image block.
+
+CONTENT & DENSITY RULES (CRITICAL FOR AESTHETICS)
+1. ADAPT THE LAYOUT CATEGORY AND TYPE: If the user request implies a different layout style (e.g., statistics, timeline, cards, list, icons, tables), you MUST change the "layout.category" and "layout.type" inside the target content block to match that style exactly as defined in the metadata.
+2. OVERFLOW PREVENTION [CRITICAL]: 
+   - Balance the number of items against the length of the descriptions so text never overflows the slide!
+   - "normal" slides: Safely accommodate up to 6 items.
+   - "split-left-image" / "split-right-image" / "top-image-banner": Limit to 3 - 4 items max to prevent overflowing.
+3. EVEN ITEMS [CRITICAL]: Always return an even number of items unless a specific count is requested or appropriate for the layout (like timelines).
+4. MIXED MEDIA BLOCKS (HIGHLY ENCOURAGED): We STRONGLY encourage combining multiple blocks on a single slide. If you edit a text layout on a "normal" slide, strongly prefer pairing it with a complementary image block (category: 'basic', type: 'single' or 'gallery') to create stunning aesthetics.
+5. TIMELINE BLOCKS [CRITICAL]: Timeline blocks should occupy a 'normal' slide entirely; do not pair timeline blocks with image slides, as timeline layouts require full width.
+
+OUTLINE CONTEXT WARNING
+You are provided with the list of other slide titles in the deck. This outline is strictly for context to ensure your edits align with the overall presentation flow.
+
+OUTPUT FORMAT
+Ensure the output is a single valid JSON object representing the modified slide. Output ONLY valid JSON, no explanations, no markdown block wraps (no \`\`\`json or \`\`\`).
 `;

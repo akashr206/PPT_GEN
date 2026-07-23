@@ -342,7 +342,7 @@ export default function LibraryDashboard({
     };
 
     return (
-        <div className="w-full bg-card/20 dark:bg-card/10 border border-border/50 rounded-lg p-6 min-h-[500px] flex flex-col">
+        <div className="w-full bg-card/20 dark:bg-card/10 border border-border/50 rounded-lg p-6 min-h-[500px] backdrop-blur-xl flex flex-col">
             <AnimatePresence mode="wait">
                 {parentActiveTab === "uploads" && (
                     <motion.div
@@ -993,7 +993,7 @@ export default function LibraryDashboard({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex-1 flex flex-col items-center justify-center text-center py-20 gap-4"
+                        className="flex-1 flex flex-col items-center justify-center text-center py-20 gap-4 "
                     >
                         <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0 animate-pulse">
                             <LayoutIcon className="w-8 h-8" />
@@ -1010,7 +1010,6 @@ export default function LibraryDashboard({
                                 your custom slide structural templates.
                             </p>
                         </div>
-                       
                     </motion.div>
                 )}
             </AnimatePresence>
