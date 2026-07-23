@@ -86,12 +86,14 @@ export const useThemeStore = create((set, get) => ({
     }
 }));
 
-export function useThemes() {
+export function useThemes(options = { fetchOnMount: true }) {
     const store = useThemeStore();
     
     useEffect(() => {
-        store.fetchThemes();
-    }, [store.fetchThemes]);
+        if (options.fetchOnMount) {
+            store.fetchThemes();
+        }
+    }, [store.fetchThemes, options.fetchOnMount]);
 
     return store;
 }

@@ -18,7 +18,7 @@ const SlideFloatingControls = React.memo(({
 }) => {
     return (
         <div
-            className={`absolute top-4 right-4 z-30 flex items-center gap-2.5 p-1.5 px-2.5 bg-white/95 dark:bg-black/95 border rounded-sm border-border/80 shadow-lg transition-opacity duration-200 ${
+            className={`absolute top-4 right-4 z-30 flex items-center gap-2.5 p-1.5 px-2.5 bg-white/95 dark:bg-black/95 border rounded-sm border-border/80 shadow-lg transition-opacity duration-200 max-md:scale-75 ${
                 isTouchDevice
                     ? "opacity-100 shadow-xl"
                     : "opacity-0 group-hover:opacity-100"

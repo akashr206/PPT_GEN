@@ -676,6 +676,7 @@ export default function PPTSlidesViewerPage({ params }) {
                                 activeSlideIndex={activeSlideIndex}
                                 setActiveSlideIndex={setActiveSlideIndex}
                                 resolvedSlideContent={resolvedContent}
+                                resolveSlideContent={resolveSlideContent}
                                 theme={theme}
                                 isBusy={isBusy}
                                 isStreamGenerating={isStreamGenerating}
