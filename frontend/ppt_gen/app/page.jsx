@@ -13,6 +13,8 @@ import {
     LayoutDashboard,
     Volume2,
     VolumeX,
+    FileStack,
+    ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -26,6 +28,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import InteractiveDotGrid from "@/components/ui/InteractiveDotGrid";
+import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 import {
     Dialog,
     DialogContent,
@@ -38,14 +43,37 @@ export default function LandingPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [prompt, setPrompt] = useState("");
+    const [slides, setSlides] = useState(6);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
+
+    const slidesArray = Array.from({ length: 10 }, (_, i) => i + 1).concat([15]);
+
+    useEffect(() => {
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+
+        const animationId = requestAnimationFrame(raf);
+
+        return () => {
+            cancelAnimationFrame(animationId);
+            lenis.destroy();
+        };
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
         if (prompt.trim()) {
+            const targetUrl = `/generate?prompt=${encodeURIComponent(prompt)}&slides=${slides}`;
             if (status === "authenticated") {
-                const targetUrl = `/generate?prompt=${encodeURIComponent(prompt)}`;
                 router.push(targetUrl);
             } else {
                 setShowLoginModal(true);
@@ -77,8 +105,15 @@ export default function LandingPage() {
                 }}
                 className="fixed top-1/2 -right-[20%] w-[60%] h-[70%] bg-gradient-to-l from-violet-600/30 to-blue-600/30 blur-[150px] rounded-full pointer-events-none z-0 mix-blend-screen transform rotate-12"
             />
+            <InteractiveDotGrid
+                spacing={28}
+                dotRadius={1.2}
+                repelRadius={200}
+                maxRepel={30}
+                className="[mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_95%)]"
+            />
 
-            <nav className="relative z-99 flex items-center justify-between p-6 max-w-[1400px] w-full mx-auto">
+            <nav className="relative z-99 flex items-center justify-between p-6 max-w-7xl 2xl:max-w-[1536px] w-full mx-auto">
                 <div className="flex items-center gap-3">
                     <Link
                         href="/"
@@ -105,7 +140,7 @@ export default function LandingPage() {
                                 <LayoutDashboard className="w-4 h-4"></LayoutDashboard>{" "}
                                 Dashboard
                             </Button>
-                            <DropdownMenu>
+                            <DropdownMenu modal={false}>
                                 <DropdownMenuTrigger asChild>
                                     <button className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-medium overflow-hidden cursor-pointer border border-white/10 hover:border-white/30 transition-all">
                                         {session.user.image ? (
@@ -155,7 +190,7 @@ export default function LandingPage() {
                     ) : (
                         <Button
                             onClick={() => setShowLoginModal(true)}
-                            className="rounded-full bg-white text-black hover:bg-white/90 px-6 font-medium cursor-pointer"
+                            className="rounded-md bg-white text-black hover:bg-white/90 px-6 font-medium cursor-pointer"
                         >
                             Sign In
                         </Button>
@@ -163,37 +198,50 @@ export default function LandingPage() {
                 </div>
             </nav>
 
-            <main className="relative z-10 min-h-[100vh] flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-5xl mx-auto">
-                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] font-medium tracking-tight mb-6 text-white leading-[1.1] max-w-4xl mx-auto">
-                    The Next Generation of Presentation Design
+            <main className="relative z-10 min-h-[100vh] flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-6xl 2xl:max-w-7xl mx-auto">
+                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] 2xl:text-[6rem] font-medium tracking-tight mb-6 text-white leading-[1.08] max-w-5xl  mx-auto">
+                    The Next Generation of Presentations
                 </h1>
 
-                <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto font-normal mb-12">
-                    Transform ideas into beautiful presentations
-                </p>
-
-                <div className="w-full max-w-4xl mx-auto">
+                <div className="w-full max-w-5xl  mx-auto">
                     <form
                         onSubmit={handleSearch}
-                        className="relative bg-[#1a1a24]/60 backdrop-blur-2xl rounded-[32px] border border-white/10 overflow-hidden flex flex-col shadow-2xl transition-all focus-within:bg-[#1a1a24]/80 focus-within:border-white/20"
+                        className="relative bg-[#1a1a24]/60 backdrop-blur-2xl rounded-xl border border-white/10 overflow-hidden flex flex-col shadow-2xl transition-all focus-within:bg-[#1a1a24]/80 focus-within:border-white/20"
                     >
                         <textarea
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             placeholder={"What presentation shall we design?"}
-                            className="w-full min-h-[160px] p-6 md:p-8 bg-transparent resize-none outline-none text-white placeholder:text-white/40 text-lg md:text-xl leading-relaxed rounded-none"
+                            className="w-full min-h-[170px] p-6 md:p-8 bg-transparent resize-none outline-none text-white placeholder:text-white/40 text-lg md:text-xl leading-relaxed rounded-none"
                         />
 
                         <div className="flex flex-wrap items-center justify-between px-6 pb-6 pt-2">
                             <div className="flex items-center gap-2">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="w-8 h-8 rounded-full text-white/60 hover:text-white hover:bg-white/10"
-                                >
-                                    <Plus size={18} />
-                                </Button>
+                                <DropdownMenu modal={false}>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 gap-1.5 text-xs text-white/80 border-white/10 bg-white/5 hover:bg-white/10 hover:text-white px-3 rounded-md cursor-pointer"
+                                        >
+                                            <FileStack size={14} className="text-indigo-400 shrink-0" />
+                                            <span>{slides} Slides</span>
+                                            <ChevronDown size={14} className="opacity-50 shrink-0" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="bg-[#121218] border-white/10 text-white min-w-[120px] rounded-md p-1 shadow-2xl">
+                                        {slidesArray.map((s) => (
+                                            <DropdownMenuItem
+                                                key={s}
+                                                onClick={() => setSlides(s)}
+                                                className="flex items-center justify-between gap-3 cursor-pointer text-xs focus:bg-white/10 focus:text-white"
+                                            >
+                                                <span>{s} Slides</span>
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
 
                             <div className="flex items-center gap-2">
@@ -211,98 +259,144 @@ export default function LandingPage() {
             </main>
 
             {/* Video Showcase Section */}
-            <section className="relative z-10 w-full max-w-6xl mx-auto px-4 mt-12 mb-32">
+            <section className="relative z-10 w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-4 mt-12 mb-32">
                 <div className="relative rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-black/40 backdrop-blur-md">
                     <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/10 via-transparent to-blue-500/10 pointer-events-none" />
                     <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                    
+
                     <div className="p-2 md:p-4 group/video">
                         <div className="relative rounded-2xl overflow-hidden aspect-video bg-[#0c0c12]">
-                            <video 
-                                src="/broadside-ai-info.webm" 
+                            <video
+                                src="/broadside-ai-info.webm"
                                 className="w-full h-full object-cover"
-                                autoPlay 
+                                autoPlay
                                 muted={isMuted}
-                                loop 
-                                playsInline 
+                                loop
+                                playsInline
                                 controls={false}
                             />
                             <button
                                 onClick={() => setIsMuted(!isMuted)}
                                 className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover/video:opacity-100"
                             >
-                                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                                {isMuted ? (
+                                    <VolumeX size={18} />
+                                ) : (
+                                    <Volume2 size={18} />
+                                )}
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Bento Grid Features Section */}
-                <div className="mt-24 grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 max-w-5xl mx-auto text-left">
-                    
+                <div className="mt-24 grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-5 md:gap-6 max-w-7xl 2xl:max-w-[1536px] mx-auto text-left">
                     {/* Large Main Feature (Spans 2 cols, 2 rows) */}
-                    <div className="md:col-span-2 md:row-span-2 p-8 rounded-[1rem] bg-gradient-to-br from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all flex flex-col justify-end relative overflow-hidden group">
+                    <div className="md:col-span-2 md:row-span-2 p-8 md:p-10 rounded-[1.25rem] bg-gradient-to-br from-white/[0.08] to-transparent border border-white/10 hover:border-white/20 backdrop-blur-xl transition-all flex flex-col justify-end relative overflow-hidden group">
                         <div className="absolute top-8 right-8 w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
                             <Sparkles size={24} />
                         </div>
                         <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px] group-hover:bg-blue-500/30 transition-all" />
                         <div className="relative z-10 mt-32">
-                            <h3 className="text-3xl font-semibold text-white mb-4 tracking-tight">AI-Powered Creation</h3>
-                            <p className="text-white/60 text-lg leading-relaxed">Turn any text prompt or raw idea into a fully structured, beautifully designed presentation in a matter of seconds. Let the AI do the heavy lifting.</p>
+                            <h3 className="text-3xl md:text-4xl font-semibold text-white mb-4 tracking-tight">
+                                AI-Powered Creation
+                            </h3>
+                            <p className="text-white/60 text-lg md:text-xl leading-relaxed">
+                                Turn any text prompt or raw idea into a fully
+                                structured, beautifully designed presentation in
+                                a matter of seconds. Let the AI do the heavy
+                                lifting.
+                            </p>
                         </div>
                     </div>
 
                     {/* Top Right Feature (Spans 2 cols, 1 row) */}
-                    <div className="md:col-span-2 p-8 rounded-[1rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between group">
+                    <div className="md:col-span-2 p-8 md:p-10 rounded-[1.25rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between group">
                         <div className="flex justify-between items-start mb-12">
-                            <h3 className="text-xl font-semibold text-white tracking-tight">Stunning Designs</h3>
+                            <h3 className="text-2xl font-semibold text-white tracking-tight">
+                                Stunning Designs
+                            </h3>
                             <div className="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center">
                                 <Palette size={20} />
                             </div>
                         </div>
-                        <p className="text-white/60 leading-relaxed">Access premium themes and dynamic layouts that automatically adapt to your content instantly, ensuring pixel-perfect slides every time.</p>
+                        <p className="text-white/60 text-lg leading-relaxed">
+                            Access premium themes and dynamic layouts that
+                            automatically adapt to your content instantly,
+                            ensuring pixel-perfect slides every time.
+                        </p>
                     </div>
 
                     {/* Bottom Right Features (1 col, 1 row each) */}
-                    <div className="p-8 rounded-[1rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
+                    <div className="p-8 rounded-[1.25rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-12">
                             <Monitor size={20} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-white mb-2">Real-time Editing</h3>
-                            <p className="text-white/60 text-sm leading-relaxed">Fine-tune text, icons, and colors instantly.</p>
+                            <h3 className="text-xl font-semibold text-white mb-2">
+                                Real-time Editing
+                            </h3>
+                            <p className="text-white/60 text-base leading-relaxed">
+                                Fine-tune text, icons, and colors instantly.
+                            </p>
                         </div>
                     </div>
-                    
-                    <div className="p-8 rounded-[1rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
+
+                    <div className="p-8 rounded-[1.25rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:bg-white/[0.05] transition-all flex flex-col justify-between">
                         <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-12">
                             <Smartphone size={20} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-white mb-2">Export Anywhere</h3>
-                            <p className="text-white/60 text-sm leading-relaxed">Download as PPTX, PDF or present directly.</p>
+                            <h3 className="text-xl font-semibold text-white mb-2">
+                                Export Anywhere
+                            </h3>
+                            <p className="text-white/60 text-base leading-relaxed">
+                                Download as PPTX, PDF or present directly.
+                            </p>
                         </div>
                     </div>
-
                 </div>
             </section>
 
             {/* Footer */}
             <footer className="relative z-10 w-full border-t border-white/10 bg-black/20 backdrop-blur-lg py-12 mt-auto">
-                <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="max-w-7xl 2xl:max-w-[1536px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-2">
-                        <img src="/logo.png" alt="Broadside AI" className="w-6 h-6 invert opacity-80" />
-                        <span className="text-white/80 font-medium tracking-tight">Broadside AI</span>
+                        <img
+                            src="/logo.png"
+                            alt="Broadside AI"
+                            className="w-6 h-6 invert opacity-80"
+                        />
+                        <span className="text-white/80 font-medium tracking-tight">
+                            Broadside AI
+                        </span>
                     </div>
                     <div className="flex items-center gap-6 text-sm text-white/50">
-                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <a href="mailto:akashr6514@gmail.com" className="hover:text-white transition-colors">Contact</a>
+                        <Link
+                            href="/terms"
+                            className="hover:text-white transition-colors"
+                        >
+                            Terms of Service
+                        </Link>
+                        <Link
+                            href="/privacy"
+                            className="hover:text-white transition-colors"
+                        >
+                            Privacy Policy
+                        </Link>
+                        <a
+                            href="mailto:akashr6514@gmail.com"
+                            className="hover:text-white transition-colors"
+                        >
+                            Contact
+                        </a>
                     </div>
-                    <p className="text-white/40 text-sm">© {new Date().getFullYear()} Broadside AI. All rights reserved.</p>
+                    <p className="text-white/40 text-sm">
+                        © {new Date().getFullYear()} Broadside AI. All rights
+                        reserved.
+                    </p>
                 </div>
             </footer>
-
 
             <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
                 <DialogContent
@@ -327,7 +421,7 @@ export default function LandingPage() {
                     <div className="flex flex-col gap-2.5 pt-2">
                         <Button
                             onClick={() => {
-                                const targetUrl = `/generate?prompt=${encodeURIComponent(prompt)}`;
+                                const targetUrl = `/generate?prompt=${encodeURIComponent(prompt)}&slides=${slides}`;
                                 signIn("google", { callbackUrl: targetUrl });
                             }}
                             className="w-full rounded-md bg-white text-black hover:bg-white/90 font-medium py-5 gap-2 cursor-pointer shadow-lg flex items-center justify-center text-sm"
@@ -360,10 +454,13 @@ export default function LandingPage() {
                         >
                             Cancel
                         </Button>
-                        
+
                         <p className="text-center text-[11px] text-zinc-500 mt-4 leading-relaxed">
                             By continuing, you agree to our{" "}
-                            <Link href="/terms" className="text-zinc-300 hover:text-white underline underline-offset-2">
+                            <Link
+                                href="/terms"
+                                className="text-zinc-300 hover:text-white underline underline-offset-2"
+                            >
                                 Terms of Service
                             </Link>{" "}
                             and Privacy Policy.

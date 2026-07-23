@@ -34,7 +34,7 @@ const EditWithAIModal = React.memo(({
                 }
             }}
         >
-            <DialogContent className="max-w-md bg-popover border-border text-popover-foreground rounded-md p-6 shadow-2xl z-50">
+            <DialogContent showCloseButton={false} className="max-w-md bg-popover border-border text-popover-foreground rounded-md p-6 shadow-2xl z-50">
                 <DialogHeader className="shrink-0 mb-4">
                     <DialogTitle className="text-lg font-bold flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -55,9 +55,7 @@ const EditWithAIModal = React.memo(({
                         </TooltipProvider>
                     </DialogTitle>
                     <DialogDescription className="text-xs text-muted-foreground pt-1">
-                        Describe how you want to modify this slide. You can
-                        ask the AI to rewrite text, add/remove points, or
-                        adjust layout styling.
+                        Describe how you want to modify this slide (e.g., rewrite text, add points, change layout).
                     </DialogDescription>
                 </DialogHeader>
 
@@ -65,7 +63,7 @@ const EditWithAIModal = React.memo(({
                     <Textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="e.g., Change layout to stats grid and add metrics for user satisfaction and growth."
+                        placeholder="e.g., Change layout to stats grid and add metrics..."
                         className="min-h-[100px] resize-none"
                         disabled={isLoading}
                     />

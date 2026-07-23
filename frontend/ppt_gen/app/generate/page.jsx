@@ -36,13 +36,20 @@ function GeneratePageContent() {
     const [thinking, setThinking] = useState("standard");
     const searchParams = useSearchParams();
     const urlprompt = searchParams.get("prompt");
+    const urlslides = searchParams.get("slides");
 
     useEffect(() => {
         if (urlprompt) {
             setPrompt(urlprompt);
             setAutoFocus(true);
         }
-    }, [urlprompt]);
+        if (urlslides) {
+            const parsed = parseInt(urlslides, 10);
+            if (!isNaN(parsed) && parsed > 0) {
+                setSlides(parsed);
+            }
+        }
+    }, [urlprompt, urlslides]);
 
     if (status === "loading") {
         return (
