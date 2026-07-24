@@ -218,13 +218,22 @@ export default function BlockLayoutSelectorModal({
                                         : getMockItems(section.id);
 
                                     return (
-                                        <button
+                                        <div
                                             key={layout.id}
+                                            role="button"
+                                            tabIndex={0}
                                             onClick={() => {
                                                 setLocalCategory(section.id);
                                                 setLocalType(layout.id);
                                                 onSelect(section.id, layout.id);
                                                 // Do NOT call onClose() here in sidebar mode to enable live preview!
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    setLocalCategory(section.id);
+                                                    setLocalType(layout.id);
+                                                    onSelect(section.id, layout.id);
+                                                }
                                             }}
                                             className={`w-full flex flex-col gap-2 p-2.5 rounded-lg border transition-all cursor-pointer group text-left
                                                 ${isSelected
@@ -256,7 +265,7 @@ export default function BlockLayoutSelectorModal({
                                                     {layout.desc}
                                                 </span>
                                             </div>
-                                        </button>
+                                        </div>
                                     );
                                 })}
                             </div>
@@ -320,13 +329,23 @@ export default function BlockLayoutSelectorModal({
                                         : getMockItems(section.id);
 
                                     return (
-                                        <button
+                                        <div
                                             key={layout.id}
+                                            role="button"
+                                            tabIndex={0}
                                             onClick={() => {
                                                 setLocalCategory(section.id);
                                                 setLocalType(layout.id);
                                                 onSelect(section.id, layout.id);
                                                 onClose(); // Close on click for modal view
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    setLocalCategory(section.id);
+                                                    setLocalType(layout.id);
+                                                    onSelect(section.id, layout.id);
+                                                    onClose();
+                                                }
                                             }}
                                             className={`w-full flex flex-col items-center gap-3 p-2 rounded-lg border transition-all cursor-pointer group text-left
                                                 ${isSelected
@@ -358,7 +377,7 @@ export default function BlockLayoutSelectorModal({
                                                     {layout.desc}
                                                 </span>
                                             </div>
-                                        </button>
+                                        </div>
                                     );
                                 })}
                             </div>

@@ -260,12 +260,9 @@ export default function LandingPage() {
 
             {/* Video Showcase Section */}
             <section className="relative z-10 w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-4 mt-12 mb-32">
-                <div className="relative rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl bg-black/40 backdrop-blur-md">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/10 via-transparent to-blue-500/10 pointer-events-none" />
-                    <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-                    <div className="p-2 md:p-4 group/video">
-                        <div className="relative rounded-2xl overflow-hidden aspect-video bg-[#0c0c12]">
+                <div className="relative">
+                    <div className="group/video">
+                        <div className="relative rounded-4xl overflow-hidden [transform:translateZ(0)]">
                             <video
                                 src="/broadside-ai-info.webm"
                                 className="w-full h-full object-cover"
@@ -277,7 +274,7 @@ export default function LandingPage() {
                             />
                             <button
                                 onClick={() => setIsMuted(!isMuted)}
-                                className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover/video:opacity-100"
+                                className="absolute bottom-6 right-6 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/70 transition-all opacity-0 group-hover/video:opacity-100"
                             >
                                 {isMuted ? (
                                     <VolumeX size={18} />
