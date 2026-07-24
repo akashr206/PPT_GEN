@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
     Sparkles,
@@ -27,7 +27,7 @@ import {
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import InteractiveDotGrid from "@/components/ui/InteractiveDotGrid";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
@@ -259,13 +259,19 @@ export default function LandingPage() {
             </main>
 
             {/* Video Showcase Section */}
-            <section className="relative z-10 w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-4 mt-12 mb-32">
+            <section className="relative z-10 w-full max-w-7xl 2xl:max-w-330 mx-auto px-4 mt-12 mb-32">
                 <div className="relative">
-                    <div className="group/video">
-                        <div className="relative rounded-4xl overflow-hidden [transform:translateZ(0)]">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8, y: 100 }}
+                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.1 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="group/video"
+                    >
+                        <div className="relative aspect-video transform-[translateZ(0)]">
                             <video
                                 src="/broadside-ai-info.webm"
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain rounded-xl"
                                 autoPlay
                                 muted={isMuted}
                                 loop
@@ -283,7 +289,7 @@ export default function LandingPage() {
                                 )}
                             </button>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
 
                 {/* Bento Grid Features Section */}
