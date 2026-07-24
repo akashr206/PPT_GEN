@@ -362,8 +362,7 @@ export const convertPPT = async (req, res) => {
     const tempFile = path.resolve(`temp_${Date.now()}.pptx`);
 
     try {
-        const payloadSizeMB = (Buffer.byteLength(JSON.stringify(req.body)) / (1024 * 1024)).toFixed(2);
-        console.log(`[Server] Incoming conversion request (${payloadSizeMB} MB), starting conversion...`);
+        console.log('[Server] Incoming conversion request, starting conversion...');
         await convertHtmlToPptx({
             slides,
             outputPath: tempFile

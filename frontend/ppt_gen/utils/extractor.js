@@ -540,7 +540,7 @@ async function applyImageFormatting(src, width, height, borderRadiusStyle, objec
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
-        const scale = 1.5; // 1.5x scale for sharp images without 4K memory bloat
+        const scale = 2; // 1.5x scale for sharp images without 4K memory bloat
         const canvas = document.createElement('canvas');
         const canvasW = Math.round(width * scale);
         const canvasH = Math.round(height * scale);
