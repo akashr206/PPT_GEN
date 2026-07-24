@@ -54,7 +54,7 @@ export function PromptBox({
                 <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Describe your presentation topic, outline, or key details..."
+                    placeholder="Describe your presentation topic, outline, or key details."
                     className="w-full min-h-[140px] max-h-[400px] border-none focus-visible:ring-0 resize-none p-5 md:p-6 bg-transparent text-lg leading-relaxed rounded-none"
                     disabled={isGenerating}
                     autoFocus={autoFocus}

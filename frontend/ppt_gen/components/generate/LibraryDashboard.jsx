@@ -125,7 +125,7 @@ export default function LibraryDashboard({
             }
         } catch (err) {
             console.error("Image upload failed:", err);
-            toast.error("Failed to upload image.", {
+            toast.error(err?.message || "Failed to upload image.", {
                 id: toastId,
             });
         } finally {
@@ -206,13 +206,13 @@ export default function LibraryDashboard({
 
         setIsUploadingIcon(true);
         const toastId = toast.loading(`Uploading icon ${file.name}...`);
-
+        let res;
         try {
             const formData = new FormData();
             formData.append("file", file);
             formData.append("name", file.name);
 
-            const res = await api.post("/api/library/icons/upload", formData);
+            res = await api.post("/api/library/icons/upload", formData);
             if (res?.success) {
                 toast.success("Icon uploaded successfully!", { id: toastId });
                 fetchUserIcons(true);
@@ -221,7 +221,7 @@ export default function LibraryDashboard({
             }
         } catch (err) {
             console.error("Icon upload failed:", err);
-            toast.error("Failed to upload icon.", {
+            toast.error(err.message || "Failed to upload icon.", {
                 id: toastId,
             });
         } finally {
@@ -506,7 +506,7 @@ export default function LibraryDashboard({
                                         onChange={(e) =>
                                             setPexelsQuery(e.target.value)
                                         }
-                                        placeholder="Search royalty-free stock photos..."
+                                        placeholder="Search royalty-free stock photos"
                                         className="w-full pl-9 pr-4 py-2 border border-border rounded-md text-xs bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
                                     />
                                 </div>
@@ -905,7 +905,7 @@ export default function LibraryDashboard({
                                         onChange={(e) =>
                                             setSystemIconQuery(e.target.value)
                                         }
-                                        placeholder="Search system Phosphor icons..."
+                                        placeholder="Search system icons"
                                         className="w-full pl-9 pr-4 py-2 border border-border rounded-md text-xs bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
                                     />
                                 </div>
@@ -987,9 +987,9 @@ export default function LibraryDashboard({
                 )}
 
                 {/* ------------------- LAYOUTS (LOCKED) ------------------- */}
-                {activeTab === "layouts" && (
+                {activeTab === "templates" && (
                     <motion.div
-                        key="layouts"
+                        key="templates"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -1000,14 +1000,14 @@ export default function LibraryDashboard({
                         </div>
                         <div className="space-y-2">
                             <h3 className="font-bold text-lg text-foreground flex items-center gap-2 justify-center">
-                                Custom Slide Layouts Builder
+                                Custom Slides Template Builder
                                 <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 border border-primary/25 px-2.5 py-0.5 rounded-full uppercase">
                                     Locked
                                 </span>
                             </h3>
                             <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                                Coming soon! A slide template editor to build
-                                your custom slide structural templates.
+                                Coming soon! A slides template editor to build
+                                your custom slides templates.
                             </p>
                         </div>
                     </motion.div>

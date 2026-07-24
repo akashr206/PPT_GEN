@@ -4,11 +4,9 @@ import path from "path"
 export const imageUpload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 25 * 1024 * 1024, // 25 MB
+        fileSize: 10 * 1024 * 1024, // 25 MB
     },
     fileFilter: (req, file, cb) => {
-        console.log("coming");
-        
         const allowedFileTypes = /jpeg|jpg|png|webp|ico/;
         const extension = allowedFileTypes.test(path.extname(file.originalname).toLowerCase());
         const mimeType = allowedFileTypes.test(file.mimetype);
@@ -23,7 +21,7 @@ export const imageUpload = multer({
 export const iconUpload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 5 * 1024 * 1024, // 5 MB
+        fileSize: 2 * 1024 * 1024, // 5 MB
     },
     fileFilter: (req, file, cb) => {
         const allowedFileTypes = /svg|jpeg|png|webp|jpg|ico/;

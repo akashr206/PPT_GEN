@@ -30,7 +30,7 @@ const ThemeSidebar = ({ isOpen, onClose, currentTheme, isBusy, onThemeChange }) 
                 className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden"
             />
             {/* Sidebar Container */}
-            <div className="fixed inset-y-0 right-0 lg:relative lg:inset-auto w-[340px] sm:w-[380px] lg:w-[420px] border-l border-border bg-card flex flex-col shrink-0 animate-in slide-in-from-right duration-200 z-50 shadow-2xl lg:shadow-none">
+            <div className="fixed inset-y-0 right-0 lg:relative lg:inset-auto w-[340px] sm:w-[380px] lg:w-[420px] border-l border-border bg-card flex flex-col shrink-0 animate-in slide-in-from-right duration-200 z-50 shadow-2xl lg:shadow-none pt-12 lg:pt-0">
                 {/* Header */}
                 <div className="p-4 border-b border-border flex items-center justify-between shrink-0 bg-secondary/10">
                     <div className="flex items-center gap-2">

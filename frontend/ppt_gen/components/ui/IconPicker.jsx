@@ -139,7 +139,7 @@ export function IconPicker({
                 <div className="px-4 pb-2 flex gap-2">
                     <input
                         type="text"
-                        placeholder="Search icons..."
+                        placeholder="Search icons"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="flex-1 p-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"

@@ -23,7 +23,7 @@ const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly, t
                             value={item.header}
                             onChange={(val) => onUpdateItem(i, "header", val)}
                             readOnly={readOnly}
-                            placeholder="Heading..."
+                            placeholder="Heading"
                         />
                         <EditableElement
                             as="p"
@@ -32,7 +32,7 @@ const LargeText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly, t
                             value={item.description}
                             onChange={(val) => onUpdateItem(i, "description", val)}
                             readOnly={readOnly}
-                            placeholder="Enter text..."
+                            placeholder="Enter text"
                         />
                         {!readOnly && (
                             <TextItemActionMenu

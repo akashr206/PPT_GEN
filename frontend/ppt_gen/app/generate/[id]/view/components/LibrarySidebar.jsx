@@ -18,7 +18,7 @@ import {
     Code,
     FileUp,
     FolderOpen,
-    Bolt
+    Bolt,
 } from "lucide-react";
 import * as phosphorIcons from "@phosphor-icons/react";
 import {
@@ -50,15 +50,17 @@ export default function LibrarySidebar({
     const [pexelsQuery, setPexelsQuery] = useState("");
     const [pexelsResults, setPexResults] = useState([]);
     const [isSearchingPexels, setIsSearchingPexels] = useState(false);
-    
-    const searchImagesStore = useMediaStore(state => state.searchImages);
-    const searchIconsStore = useMediaStore(state => state.searchIcons);
 
-    const userImages = useMediaStore(state => state.userImages);
-    const fetchUserImagesStore = useMediaStore(state => state.fetchUserImages);
-    const userIcons = useMediaStore(state => state.userIcons);
-    const fetchUserIconsStore = useMediaStore(state => state.fetchUserIcons);
-    
+    const searchImagesStore = useMediaStore((state) => state.searchImages);
+    const searchIconsStore = useMediaStore((state) => state.searchIcons);
+
+    const userImages = useMediaStore((state) => state.userImages);
+    const fetchUserImagesStore = useMediaStore(
+        (state) => state.fetchUserImages,
+    );
+    const userIcons = useMediaStore((state) => state.userIcons);
+    const fetchUserIconsStore = useMediaStore((state) => state.fetchUserIcons);
+
     const [isLoadingImages, setIsLoadingImages] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
 
@@ -82,30 +84,36 @@ export default function LibrarySidebar({
     }, [isOpen, defaultTab]);
 
     // API Call: Load User Uploaded Images
-    const fetchUserImages = useCallback(async (force = false) => {
-        setIsLoadingImages(true);
-        try {
-            await fetchUserImagesStore(force);
-        } catch (err) {
-            console.error("Failed to load user images:", err);
-            toast.error("Failed to load your images.");
-        } finally {
-            setIsLoadingImages(false);
-        }
-    }, [fetchUserImagesStore]);
+    const fetchUserImages = useCallback(
+        async (force = false) => {
+            setIsLoadingImages(true);
+            try {
+                await fetchUserImagesStore(force);
+            } catch (err) {
+                console.error("Failed to load user images:", err);
+                toast.error("Failed to load your images.");
+            } finally {
+                setIsLoadingImages(false);
+            }
+        },
+        [fetchUserImagesStore],
+    );
 
     // API Call: Load User Custom Icons
-    const fetchUserIcons = useCallback(async (force = false) => {
-        setIsLoadingIcons(true);
-        try {
-            await fetchUserIconsStore(force);
-        } catch (err) {
-            console.error("Failed to load user icons:", err);
-            toast.error("Failed to load your icons.");
-        } finally {
-            setIsLoadingIcons(false);
-        }
-    }, [fetchUserIconsStore]);
+    const fetchUserIcons = useCallback(
+        async (force = false) => {
+            setIsLoadingIcons(true);
+            try {
+                await fetchUserIconsStore(force);
+            } catch (err) {
+                console.error("Failed to load user icons:", err);
+                toast.error("Failed to load your icons.");
+            } finally {
+                setIsLoadingIcons(false);
+            }
+        },
+        [fetchUserIconsStore],
+    );
 
     // Load data when tab changes or sidebar opens
     useEffect(() => {
@@ -118,42 +126,48 @@ export default function LibrarySidebar({
     }, [isOpen, activeTab, fetchUserImages, fetchUserIcons]);
 
     // Image Search (Pexels)
-    const handleSearchPexels = useCallback(async (query) => {
-        if (!query || query.trim() === "") {
-            setPexResults([]);
-            return;
-        }
-        setIsSearchingPexels(true);
-        try {
-            const data = await searchImagesStore(query);
-            setPexResults(data);
-        } catch (err) {
-            console.error("Failed to search Pexels:", err);
-            setPexResults([]);
-            toast.error("Failed to search images from Pexels.");
-        } finally {
-            setIsSearchingPexels(false);
-        }
-    }, [searchImagesStore]);
+    const handleSearchPexels = useCallback(
+        async (query) => {
+            if (!query || query.trim() === "") {
+                setPexResults([]);
+                return;
+            }
+            setIsSearchingPexels(true);
+            try {
+                const data = await searchImagesStore(query);
+                setPexResults(data);
+            } catch (err) {
+                console.error("Failed to search Pexels:", err);
+                setPexResults([]);
+                toast.error("Failed to search images from Pexels.");
+            } finally {
+                setIsSearchingPexels(false);
+            }
+        },
+        [searchImagesStore],
+    );
 
     // Icon Search (Backend)
-    const handleSearchSystemIcons = useCallback(async (query) => {
-        if (!query || query.trim() === "") {
-            setSystemIconResults([]);
-            return;
-        }
-        setIsSearchingSystemIcons(true);
-        try {
-            const data = await searchIconsStore(query);
-            setSystemIconResults(data);
-        } catch (err) {
-            console.error("Failed to search system icons:", err);
-            setSystemIconResults([]);
-            toast.error("Failed to search system icons.");
-        } finally {
-            setIsSearchingSystemIcons(false);
-        }
-    }, [searchIconsStore]);
+    const handleSearchSystemIcons = useCallback(
+        async (query) => {
+            if (!query || query.trim() === "") {
+                setSystemIconResults([]);
+                return;
+            }
+            setIsSearchingSystemIcons(true);
+            try {
+                const data = await searchIconsStore(query);
+                setSystemIconResults(data);
+            } catch (err) {
+                console.error("Failed to search system icons:", err);
+                setSystemIconResults([]);
+                toast.error("Failed to search system icons.");
+            } finally {
+                setIsSearchingSystemIcons(false);
+            }
+        },
+        [searchIconsStore],
+    );
 
     // Auto-search Pexels if query context exists from image edit trigger
     useEffect(() => {
@@ -178,10 +192,13 @@ export default function LibrarySidebar({
         if (
             isOpen &&
             activeTab === "icons" &&
-            (iconEditContext?.recommendedIcons?.length > 0 || iconEditContext?.contextText)
+            (iconEditContext?.recommendedIcons?.length > 0 ||
+                iconEditContext?.contextText)
         ) {
             setIconSubTab("system");
-            const query = iconEditContext.contextText || iconEditContext.recommendedIcons[0];
+            const query =
+                iconEditContext.contextText ||
+                iconEditContext.recommendedIcons[0];
             setSystemIconQuery(query);
             handleSearchSystemIcons(query);
         }
@@ -203,11 +220,11 @@ export default function LibrarySidebar({
             if (res?.success) {
                 fetchUserImages();
             } else {
-                throw new Error(res?.message || "Upload failed");
+                throw new Error(res?.message || "Failed to upload image.");
             }
         } catch (err) {
             console.error("Image upload failed:", err);
-            toast.error( "Failed to upload image to backend.", {
+            toast.error(err?.message || "Failed to upload image.", {
                 id: toastId,
             });
         } finally {
@@ -275,7 +292,7 @@ export default function LibrarySidebar({
             }
         } catch (err) {
             console.error("Pasted SVG upload failed:", err);
-            toast.error( "Failed to save SVG icon.", {
+            toast.error("Failed to save SVG icon.", {
                 id: toastId,
             });
         } finally {
@@ -288,12 +305,12 @@ export default function LibrarySidebar({
     // ----------------------------------------------------
     const handleDeleteImage = (id, e) => {
         e.stopPropagation();
-        setItemToDelete({ id, type: 'image' });
+        setItemToDelete({ id, type: "image" });
     };
 
     const handleDeleteIcon = (id, e) => {
         e.stopPropagation();
-        setItemToDelete({ id, type: 'custom icon' });
+        setItemToDelete({ id, type: "custom icon" });
     };
 
     const confirmDelete = async () => {
@@ -301,13 +318,13 @@ export default function LibrarySidebar({
 
         const { id, type } = itemToDelete;
         const toastId = toast.loading(`Deleting ${type}...`);
-        
+
         try {
-            if (type === 'image') {
+            if (type === "image") {
                 await api.delete(`/api/library/images/${id}`);
                 toast.success("Image deleted", { id: toastId });
                 fetchUserImages();
-            } else if (type === 'custom icon') {
+            } else if (type === "custom icon") {
                 await api.delete(`/api/library/icons/${id}`);
                 toast.success("Icon deleted", { id: toastId });
                 fetchUserIcons();
@@ -372,10 +389,10 @@ export default function LibrarySidebar({
             {/* Mobile Backdrop Overlay */}
             <div
                 onClick={onClose}
-                className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 md:hidden"
+                className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden"
             />
             {/* Sidebar Container */}
-            <div className="fixed inset-y-0 right-0 md:relative md:inset-auto w-[340px] sm:w-[380px] md:w-[420px] border-l border-border bg-card flex flex-col shrink-0 animate-in slide-in-from-right duration-200 z-50 shadow-2xl md:shadow-none">
+            <div className="fixed inset-y-0 right-0 lg:relative lg:inset-auto w-[340px] sm:w-[380px] lg:w-[420px] border-l border-border bg-card flex flex-col shrink-0 animate-in slide-in-from-right duration-200 z-50 shadow-2xl lg:shadow-none pt-12 lg:pt-0">
                 {/* Header */}
                 <div className="p-4 border-b border-border flex items-center justify-between shrink-0 bg-secondary/10">
                     <div className="flex items-center gap-2">
@@ -510,7 +527,9 @@ export default function LibrarySidebar({
                                                             {/* Top actions */}
                                                             <div className="flex justify-end pointer-events-auto">
                                                                 <button
-                                                                    onClick={(e) =>
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) =>
                                                                         handleDeleteImage(
                                                                             img.id,
                                                                             e,
@@ -571,9 +590,7 @@ export default function LibrarySidebar({
                                             disabled={isSearchingPexels}
                                             className="px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold cursor-pointer disabled:opacity-50 hover:bg-primary/95 transition-colors"
                                         >
-                                            {isSearchingPexels
-                                                ? "..."
-                                                : "Search"}
+                                            Search
                                         </button>
                                     </form>
                                     <div className="text-[10px] text-muted-foreground shrink-0 flex items-center gap-1">
@@ -606,7 +623,9 @@ export default function LibrarySidebar({
                                                         onClick={() =>
                                                             handleSelectImageItem(
                                                                 img.imageURL,
-                                                                img.alt || pexelsQuery || "Pexels Photo",
+                                                                img.alt ||
+                                                                    pexelsQuery ||
+                                                                    "Pexels Photo",
                                                             )
                                                         }
                                                         className="break-inside-avoid relative overflow-hidden rounded-lg bg-card border border-border/40 hover:border-primary/45 group transition-all duration-300 hover:shadow-md mb-3 cursor-pointer"
@@ -622,7 +641,9 @@ export default function LibrarySidebar({
                                                         {/* Floating default title badge */}
                                                         <div className="absolute bottom-1.5 left-1.5 right-1.5 backdrop-blur-md bg-black/65 border border-white/5 rounded px-2 py-1 flex items-center justify-between text-white transition-all duration-300 group-hover:opacity-0 group-hover:translate-y-1.5 pointer-events-none z-10">
                                                             <span className="text-[9px] font-medium truncate max-w-[85%]">
-                                                                {img.alt || pexelsQuery || "Pexels Photo"}
+                                                                {img.alt ||
+                                                                    pexelsQuery ||
+                                                                    "Pexels Photo"}
                                                             </span>
                                                         </div>
 
@@ -637,7 +658,8 @@ export default function LibrarySidebar({
 
                                                             {/* Bottom text */}
                                                             <span className="text-[9px] font-semibold text-white truncate w-full pt-1.5 border-t border-white/10 mt-auto">
-                                                                {img.alt || "Select Photo"}
+                                                                {img.alt ||
+                                                                    "Select Photo"}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -770,14 +792,14 @@ export default function LibrarySidebar({
                                         {isLoadingIcons ? (
                                             <div className="w-full overflow-hidden">
                                                 <div className="grid grid-cols-4 gap-3">
-                                                    {Array.from({ length: 8 }).map(
-                                                        (_, i) => (
-                                                            <div
-                                                                key={i}
-                                                                className="aspect-square rounded-md skeleton-sweep border border-border/50"
-                                                            />
-                                                        ),
-                                                    )}
+                                                    {Array.from({
+                                                        length: 8,
+                                                    }).map((_, i) => (
+                                                        <div
+                                                            key={i}
+                                                            className="aspect-square rounded-md skeleton-sweep border border-border/50"
+                                                        />
+                                                    ))}
                                                 </div>
                                             </div>
                                         ) : userIcons.length > 0 ? (
@@ -844,10 +866,12 @@ export default function LibrarySidebar({
                             ) : (
                                 // Search System Icons Tab
                                 <div className="grow flex flex-col gap-4 min-h-0">
-                                    <form 
+                                    <form
                                         onSubmit={(e) => {
                                             e.preventDefault();
-                                            handleSearchSystemIcons(systemIconQuery);
+                                            handleSearchSystemIcons(
+                                                systemIconQuery,
+                                            );
                                         }}
                                         className="flex gap-2 shrink-0"
                                     >
@@ -867,61 +891,115 @@ export default function LibrarySidebar({
                                             disabled={isSearchingSystemIcons}
                                             className="px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold cursor-pointer disabled:opacity-50 hover:bg-primary/95 transition-colors"
                                         >
-                                            {isSearchingSystemIcons ? "..." : "Search"}
+                                            Search
                                         </button>
                                     </form>
 
                                     <div className="grow overflow-y-auto min-h-0">
                                         {isSearchingSystemIcons ? (
                                             <div className="grid grid-cols-6 gap-2.5">
-                                                {Array.from({ length: 12 }).map((_, i) => (
-                                                    <div key={i} className="aspect-square rounded-md skeleton-sweep border border-border/50" />
-                                                ))}
+                                                {Array.from({ length: 12 }).map(
+                                                    (_, i) => (
+                                                        <div
+                                                            key={i}
+                                                            className="aspect-square rounded-md skeleton-sweep border border-border/50"
+                                                        />
+                                                    ),
+                                                )}
                                             </div>
-                                        ) : systemIconResults.length > 0 || iconEditContext?.recommendedIcons?.length > 0 ? (
+                                        ) : systemIconResults.length > 0 ||
+                                          iconEditContext?.recommendedIcons
+                                              ?.length > 0 ? (
                                             <div className="flex flex-col gap-4">
-                                                {iconEditContext?.recommendedIcons?.length > 0 && (
+                                                {iconEditContext
+                                                    ?.recommendedIcons?.length >
+                                                    0 && (
                                                     <div className="flex flex-col gap-2">
-                                                        <span className="text-xs font-semibold text-muted-foreground">Recommended for this block</span>
+                                                        <span className="text-xs font-semibold text-muted-foreground">
+                                                            Recommended for this
+                                                            block
+                                                        </span>
                                                         <div className="grid grid-cols-6 gap-2.5">
-                                                            {iconEditContext.recommendedIcons.map((name) => {
-                                                                const IconComponent = phosphorIcons[name];
-                                                                if (!IconComponent) return null;
-                                                                return (
-                                                                    <button
-                                                                        key={name}
-                                                                        type="button"
-                                                                        onClick={() => handleSelectSystemIconItem(name)}
-                                                                        className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group p-1.5"
-                                                                        title={name}
-                                                                    >
-                                                                        <IconComponent weight="regular" className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                                                                    </button>
-                                                                );
-                                                            })}
+                                                            {iconEditContext.recommendedIcons.map(
+                                                                (name) => {
+                                                                    const IconComponent =
+                                                                        phosphorIcons[
+                                                                            name
+                                                                        ];
+                                                                    if (
+                                                                        !IconComponent
+                                                                    )
+                                                                        return null;
+                                                                    return (
+                                                                        <button
+                                                                            key={
+                                                                                name
+                                                                            }
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                handleSelectSystemIconItem(
+                                                                                    name,
+                                                                                )
+                                                                            }
+                                                                            className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group p-1.5"
+                                                                            title={
+                                                                                name
+                                                                            }
+                                                                        >
+                                                                            <IconComponent
+                                                                                weight="regular"
+                                                                                className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors"
+                                                                            />
+                                                                        </button>
+                                                                    );
+                                                                },
+                                                            )}
                                                         </div>
                                                     </div>
                                                 )}
-                                                {systemIconResults.length > 0 && (
+                                                {systemIconResults.length >
+                                                    0 && (
                                                     <div className="flex flex-col gap-2">
-                                                        <span className="text-xs font-semibold text-muted-foreground">Search Results</span>
+                                                        <span className="text-xs font-semibold text-muted-foreground">
+                                                            Search Results
+                                                        </span>
                                                         <div className="grid grid-cols-6 gap-2.5">
-                                                            {systemIconResults.map((iconObj) => {
-                                                                const name = iconObj.name;
-                                                                const IconComponent = phosphorIcons[name];
-                                                                if (!IconComponent) return null;
-                                                                return (
-                                                                    <button
-                                                                        key={name}
-                                                                        type="button"
-                                                                        onClick={() => handleSelectSystemIconItem(name)}
-                                                                        className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group p-1.5"
-                                                                        title={name}
-                                                                    >
-                                                                        <IconComponent weight="regular" className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                                                                    </button>
-                                                                );
-                                                            })}
+                                                            {systemIconResults.map(
+                                                                (iconObj) => {
+                                                                    const name =
+                                                                        iconObj.name;
+                                                                    const IconComponent =
+                                                                        phosphorIcons[
+                                                                            name
+                                                                        ];
+                                                                    if (
+                                                                        !IconComponent
+                                                                    )
+                                                                        return null;
+                                                                    return (
+                                                                        <button
+                                                                            key={
+                                                                                name
+                                                                            }
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                handleSelectSystemIconItem(
+                                                                                    name,
+                                                                                )
+                                                                            }
+                                                                            className="aspect-square flex items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground border border-transparent hover:border-border transition-colors group p-1.5"
+                                                                            title={
+                                                                                name
+                                                                            }
+                                                                        >
+                                                                            <IconComponent
+                                                                                weight="regular"
+                                                                                className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors"
+                                                                            />
+                                                                        </button>
+                                                                    );
+                                                                },
+                                                            )}
                                                         </div>
                                                     </div>
                                                 )}
@@ -929,7 +1007,9 @@ export default function LibrarySidebar({
                                         ) : (
                                             <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
                                                 <Search className="w-8 h-8 opacity-20 mb-2" />
-                                                <span className="text-xs">Search for an icon above</span>
+                                                <span className="text-xs">
+                                                    Search for an icon above
+                                                </span>
                                             </div>
                                         )}
                                     </div>
@@ -937,20 +1017,31 @@ export default function LibrarySidebar({
                             )}
                         </div>
                     )}
-
                 </div>
             </div>
 
-            <AlertDialog open={itemToDelete !== null} onOpenChange={(open) => { if (!open) setItemToDelete(null); }}>
+            <AlertDialog
+                open={itemToDelete !== null}
+                onOpenChange={(open) => {
+                    if (!open) setItemToDelete(null);
+                }}
+            >
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="capitalize">Delete {itemToDelete?.type}?</AlertDialogTitle>
+                        <AlertDialogTitle className="capitalize">
+                            Delete {itemToDelete?.type}?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete this {itemToDelete?.type}? This action cannot be undone.
+                            Are you sure you want to delete this{" "}
+                            {itemToDelete?.type}? This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setItemToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel
+                            onClick={() => setItemToDelete(null)}
+                        >
+                            Cancel
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             variant="destructive"
                             onClick={confirmDelete}

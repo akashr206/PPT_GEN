@@ -106,6 +106,7 @@ async function apiCall(endpoint, options = {}) {
       if (response.status === 402 && typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("insufficient-credits"));
       }
+      
       throw new APIError(errorMessage, response.status, data);
     }
 

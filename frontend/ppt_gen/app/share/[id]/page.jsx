@@ -158,10 +158,14 @@ export default function SharedPresentationViewer({ params }) {
                             alt="Broadside AI"
                             className="h-5 w-5 object-contain dark:invert"
                         />
-                        <span className="font-bold hidden sm:inline text-foreground">Broadside AI</span>
+                        <span className="font-bold hidden sm:inline text-foreground">
+                            Broadside AI
+                        </span>
                     </Link>
 
-                    <span className="text-border text-sm font-light hidden sm:inline">|</span>
+                    <span className="text-border text-sm font-light hidden sm:inline">
+                        |
+                    </span>
 
                     <div className="font-medium text-xs sm:text-sm text-muted-foreground truncate max-w-[200px] sm:max-w-md">
                         {pptData?.title || "Shared Presentation"}
@@ -176,7 +180,11 @@ export default function SharedPresentationViewer({ params }) {
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.dispatchEvent(new CustomEvent("trigger-present"))}
+                        onClick={() =>
+                            window.dispatchEvent(
+                                new CustomEvent("trigger-present"),
+                            )
+                        }
                         className="rounded-md border border-border font-semibold text-xs gap-1.5 px-3 py-1.5 transition-all cursor-pointer hover:bg-accent"
                     >
                         <Play size={13} className="fill-current text-primary" />
@@ -190,18 +198,16 @@ export default function SharedPresentationViewer({ params }) {
                         >
                             {/* Internal Aurora Light Element */}
                             <div className="absolute -bottom-1 inset-x-0 h-1/2 bg-gradient-to-r bg-blue-500/50 blur-xs rounded-full pointer-events-none" />
-                            
-                            <span className="relative z-10">
-                                Create yours
-                            </span>
+
+                            <span className="relative z-10">Create yours</span>
                         </Button>
                     </Link>
                 </div>
             </div>
 
             <div className="w-full flex-1 flex flex-col min-h-0 relative overflow-hidden">
-                <div className="flex-1 flex flex-col items-center justify-between p-2 sm:p-4 pb-3 sm:pb-4 min-h-0 overflow-hidden">
-                    <div className="w-full max-w-[1200px] flex-1 flex flex-col items-center justify-center min-h-0 z-10 max-sm:px-0 px-4 md:px-12">
+                <div className="flex-1 flex flex-col items-center justify-between p-2 sm:p-4 pb-3 sm:pb-4 min-h-0 z-10 overflow-hidden">
+                    <div className="w-full max-w-[1200px] flex-1 flex flex-col items-center justify-center min-h-0  max-sm:px-0 px-4 md:px-12">
                         <SlideViewer
                             editableSlides={editableSlides}
                             activeSlideIndex={activeSlideIndex}

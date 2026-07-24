@@ -413,7 +413,6 @@ const SlideViewer = React.memo(function SlideViewer({
                                     ? "default"
                                     : CURSOR_LEFT,
                         }}
-                        title="Previous Slide"
                     />
                     <div
                         onClick={() =>
@@ -428,7 +427,6 @@ const SlideViewer = React.memo(function SlideViewer({
                                     ? "default"
                                     : CURSOR_RIGHT,
                         }}
-                        title="Next Slide"
                     />
                 </>
             )}

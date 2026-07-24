@@ -108,7 +108,7 @@ const ViewerToolbar = React.memo(({
                             className="px-2.5 py-2 cursor-pointer flex items-center gap-2 text-sm rounded-md"
                         >
                             <FolderOpen size={14} />
-                            <span>Open Library</span>
+                            <span>Library</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

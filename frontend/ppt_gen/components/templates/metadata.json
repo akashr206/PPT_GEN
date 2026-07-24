@@ -104,6 +104,71 @@
         }
     ],
     "layoutCategories": {
+        "basic": {
+            "name": "Basic Blocks",
+            "description": "Essential structural blocks like text, images, tables, and code snippets.",
+            "fields": [
+                "title",
+                "subtitle",
+                "items",
+                "verticalAlign",
+                "columns"
+            ],
+            "types": [
+                {
+                    "id": "large",
+                    "name": "Large Text",
+                    "description": "Large text perfect for main slide titles or big statements.",
+                    "itemFields": [
+                        "header",
+                        "description",
+                        "align",
+                        "headerFontSize",
+                        "descriptionFontSize"
+                    ]
+                },
+                {
+                    "id": "plain",
+                    "name": "Plain Text",
+                    "description": "A clean, simple text paragraph layout for long-form descriptions or quotes.",
+                    "itemFields": [
+                        "description",
+                        "align",
+                        "descriptionFontSize"
+                    ]
+                },
+                {
+                    "id": "single",
+                    "name": "Single Image",
+                    "description": "A single prominent image occupying maximum space, suitable for high-impact visual slides.",
+                    "itemFields": ["imageDescription", "imageFocus", "imageFit"]
+                },
+                {
+                    "id": "gallery",
+                    "name": "Image Gallery",
+                    "description": "A dynamic grid gallery displaying multiple images beautifully.",
+                    "supportsColumns": true,
+                    "itemFields": ["imageDescription", "imageFocus", "imageFit"]
+                },
+                {
+                    "id": "table",
+                    "name": "Table",
+                    "description": "A clean, flexible data table layout for presenting structured information in rows and columns.",
+                    "blockFields": ["tableColumns"],
+                    "itemFields": ["cells"]
+                },
+                {
+                    "id": "code",
+                    "name": "Code Block",
+                    "description": "A preformatted code block for displaying source code.",
+                    "itemFields": ["header", "description"]
+                }
+            ],
+            "constraints": {
+                "maxItems": 10,
+                "recommendedItems": "3 to 6"
+            }
+        },
         "bullets": {
             "name": "Bullet Points",
             "description": "Standard lists or grids containing multiple sequential headers and descriptions.",
@@ -267,70 +332,41 @@
                 "recommendedItems": "3 to 5"
             }
         },
-        "basic": {
-            "name": "Basic Blocks",
-            "description": "Essential structural blocks like text, images, tables, and code snippets.",
-            "fields": [
-                "title",
-                "subtitle",
-                "items",
-                "verticalAlign",
-                "columns"
-            ],
+        "charts": {
+            "name": "Data Visualization",
+            "description": "Visual charts including bar, line, area, and pie charts.",
+            "fields": ["title", "subtitle", "items"],
             "types": [
                 {
-                    "id": "large",
-                    "name": "Large Text",
-                    "description": "Large text perfect for main slide titles or big statements.",
-                    "itemFields": [
-                        "header",
-                        "description",
-                        "align",
-                        "headerFontSize",
-                        "descriptionFontSize"
-                    ]
+                    "id": "bar",
+                    "name": "Bar Chart",
+                    "description": "A responsive bar chart for comparing quantities. Uses 'header' for label and 'chartValue' for numeric data.",
+                    "itemFields": ["header", "chartValue"]
                 },
                 {
-                    "id": "plain",
-                    "name": "Plain Text",
-                    "description": "A clean, simple text paragraph layout for long-form descriptions or quotes.",
-                    "itemFields": [
-                        "description",
-                        "align",
-                        "descriptionFontSize"
-                    ]
+                    "id": "line",
+                    "name": "Line Chart",
+                    "description": "A responsive line chart for showing trends over time. Uses 'header' for label and 'chartValue' for numeric data.",
+                    "itemFields": ["header", "chartValue"]
                 },
                 {
-                    "id": "single",
-                    "name": "Single Image",
-                    "description": "A single prominent image occupying maximum space, suitable for high-impact visual slides.",
-                    "itemFields": ["imageDescription", "imageFocus", "imageFit"]
+                    "id": "area",
+                    "name": "Area Chart",
+                    "description": "A responsive area chart with filled gradient for showing volume/trends. Uses 'header' for label and 'chartValue' for numeric data.",
+                    "itemFields": ["header", "chartValue"]
                 },
                 {
-                    "id": "gallery",
-                    "name": "Image Gallery",
-                    "description": "A dynamic grid gallery displaying multiple images beautifully.",
-                    "supportsColumns": true,
-                    "itemFields": ["imageDescription", "imageFocus", "imageFit"]
-                },
-                {
-                    "id": "table",
-                    "name": "Table",
-                    "description": "A clean, flexible data table layout for presenting structured information in rows and columns.",
-                    "blockFields": ["tableColumns"],
-                    "itemFields": ["cells"]
-                },
-                {
-                    "id": "code",
-                    "name": "Code Block",
-                    "description": "A preformatted code block for displaying source code.",
-                    "itemFields": ["header", "description"]
+                    "id": "pie",
+                    "name": "Pie Chart",
+                    "description": "A responsive pie chart for showing percentages or parts of a whole. Uses 'header' for label and 'chartValue' for numeric data.",
+                    "itemFields": ["header", "chartValue"]
                 }
             ],
             "constraints": {
-                "maxItems": 10,
-                "recommendedItems": "3 to 6"
+                "maxItems": 12,
+                "recommendedItems": "3 to 8"
             }
         }
+        
     }
 }

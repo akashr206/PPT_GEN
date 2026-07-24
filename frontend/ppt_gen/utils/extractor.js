@@ -451,7 +451,7 @@ export async function extractSlideData(slideWrapper, slideIndex = 0) {
       isSvg,
       x: relX,
       y: relY,
-      width: relW,
+      width: isTextBoxRoot ? relW + 0.005 : relW,
       height: relH,
       zIndex,
       slideIndex,

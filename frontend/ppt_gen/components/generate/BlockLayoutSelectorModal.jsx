@@ -8,7 +8,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Check, X } from "lucide-react";
+import { Check, X, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import SlideLayout from "../templates/layouts/SlideLayout";
 import metadata from "../templates/metadata.json";
 
@@ -120,6 +121,24 @@ export default function BlockLayoutSelectorModal({
     const [isSidebar, setIsSidebar] = useState(false);
     const [localCategory, setLocalCategory] = useState(currentCategory);
     const [localType, setLocalType] = useState(currentType);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const filteredSections = React.useMemo(() => {
+        if (!searchQuery.trim()) return ALL_SECTIONS;
+        const lowerQuery = searchQuery.toLowerCase();
+
+        return ALL_SECTIONS.map((section) => {
+            const isSectionMatch = section.name.toLowerCase().includes(lowerQuery);
+            const matchingLayouts = section.layouts.filter((layout) =>
+                layout.name.toLowerCase().includes(lowerQuery) ||
+                layout.desc.toLowerCase().includes(lowerQuery)
+            );
+
+            if (isSectionMatch) return section;
+            if (matchingLayouts.length > 0) return { ...section, layouts: matchingLayouts };
+            return null;
+        }).filter(Boolean);
+    }, [searchQuery]);
 
     useEffect(() => {
         if (isOpen) {
@@ -153,16 +172,35 @@ export default function BlockLayoutSelectorModal({
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-colors border border-border/40"
+                        className="px-2.5 py-1 text-xs font-medium rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-colors border border-border/40"
                         title="Close layout selector"
                     >
-                        <X className="w-3.5 h-3.5" />
+                        Close
                     </button>
+                </div>
+
+                {/* Search Bar */}
+                <div className="px-4 py-3 border-b border-border shrink-0 bg-background/50">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                        <Input
+                            type="text"
+                            placeholder="Search layouts"
+                            className="pl-8 h-8 text-xs bg-secondary/30"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 {/* Sidebar Scrollable Body */}
                 <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
-                    {ALL_SECTIONS.map((section) => (
+                    {filteredSections.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                            <span className="text-xs">No layouts found.</span>
+                        </div>
+                    ) : (
+                        filteredSections.map((section) => (
                         <div key={section.id} className="flex flex-col">
                             {/* Category Label */}
                             <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 pl-0.5">
@@ -223,7 +261,7 @@ export default function BlockLayoutSelectorModal({
                                 })}
                             </div>
                         </div>
-                    ))}
+                    )))}
                 </div>
             </div>
         );
@@ -243,9 +281,28 @@ export default function BlockLayoutSelectorModal({
                     </DialogDescription>
                 </DialogHeader>
 
+                {/* Search Bar */}
+                <div className="mb-4 shrink-0">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="text"
+                            placeholder="Search layouts"
+                            className="pl-9 h-9 text-sm"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
+
                 {/* All categories + layouts in a single scrollable view */}
                 <div className="flex-1 overflow-y-auto -mx-1 px-1">
-                    {ALL_SECTIONS.map((section) => (
+                    {filteredSections.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                            <span className="text-sm">No layouts found.</span>
+                        </div>
+                    ) : (
+                        filteredSections.map((section) => (
                         <div key={section.id} className="mb-5 last:mb-0">
                             {/* Category label */}
                             <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5 pl-0.5">
@@ -306,7 +363,7 @@ export default function BlockLayoutSelectorModal({
                                 })}
                             </div>
                         </div>
-                    ))}
+                    )))}
                 </div>
             </DialogContent>
         </Dialog>

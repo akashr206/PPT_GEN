@@ -94,7 +94,7 @@ export default function ImageSidebar({
                         disabled={isSearching}
                         className="px-3 rounded-md bg-primary text-primary-foreground text-xs font-semibold cursor-pointer disabled:opacity-50 hover:bg-primary/95 transition-colors"
                     >
-                        {isSearching ? "..." : "Search"}
+                        Search
                     </button>
                 </form>
 

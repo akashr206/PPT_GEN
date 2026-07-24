@@ -23,7 +23,7 @@ const PlainText = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly, t
                             value={item.description || item.header}
                             onChange={(val) => onUpdateItem(i, "description", val)}
                             readOnly={readOnly}
-                            placeholder="Enter text..."
+                            placeholder="Enter text"
                         />
                         {!readOnly && (
                             <TextItemActionMenu

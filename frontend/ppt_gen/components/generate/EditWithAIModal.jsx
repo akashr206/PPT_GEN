@@ -63,7 +63,7 @@ const EditWithAIModal = React.memo(({
                     <Textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="e.g., Change layout to stats grid and add metrics..."
+                        placeholder="e.g., Change layout to stats grid and add metrics."
                         className="min-h-[100px] resize-none"
                         disabled={isLoading}
                     />
