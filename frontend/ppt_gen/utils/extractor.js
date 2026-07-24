@@ -540,10 +540,10 @@ async function applyImageFormatting(src, width, height, borderRadiusStyle, objec
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
-        const scale = 3; // 3x scale for crisp images
+        const scale = 2; // 1.5x scale for sharp images without 4K memory bloat
         const canvas = document.createElement('canvas');
-        const canvasW = width * scale;
-        const canvasH = height * scale;
+        const canvasW = Math.round(width * scale);
+        const canvasH = Math.round(height * scale);
         canvas.width = canvasW;
         canvas.height = canvasH;
 
@@ -595,8 +595,10 @@ async function applyImageFormatting(src, width, height, borderRadiusStyle, objec
           ctx.drawImage(img, 0, 0, canvasW, canvasH);
         }
 
-        const pngBase64 = canvas.toDataURL('image/png');
-        resolve(pngBase64);
+        // Use JPEG for non-transparent photo crops to drastically reduce payload size
+        const mimeType = hasBorderRadius ? 'image/png' : 'image/jpeg';
+        const compressedBase64 = canvas.toDataURL(mimeType, 0.85);
+        resolve(compressedBase64);
       } catch (err) {
         console.error('[Extractor] Error rounding image with canvas:', err);
         resolve(src);
