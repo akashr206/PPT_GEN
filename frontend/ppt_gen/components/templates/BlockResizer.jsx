@@ -65,11 +65,11 @@ const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction
         return (
             <div
                 ref={resizerRef}
-                className={`h-[0.5cqw] group/resizer flex justify-center items-center cursor-row-resize shrink-0 z-40 transition-colors ${isDragging ? "bg-blue-500/20" : ""}`}
+                className={`h-[0.3cqw] group/resizer flex justify-center items-center cursor-row-resize shrink-0 z-40 transition-colors ${isDragging ? "bg-blue-500/20" : ""}`}
                 onMouseDown={handleMouseDown}
             >
                 <div
-                    className={`w-[4cqw] h-[0.2cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? "bg-primary text-primary-foreground" : "bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-primary/50 group-hover/resizer:text-primary"}`}
+                    className={`w-[4cqw] h-[0.1cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? "bg-primary text-primary-foreground" : "bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-primary/50 group-hover/resizer:text-primary"}`}
                 >
                     <GripHorizontal className="w-[0.5cqw] h-[0.5cqw] opacity-0 group-hover/resizer:opacity-100" />
                 </div>
@@ -80,10 +80,10 @@ const BlockResizer = ({ onResize, onResizeEnd, initialSplitRatio = 50, direction
     return (
         <div
             ref={resizerRef}  
-            className={`w-[0.5cqw] group/resizer flex justify-center items-center cursor-col-resize shrink-0 z-40 transition-colors ${isDragging ? 'bg-blue-500/20' : ''}`}
+            className={`w-[0.3cqw] group/resizer flex justify-center items-center cursor-col-resize shrink-0 z-40 transition-colors ${isDragging ? 'bg-blue-500/20' : ''}`}
             onMouseDown={handleMouseDown}
         >
-            <div className={`h-[4cqw] w-[0.2cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-blue-500/50 group-hover/resizer:text-primary'}`}>
+            <div className={`h-[4cqw] w-[0.1cqw] rounded-full transition-colors flex items-center justify-center ${isDragging ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/30 text-muted-foreground group-hover/resizer:bg-blue-500/50 group-hover/resizer:text-primary'}`}>
                  <GripVertical className="w-[0.5cqw] h-[0.5cqw] opacity-0 group-hover/resizer:opacity-100" />
             </div>
         </div>

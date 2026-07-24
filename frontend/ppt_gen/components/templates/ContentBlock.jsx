@@ -40,6 +40,11 @@ import {
 } from "@/components/ui/tooltip";
 import "./themes.css";
 
+function capitalizeFirstLetter(str) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 const ContentBlock = ({
     block,
     blockId,
@@ -65,7 +70,10 @@ const ContentBlock = ({
     let justifyClass = "justify-center";
     if (block.verticalAlign === "top") justifyClass = "justify-start";
     else if (block.verticalAlign === "bottom") justifyClass = "justify-end";
-
+    block.name =
+        capitalizeFirstLetter(block?.layout?.category) +
+        " " +
+        capitalizeFirstLetter(block?.layout?.type || "Layout");
     const handleLayoutSelect = (cat, type) => {
         if (onUpdateBlock) {
             onUpdateBlock(blockId, "layout", { category: cat, type });
@@ -260,7 +268,7 @@ const ContentBlock = ({
                                         >
                                             <LayoutTemplate className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                             <span className="text-[10px] sm:text-xs text-muted-foreground max-sm:hidden">
-                                                {block.layout?.type || "Layout"}
+                                                {block.name || "Layout"}
                                             </span>
                                         </button>
                                     </TooltipTrigger>

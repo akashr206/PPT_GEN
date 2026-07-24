@@ -71,7 +71,7 @@ const HeaderBlock = ({ block, onUpdateBlock, onDeleteBlock, readOnly, textSizes 
                     value={block.subtitle || ""}
                     onChange={(val) => onUpdateBlock?.("subtitle", val)}
                     readOnly={readOnly}
-                    placeholder="Add subtitle..."
+                    placeholder="Add subtitle"
                 />
             )}
 

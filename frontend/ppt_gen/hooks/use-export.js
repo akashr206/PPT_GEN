@@ -24,7 +24,7 @@ export function useExport({ editableSlides, pptData }) {
         let active = true;
 
         const generate = async () => {
-            const toastId = toast.loading("Preparing slides for high-res PDF export");
+            const toastId = toast.loading("Preparing slides for PDF export");
 
             // Give browser time to render the hidden slides
             await new Promise((resolve) => setTimeout(resolve, 800));

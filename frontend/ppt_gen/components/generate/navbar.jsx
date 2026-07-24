@@ -329,67 +329,62 @@ export function Navbar() {
                                             <span>Download as PPTX</span>
                                         </Button>
 
-                                        {/* Present & Share */}
-                                        <div className="flex flex-col w-full border border-border rounded-md overflow-hidden bg-background">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                handleShareClick();
+                                                setIsMobileMenuOpen(false);
+                                            }}
+                                            disabled={pptInfo.isBusy}
+                                            className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground h-9 gap-2 px-3 rounded-md text-xs font-medium cursor-pointer"
+                                        >
+                                            <Share2
+                                                size={14}
+                                                className="text-primary"
+                                            />
+                                            <span>Share</span>
+                                        </Button>
+                                        <div className="flex items-center h-9 rounded-md overflow-hidden">
                                             <Button
-                                                variant="ghost"
+                                                variant="outline"
                                                 size="sm"
                                                 onClick={() => {
-                                                    handleShareClick();
+                                                    handlePresentClick();
                                                     setIsMobileMenuOpen(false);
                                                 }}
                                                 disabled={pptInfo.isBusy}
-                                                className="flex-1 justify-start h-9 gap-2 px-3 rounded-none text-xs font-medium cursor-pointer border-b border-border"
+                                                className="flex-1 justify-start h-full gap-2 px-3 rounded-r-none text-xs font-medium cursor-pointer border-r border-border"
                                             >
-                                                <Share2
+                                                <Play
                                                     size={14}
-                                                    className="text-primary"
+                                                    className="fill-current text-primary"
                                                 />
-                                                <span>Share</span>
+                                                <span>Present</span>
                                             </Button>
-                                            <div className="flex items-center h-9">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        handlePresentClick();
-                                                        setIsMobileMenuOpen(
-                                                            false,
-                                                        );
-                                                    }}
-                                                    disabled={pptInfo.isBusy}
-                                                    className="flex-1 justify-start h-full gap-2 px-3 rounded-none text-xs font-medium cursor-pointer border-r border-border"
-                                                >
-                                                    <Play
-                                                        size={14}
-                                                        className="fill-current text-primary"
-                                                    />
-                                                    <span>Present</span>
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        toggleAnimations()
-                                                    }
-                                                    disabled={pptInfo.isBusy}
-                                                    className={`w-10 h-full p-0 flex items-center justify-center cursor-pointer ${animationsEnabled ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground"}`}
-                                                    title={
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() =>
+                                                    toggleAnimations()
+                                                }
+                                                disabled={pptInfo.isBusy}
+                                                className={`w-10 h-10 m-0 p-0 flex items-center justify-center rounded-l-none cursor-pointer ${animationsEnabled ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-muted-foreground"}`}
+                                                title={
+                                                    animationsEnabled
+                                                        ? "Disable presentation animations"
+                                                        : "Enable presentation animations"
+                                                }
+                                            >
+                                                <Sparkles
+                                                    size={14}
+                                                    className={
                                                         animationsEnabled
-                                                            ? "Disable presentation animations"
-                                                            : "Enable presentation animations"
+                                                            ? "text-primary fill-primary/25"
+                                                            : "text-muted-foreground"
                                                     }
-                                                >
-                                                    <Sparkles
-                                                        size={14}
-                                                        className={
-                                                            animationsEnabled
-                                                                ? "text-primary fill-primary/25"
-                                                                : "text-muted-foreground"
-                                                        }
-                                                    />
-                                                </Button>
-                                            </div>
+                                                />
+                                            </Button>
                                         </div>
                                     </div>
                                 )}

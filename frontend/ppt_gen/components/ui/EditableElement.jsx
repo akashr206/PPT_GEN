@@ -7,7 +7,7 @@ export function EditableElement({
     onChange,
     className = "",
     as: Component = "div",
-    placeholder = "Type here...",
+    placeholder = "Type here",
     readOnly = false,
     style = {},
 }) {

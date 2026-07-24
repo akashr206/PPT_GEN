@@ -58,7 +58,6 @@ export const uploadImage = async (req, res) => {
         sendSuccess(res, { url })
     } catch (error) {
         console.log("Error : ", error);
-        
         sendError(res, "Error uploading image", error);
     }
 }

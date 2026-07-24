@@ -79,22 +79,41 @@ export default function PPTSlidesViewerPage({ params }) {
 
     // Stable callbacks for opening sidebars and modals
     const openSettings = useCallback(() => {
-        setIsSlideSettingsOpen(true);
         setIsThemeModalOpen(false);
         closeLibrary();
+        setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
+        setIsSlideSettingsOpen(true);
     }, [closeLibrary]);
 
     const openThemeSelector = useCallback(() => {
-        setIsThemeModalOpen(true);
         setIsSlideSettingsOpen(false);
         closeLibrary();
+        setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
+        setIsThemeModalOpen(true);
     }, [closeLibrary]);
     
     const handleOpenLibrary = useCallback(() => {
-        openLibrary();
         setIsSlideSettingsOpen(false);
         setIsThemeModalOpen(false);
+        setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        // Also tell any block-level sidebars to close
+        window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
+        openLibrary();
     }, [openLibrary]);
+
+    // Listen for chart sidebar opening to close page-level sidebars
+    useEffect(() => {
+        const handleChartSidebarOpen = () => {
+            closeLibrary();
+            setIsSlideSettingsOpen(false);
+            setIsThemeModalOpen(false);
+            setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        };
+        window.addEventListener("trigger-chart-sidebar-open", handleChartSidebarOpen);
+        return () => window.removeEventListener("trigger-chart-sidebar-open", handleChartSidebarOpen);
+    }, [closeLibrary]);
 
     const openEditWithAI = useCallback(
         () => setIsEditWithAIModalOpen(true),
@@ -106,6 +125,8 @@ export default function PPTSlidesViewerPage({ params }) {
         setIsSlideSettingsOpen(false);
         setIsThemeModalOpen(false);
         closeLibrary();
+        setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
     }, [closeLibrary]);
 
     useEffect(() => {
@@ -252,7 +273,10 @@ export default function PPTSlidesViewerPage({ params }) {
     // --- Layout selector sidebar toggle & sync ---
     useEffect(() => {
         const handleOpenEvent = (e) => {
-            closeLibrary(); // Close library sidebar if layout selector opens
+            closeLibrary();
+            setIsSlideSettingsOpen(false);
+            setIsThemeModalOpen(false);
+            window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
             setBlockLayoutModalState({
                 isOpen: true,
                 blockIndex: e.detail.blockIndex,
@@ -273,9 +297,9 @@ export default function PPTSlidesViewerPage({ params }) {
             );
     }, [closeLibrary]);
 
-    // Close layout selector if library sidebar opens
+    // Close layout selector if any other sidebar opens
     useEffect(() => {
-        if (isLibraryOpen) {
+        if (isLibraryOpen || isSlideSettingsOpen || isThemeModalOpen) {
             const timer = setTimeout(() => {
                 setBlockLayoutModalState((prev) => ({
                     ...prev,
@@ -284,7 +308,7 @@ export default function PPTSlidesViewerPage({ params }) {
             }, 0);
             return () => clearTimeout(timer);
         }
-    }, [isLibraryOpen]);
+    }, [isLibraryOpen, isSlideSettingsOpen, isThemeModalOpen]);
 
     // One-time initialization guard to restore slide index from URL on load
     const isSlideInitializedRef = useRef(false);
@@ -336,6 +360,10 @@ export default function PPTSlidesViewerPage({ params }) {
     // Bridge: handleEditImage opens the library sidebar
     const handleEditImageBridged = useCallback(
         (context) => {
+            setIsSlideSettingsOpen(false);
+            setIsThemeModalOpen(false);
+            setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+            window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
             handleEditImage(context, openLibraryForImage);
         },
         [handleEditImage, openLibraryForImage],
@@ -488,7 +516,7 @@ export default function PPTSlidesViewerPage({ params }) {
         const activeSlide = currentSlides[activeIndex];
 
         setIsEditWithAILoading(true);
-        const toastId = toast.loading("AI is editing your slide...");
+        const toastId = toast.loading("AI is editing your slide");
         try {
             const res = await api.post(`/api/ppt/edit-slide`, {
                 slide: denormalizeSlide(activeSlide),
@@ -701,6 +729,9 @@ export default function PPTSlidesViewerPage({ params }) {
                         />
                     </div>
                 </div>
+
+                {/* Portal root for block-level sidebars (e.g. ChartDataSidebar) */}
+                <div id="sidebar-portal-root" className="flex shrink-0 h-full z-50 empty:hidden"></div>
 
                 {/* Right: Library sidebar */}
                 <LibrarySidebar

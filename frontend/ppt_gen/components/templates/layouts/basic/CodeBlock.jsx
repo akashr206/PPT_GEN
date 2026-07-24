@@ -53,7 +53,7 @@ const CodeBlock = ({ content, onUpdateItem, onDeleteItem, onAddItem, readOnly })
                         <EditableElement
                             value={item.description}
                             onChange={(val) => onUpdateItem && onUpdateItem(index, 'description', val)}
-                            placeholder="// Enter your code here..."
+                            placeholder="// Enter your code here"
                             readOnly={readOnly}
                             className="text-[1.2cqw] theme-text-primary font-mono whitespace-pre-wrap leading-relaxed w-full"
                         />

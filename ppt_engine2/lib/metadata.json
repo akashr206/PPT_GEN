@@ -267,6 +267,41 @@
                 "recommendedItems": "3 to 5"
             }
         },
+        "charts": {
+            "name": "Data Visualization",
+            "description": "Visual charts (bar, line, area, pie) for presenting numerical data. VERY IMPORTANT: You MUST provide numerical data in the 'chartValue' field for each item (e.g., 50, 75.5) and a label in the 'header' field. To display legends on any chart, include 'showLegends': true inside the block's 'layout' object. For bar, line, and area charts, you should also include a 'legendLabel' (e.g. 'Revenue' or 'Growth') inside the 'layout' object to indicate the metric.",
+            "fields": ["title", "subtitle", "items"],
+            "types": [
+                {
+                    "id": "bar",
+                    "name": "Bar Chart",
+                    "description": "A responsive bar chart for comparing quantities. MUST use 'header' for the category label and 'chartValue' strictly for a numeric value (e.g. 100).",
+                    "itemFields": ["header", "chartValue"]
+                },
+                {
+                    "id": "line",
+                    "name": "Line Chart",
+                    "description": "A responsive line chart for showing trends over time. MUST use 'header' for the time/category label and 'chartValue' strictly for a numeric value (e.g. 50).",
+                    "itemFields": ["header", "chartValue"]
+                },
+                {
+                    "id": "area",
+                    "name": "Area Chart",
+                    "description": "A responsive area chart with filled gradient for showing volume/trends. MUST use 'header' for the time/category label and 'chartValue' strictly for a numeric value (e.g. 75).",
+                    "itemFields": ["header", "chartValue"]
+                },
+                {
+                    "id": "pie",
+                    "name": "Pie Chart",
+                    "description": "A responsive pie chart for showing percentages or parts of a whole. MUST use 'header' for the slice label and 'chartValue' strictly for a numeric value (e.g. 25).",
+                    "itemFields": ["header", "chartValue"]
+                }
+            ],
+            "constraints": {
+                "maxItems": 12,
+                "recommendedItems": "3 to 8"
+            }
+        },
         "basic": {
             "name": "Basic Blocks",
             "description": "Essential structural blocks like text, images, tables, and code snippets.",

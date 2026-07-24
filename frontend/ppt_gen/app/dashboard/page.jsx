@@ -94,7 +94,7 @@ function DashboardPageContent() {
             </div>
 
             <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 pt-8 pb-28 lg:pb-8 relative z-10 flex flex-col lg:flex-row gap-8 items-start">
-                {/* Left SaaS Sidebar (Desktop only) */}
+                {/* Left Sidebar (Desktop only) */}
                 <div className="max-lg:hidden flex flex-col w-16 min-h-[calc(100vh-4rem)] h-full py-4 bg-zinc-50/50 dark:bg-zinc-950/20 justify-between items-center top-8 border border-border/40 sticky rounded-lg backdrop-blur-md">
                     {/* Presentations */}
                     <div className="flex flex-col gap-2 items-center shrink-0">
@@ -213,12 +213,12 @@ function DashboardPageContent() {
 
                         {/* Slide Layouts */}
                         <button
-                            onClick={() => setActiveTab("layouts")}
+                            onClick={() => setActiveTab("templates")}
                             className="group flex flex-col items-center gap-1 w-full py-1.5 rounded-md transition-all duration-200 cursor-pointer relative"
                         >
                             <div
                                 className={`p-2.5 rounded-md transition-all duration-200 ${
-                                    activeTab === "layouts"
+                                    activeTab === "templates"
                                         ? "bg-primary/10 text-primary shadow-xs"
                                         : "text-zinc-500 dark:text-zinc-400 group-hover:bg-zinc-100 dark:group-hover:bg-zinc-800/60 group-hover:scale-105"
                                 }`}
@@ -227,12 +227,12 @@ function DashboardPageContent() {
                             </div>
                             <span
                                 className={`text-[10px] font-medium tracking-tight text-center leading-tight transition-colors ${
-                                    activeTab === "layouts"
+                                    activeTab === "templates"
                                         ? "text-foreground font-semibold"
                                         : "text-zinc-500 dark:text-zinc-400 group-hover:text-foreground"
                                 }`}
                             >
-                                Layouts
+                                Templates
                             </span>
                             <div
                                 className="absolute top-1.5 right-0 w-1.5 h-1.5 rounded-full bg-primary"

@@ -28,6 +28,11 @@ import TimelinesVertical from "./timelines/TimelinesVertical";
 import TableBasic from "./basic/TableBasic";
 import CodeBlock from "./basic/CodeBlock";
 
+import BarChartLayout from "./charts/BarChartLayout";
+import LineChartLayout from "./charts/LineChartLayout";
+import AreaChartLayout from "./charts/AreaChartLayout";
+import PieChartLayout from "./charts/PieChartLayout";
+
 export const layout_map = {
     "bullets": {
         "simple": BulletsSimple,
@@ -63,6 +68,12 @@ export const layout_map = {
         "single": ImagesSingle,
         "gallery": ImagesGallery,
         "code": CodeBlock
+    },
+    "charts": {
+        "bar": BarChartLayout,
+        "line": LineChartLayout,
+        "area": AreaChartLayout,
+        "pie": PieChartLayout
     }
 };
 
@@ -72,3 +83,4 @@ layout_map.card = layout_map.cards;
 layout_map.icon = layout_map.icons;
 layout_map.stat = layout_map.stats;
 layout_map.timeline = layout_map.timelines;
+layout_map.chart = layout_map.charts;
