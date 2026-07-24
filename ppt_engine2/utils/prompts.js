@@ -18,7 +18,7 @@ CONTENT & DENSITY RULES (CRITICAL FOR AESTHETICS)
 2. Text Content Preference: This setting dictates the LENGTH (word count) of your item descriptions, NOT necessarily the number of items.
    - concise: 1 short sentence per description (approx 10-15 words).
    - balanced: 1-2 sentences per description (approx 20-30 words).
-   - detailed: 2-3 comprehensive sentences per description (approx 40-60 words).
+   - detailed: 2-3 comprehensive sentences per description (approx 30-50 words).
 3. Overflow Prevention by Slide Type [CRITICAL]:
    - You must balance the number of items against the length of the descriptions so text never overflows the slide!
    - "normal" slides: Full screen real estate. Safely accommodates up to 6 items even with "detailed" text. Focus on providing 4 - 6 items.
@@ -31,12 +31,12 @@ CONTENT & DENSITY RULES (CRITICAL FOR AESTHETICS)
 8. Closing Slide (CRITICAL): For the LAST slide (Closing), VARY the design! You can make it perfectly centered and elegant on a "normal" slide, OR use "split-left-image", "split-right-image", or "top-image-banner" for a striking visual finish. DO NOT use a "header" block! Use a "content" block with a clean text layout (e.g., category: "basic", type: "large") and make the text BIG and memorable. Ensure 'align' matches your chosen layout perfectly.
 9. [CRITICAL] Always return an even number of items unless a specific count is requested or appropriate for the layout.
 10. [CRITICAL] Image Pairing on Normal Slides: When using text, bullet, or card block layouts on a 'normal' slide, strongly prefer pairing them with a complementary image block (category: 'basic', type: 'single' or 'gallery'). Standalone text blocks on normal slides lack visual contrast and look unappealing.
-11. [CRITICAL] Timeline blocks should occupy a 'normal' slide entirely; do not pair timeline blocks with image slide as timeline layouts require full width, timeline should be the only block on its slide.
+11. [CRITICAL] Timeline blocks should occupy a 'normal' slide entirely; they should only be used on 'normal' slide type only; do not pair timeline blocks with image slide as timeline layouts require full width, timeline should be the only block on its slide.
 
 SLIDE ARCHITECTURE & MACRO TYPES
 1. Every slide must specify a "type" (e.g., normal, split-left-image, top-image-banner, full-image, closing).
 2. Slide Type Diversity (CRITICAL): You MUST actively use image-based slide types ("split-left-image", "split-right-image", "top-image-banner", "full-image") throughout the presentation. DO NOT rely solely on "normal" slides. A visually stunning presentation alternates between text-focused "normal" slides and rich image-based slides.
-3. For slide types with images, you MUST include an "image" string (search query) and an "imageSize" integer (25-75, typically 50).
+3. For slide types with images, you MUST include an "image" string (search query) and an "imageSize" integer (25-75).
 4. The content of each slide (except full-image) is composed of a "blocks" array.
 5. Standard Slides: Every standard slide (all slides between the Title and Closing) MUST start with exactly 1 "header" block.
    - "header" block schema: { "type": "header", "title": "...", "subtitle": "...", "align": "left|center|right" }
