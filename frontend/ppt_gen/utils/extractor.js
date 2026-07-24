@@ -25,8 +25,8 @@ export async function rasterizeSvgToPng(svgElement) {
         clonedSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
       }
 
-      // High-resolution scaling (12x) for crystal-clear snapshots
-      const scale = 12;
+      // High-resolution scaling (2x) for crisp snapshots without bloated payload sizes
+      const scale = 2;
       
       // Override HTML attributes
       clonedSvg.setAttribute('width', width * scale);
