@@ -9,10 +9,24 @@ import React, {
     useRef,
 } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import api from "@/lib/api";
 
-import { useSlideEditor, normalizeSlides, denormalizeSlide } from "@/hooks/use-slide-editor";
+import {
+    useSlideEditor,
+    normalizeSlides,
+    denormalizeSlide,
+} from "@/hooks/use-slide-editor";
 import { usePptData } from "@/hooks/use-ppt-data";
 import { useImageFetcher } from "@/hooks/use-image-fetcher";
 import { useMediaStore } from "@/hooks/use-media-store";
@@ -81,7 +95,7 @@ export default function PPTSlidesViewerPage({ params }) {
     const openSettings = useCallback(() => {
         setIsThemeModalOpen(false);
         closeLibrary();
-        setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }));
         window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
         setIsSlideSettingsOpen(true);
     }, [closeLibrary]);
@@ -89,15 +103,15 @@ export default function PPTSlidesViewerPage({ params }) {
     const openThemeSelector = useCallback(() => {
         setIsSlideSettingsOpen(false);
         closeLibrary();
-        setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }));
         window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
         setIsThemeModalOpen(true);
     }, [closeLibrary]);
-    
+
     const handleOpenLibrary = useCallback(() => {
         setIsSlideSettingsOpen(false);
         setIsThemeModalOpen(false);
-        setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }));
         // Also tell any block-level sidebars to close
         window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
         openLibrary();
@@ -109,10 +123,17 @@ export default function PPTSlidesViewerPage({ params }) {
             closeLibrary();
             setIsSlideSettingsOpen(false);
             setIsThemeModalOpen(false);
-            setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+            setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }));
         };
-        window.addEventListener("trigger-chart-sidebar-open", handleChartSidebarOpen);
-        return () => window.removeEventListener("trigger-chart-sidebar-open", handleChartSidebarOpen);
+        window.addEventListener(
+            "trigger-chart-sidebar-open",
+            handleChartSidebarOpen,
+        );
+        return () =>
+            window.removeEventListener(
+                "trigger-chart-sidebar-open",
+                handleChartSidebarOpen,
+            );
     }, [closeLibrary]);
 
     const openEditWithAI = useCallback(
@@ -125,16 +146,16 @@ export default function PPTSlidesViewerPage({ params }) {
         setIsSlideSettingsOpen(false);
         setIsThemeModalOpen(false);
         closeLibrary();
-        setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
+        setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }));
         window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
     }, [closeLibrary]);
 
     useEffect(() => {
         const handleOpenShare = () => openShareModal();
         window.addEventListener("trigger-share-modal", handleOpenShare);
-        return () => window.removeEventListener("trigger-share-modal", handleOpenShare);
+        return () =>
+            window.removeEventListener("trigger-share-modal", handleOpenShare);
     }, [openShareModal]);
-
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -193,6 +214,7 @@ export default function PPTSlidesViewerPage({ params }) {
         isExtractingPPTX,
         setIsGeneratingPDF,
         handleDownloadAsPPT,
+        overflowPrompt,
     } = useExport({
         editableSlides,
         pptData,
@@ -200,29 +222,43 @@ export default function PPTSlidesViewerPage({ params }) {
 
     const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX;
 
-    const handleToggleShare = useCallback(async (checked) => {
-        setIsShareLoading(true);
-        try {
-            await api.post(`/api/ppt/${pptId}/share`, { is_shared: checked });
-            setPptData((prev) => ({ ...prev, is_shared: checked }));
-            toast.success(checked ? "Share link enabled!" : "Share link disabled.");
-        } catch (err) {
-            toast.error(err.message || "Failed to update sharing status.");
-            console.error("Toggle share error:", err);
-        } finally {
-            setIsShareLoading(false);
-        }
-    }, [pptId, setPptData]);
+    const handleToggleShare = useCallback(
+        async (checked) => {
+            setIsShareLoading(true);
+            try {
+                await api.post(`/api/ppt/${pptId}/share`, {
+                    is_shared: checked,
+                });
+                setPptData((prev) => ({ ...prev, is_shared: checked }));
+                toast.success(
+                    checked ? "Share link enabled!" : "Share link disabled.",
+                );
+            } catch (err) {
+                toast.error(err.message || "Failed to update sharing status.");
+                console.error("Toggle share error:", err);
+            } finally {
+                setIsShareLoading(false);
+            }
+        },
+        [pptId, setPptData],
+    );
 
     // --- Global Text Sizes ---
-    const defaultTextSizes = { title: 2.8, subtitle: 2.0, heading: 1.8, description: 1.3 };
+    const defaultTextSizes = {
+        title: 2.8,
+        subtitle: 2.0,
+        heading: 1.8,
+        description: 1.3,
+    };
     const textSizes = pptData?.textSizes || defaultTextSizes;
 
     const handleUpdateTextSizes = useCallback(
         async (newSizes) => {
             setPptData((prev) => ({ ...prev, textSizes: newSizes }));
             try {
-                const payloadSlides = JSON.parse(JSON.stringify(editableSlidesRef.current));
+                const payloadSlides = JSON.parse(
+                    JSON.stringify(editableSlidesRef.current),
+                );
                 if (payloadSlides.length > 0) {
                     payloadSlides[0].globalTextSizes = newSizes;
                 }
@@ -231,7 +267,7 @@ export default function PPTSlidesViewerPage({ params }) {
                 console.error("[TextSizes] Failed to save text sizes:", err);
             }
         },
-        [pptId, setPptData]
+        [pptId, setPptData],
     );
 
     const handleThemeChange = useCallback(
@@ -242,23 +278,17 @@ export default function PPTSlidesViewerPage({ params }) {
                 await api.patch(`/api/ppt/${pptId}`, { theme: newTheme });
                 useHistoryStore
                     .getState()
-                    .updateFirstSlide(
-                        pptId,
-                        undefined,
-                        undefined,
-                        newTheme,
-                    );
+                    .updateFirstSlide(pptId, undefined, undefined, newTheme);
                 console.log("[Theme] Saved theme to database:", newTheme);
             } catch (err) {
                 console.error("[Theme] Failed to save theme:", err);
             }
         },
-        [pptId, isBusy, setPptData]
+        [pptId, isBusy, setPptData],
     );
 
     // --- Auto-save slides to DB on every edit (debounced) ---
     useAutosave({ pptId, editableSlides, initialDataRef, isBusy, textSizes });
-
 
     // --- Image fetching ---
     const { resolveSlideContent, handleEditImage, handleSelectSidebarImage } =
@@ -276,7 +306,9 @@ export default function PPTSlidesViewerPage({ params }) {
             closeLibrary();
             setIsSlideSettingsOpen(false);
             setIsThemeModalOpen(false);
-            window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
+            window.dispatchEvent(
+                new CustomEvent("trigger-close-chart-sidebar"),
+            );
             setBlockLayoutModalState({
                 isOpen: true,
                 blockIndex: e.detail.blockIndex,
@@ -362,8 +394,10 @@ export default function PPTSlidesViewerPage({ params }) {
         (context) => {
             setIsSlideSettingsOpen(false);
             setIsThemeModalOpen(false);
-            setBlockLayoutModalState(prev => ({ ...prev, isOpen: false }));
-            window.dispatchEvent(new CustomEvent("trigger-close-chart-sidebar"));
+            setBlockLayoutModalState((prev) => ({ ...prev, isOpen: false }));
+            window.dispatchEvent(
+                new CustomEvent("trigger-close-chart-sidebar"),
+            );
             handleEditImage(context, openLibraryForImage);
         },
         [handleEditImage, openLibraryForImage],
@@ -412,44 +446,71 @@ export default function PPTSlidesViewerPage({ params }) {
             } else if (e.key === "ArrowLeft") {
                 setActiveSlideIndex((prev) => Math.max(prev - 1, 0));
             } else if ((e.ctrlKey || e.metaKey) && e.key === "v") {
-                if (document.querySelector('.group\\/block.outline')) {
+                if (document.querySelector(".group\\/block.outline")) {
                     // A block is selected. Let ContentBlock's keydown handler deal with the paste.
                     return;
                 }
 
-                const copiedData = localStorage.getItem('ppt_copied_block');
+                const copiedData = localStorage.getItem("ppt_copied_block");
                 if (copiedData) {
                     try {
                         const parsedBlock = JSON.parse(copiedData);
-                        const currentSlide = editableSlides[activeSlideIndexRef.current];
-                        
+                        const currentSlide =
+                            editableSlides[activeSlideIndexRef.current];
+
                         // We can only paste on the slide if the slide's root block is empty
-                        const isDefaultItem = currentSlide?.contentTree?.items?.length === 1 && currentSlide.contentTree.items[0]?.header === "New Point";
-                        const isEmpty = currentSlide && currentSlide.contentTree && currentSlide.contentTree.type === 'leaf' && (!currentSlide.contentTree.layout || isDefaultItem || currentSlide.contentTree.items?.length === 0);
+                        const isDefaultItem =
+                            currentSlide?.contentTree?.items?.length === 1 &&
+                            currentSlide.contentTree.items[0]?.header ===
+                                "New Point";
+                        const isEmpty =
+                            currentSlide &&
+                            currentSlide.contentTree &&
+                            currentSlide.contentTree.type === "leaf" &&
+                            (!currentSlide.contentTree.layout ||
+                                isDefaultItem ||
+                                currentSlide.contentTree.items?.length === 0);
 
                         if (isEmpty) {
                             e.preventDefault();
-                            handleReplaceBlock(currentSlide.contentTree.id, parsedBlock);
-                            toast.success("Block pasted on slide successfully!");
+                            handleReplaceBlock(
+                                currentSlide.contentTree.id,
+                                parsedBlock,
+                            );
+                            toast.success(
+                                "Block pasted on slide successfully!",
+                            );
                         } else {
                             e.preventDefault();
                             handleAddBlock(parsedBlock);
-                            toast.success("Block pasted alongside existing content on the slide!");
+                            toast.success(
+                                "Block pasted alongside existing content on the slide!",
+                            );
                         }
                     } catch (error) {
-                        console.error("Failed to parse copied block data", error);
+                        console.error(
+                            "Failed to parse copied block data",
+                            error,
+                        );
                     }
                 }
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [editableSlides, activeSlideIndexRef, handleUndo, handleRedo, isBusy, handleReplaceBlock]);
+    }, [
+        editableSlides,
+        activeSlideIndexRef,
+        handleUndo,
+        handleRedo,
+        isBusy,
+        handleReplaceBlock,
+    ]);
 
     // Clean up copied block on mount/unmount
     useEffect(() => {
-        localStorage.removeItem('ppt_copied_block');
-        return () => localStorage.removeItem('ppt_copied_block');
+        localStorage.removeItem("ppt_copied_block");
+        return () => localStorage.removeItem("ppt_copied_block");
     }, []);
 
     // --- Sync info with header / navbar ---
@@ -544,12 +605,22 @@ export default function PPTSlidesViewerPage({ params }) {
                 const resolveNode = async (node) => {
                     if (!node) return;
                     if (node.type === "split") {
-                        await Promise.all([resolveNode(node.first), resolveNode(node.second)]);
-                    } else if (node.type === "leaf" || node.type === "content") {
+                        await Promise.all([
+                            resolveNode(node.first),
+                            resolveNode(node.second),
+                        ]);
+                    } else if (
+                        node.type === "leaf" ||
+                        node.type === "content"
+                    ) {
                         if (node.items) {
                             for (const item of node.items) {
-                                if (!item.icon && (item.iconKeywords || item.header)) {
-                                    const query = item.iconKeywords || item.header;
+                                if (
+                                    !item.icon &&
+                                    (item.iconKeywords || item.header)
+                                ) {
+                                    const query =
+                                        item.iconKeywords || item.header;
                                     const data = await searchIcons(query);
                                     if (data && data.length > 0) {
                                         item.icon = data[0].name;
@@ -558,13 +629,28 @@ export default function PPTSlidesViewerPage({ params }) {
                                     }
                                 }
                                 if (item.image && !isRealUrl(item.image)) {
-                                    const query = item.image || item.imageDescription || item.header;
+                                    const query =
+                                        item.image ||
+                                        item.imageDescription ||
+                                        item.header;
                                     const data = await searchImages(query);
                                     if (data && data.length > 0) {
                                         item.image = data[0].imageURL;
                                     }
-                                } else if (!item.image && (node.layout?.category === "images" || node.layout?.category === "image" || node.layout?.type === "image" || (node.layout?.category === "basic" && (node.layout?.type === "gallery" || node.layout?.type === "single")))) {
-                                    const query = item.imageDescription || item.header || "placeholder";
+                                } else if (
+                                    !item.image &&
+                                    (node.layout?.category === "images" ||
+                                        node.layout?.category === "image" ||
+                                        node.layout?.type === "image" ||
+                                        (node.layout?.category === "basic" &&
+                                            (node.layout?.type === "gallery" ||
+                                                node.layout?.type ===
+                                                    "single")))
+                                ) {
+                                    const query =
+                                        item.imageDescription ||
+                                        item.header ||
+                                        "placeholder";
                                     const data = await searchImages(query);
                                     if (data && data.length > 0) {
                                         item.image = data[0].imageURL;
@@ -579,9 +665,17 @@ export default function PPTSlidesViewerPage({ params }) {
                     await resolveNode(updatedSlide.contentTree);
                 }
 
-                if (['full-image', 'split-left-image', 'split-right-image', 'top-image-banner'].includes(updatedSlide.type)) {
+                if (
+                    [
+                        "full-image",
+                        "split-left-image",
+                        "split-right-image",
+                        "top-image-banner",
+                    ].includes(updatedSlide.type)
+                ) {
                     if (!isRealUrl(updatedSlide.image)) {
-                        const query = updatedSlide.imageDescription || updatedSlide.image;
+                        const query =
+                            updatedSlide.imageDescription || updatedSlide.image;
                         if (query) {
                             const data = await searchImages(query);
                             if (data && data.length > 0) {
@@ -731,7 +825,10 @@ export default function PPTSlidesViewerPage({ params }) {
                 </div>
 
                 {/* Portal root for block-level sidebars (e.g. ChartDataSidebar) */}
-                <div id="sidebar-portal-root" className="flex shrink-0 h-full z-50 empty:hidden"></div>
+                <div
+                    id="sidebar-portal-root"
+                    className="flex shrink-0 h-full z-50 empty:hidden"
+                ></div>
 
                 {/* Right: Library sidebar */}
                 <LibrarySidebar
@@ -760,7 +857,7 @@ export default function PPTSlidesViewerPage({ params }) {
                     onSelect={blockLayoutModalState.onSelect}
                     theme={pptData?.theme || "default"}
                 />
-                
+
                 {/* Sidebars */}
                 <SlideSettingsSidebar
                     isOpen={isSlideSettingsOpen}
@@ -799,7 +896,11 @@ export default function PPTSlidesViewerPage({ params }) {
                 isShared={!!pptData?.is_shared}
                 onToggleShare={handleToggleShare}
                 isLoading={isShareLoading}
-                shareUrl={typeof window !== "undefined" ? `${window.location.origin}/share/${pptId}` : ""}
+                shareUrl={
+                    typeof window !== "undefined"
+                        ? `${window.location.origin}/share/${pptId}`
+                        : ""
+                }
             />
 
             {/* Off-screen export frames (only mounted during export) */}
@@ -819,6 +920,37 @@ export default function PPTSlidesViewerPage({ params }) {
                     theme={theme}
                 />
             )}
+
+            <AlertDialog open={!!overflowPrompt}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Overflowing Slides Detected
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className={"text-yellow-500"}>
+                            It looks like{" "}
+                            {overflowPrompt?.slides?.length > 1
+                                ? "Slides"
+                                : "Slide"}{" "}
+                            {overflowPrompt?.slides?.join(", ")} might have some
+                            overflowing content. Would you like to continue
+                            exporting anyway?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            onClick={() => overflowPrompt?.resolve(false)}
+                        >
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => overflowPrompt?.resolve(true)}
+                        >
+                            Continue Export
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

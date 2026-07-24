@@ -16,6 +16,8 @@ import api from "@/lib/api";
 export function useExport({ editableSlides, pptData }) {
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [isExtractingPPTX, setIsExtractingPPTX] = useState(false);
+    const [overflowPrompt, setOverflowPrompt] = useState(null);
+
 
     // PDF generation — fires when isGeneratingPDF flips to true
     useEffect(() => {
@@ -29,6 +31,37 @@ export function useExport({ editableSlides, pptData }) {
             // Give browser time to render the hidden slides
             await new Promise((resolve) => setTimeout(resolve, 800));
             if (!active) return;
+
+            let hasOverflow = false;
+            let overflowSlideIndices = [];
+            for (let i = 0; i < editableSlides.length; i++) {
+                const element = document.getElementById(`pdf-slide-${i}`);
+                if (!element) continue;
+                const slideContent = element.querySelector('.slide-content');
+                if (slideContent && slideContent.scrollHeight > slideContent.clientHeight + 2) {
+                    hasOverflow = true;
+                    overflowSlideIndices.push(i + 1);
+                } else if (element.scrollHeight > element.clientHeight + 2) {
+                    hasOverflow = true;
+                    overflowSlideIndices.push(i + 1);
+                }
+            }
+
+            if (hasOverflow) {
+                const proceed = await new Promise((resolve) => {
+                    setOverflowPrompt({
+                        slides: overflowSlideIndices,
+                        resolve
+                    });
+                });
+                setOverflowPrompt(null);
+                
+                if (!proceed) {
+                    toast.dismiss(toastId);
+                    if (active) setIsGeneratingPDF(false);
+                    return;
+                }
+            }
 
             try {
                 const { jsPDF } = await import("jspdf");
@@ -89,6 +122,37 @@ export function useExport({ editableSlides, pptData }) {
         // Give the browser time to render the hidden slides at full size (1280x720)
         await new Promise((resolve) => setTimeout(resolve, 800));
 
+        let hasOverflow = false;
+        let overflowSlideIndices = [];
+        for (let i = 0; i < editableSlides.length; i++) {
+            const element = document.getElementById(`pptx-slide-${i}`);
+            if (!element) continue;
+            const slideContent = element.querySelector('.slide-content');
+            if (slideContent && slideContent.scrollHeight > slideContent.clientHeight + 2) {
+                hasOverflow = true;
+                overflowSlideIndices.push(i + 1);
+            } else if (element.scrollHeight > element.clientHeight + 2) {
+                hasOverflow = true;
+                overflowSlideIndices.push(i + 1);
+            }
+        }
+
+        if (hasOverflow) {
+            const proceed = await new Promise((resolve) => {
+                setOverflowPrompt({
+                    slides: overflowSlideIndices,
+                    resolve
+                });
+            });
+            setOverflowPrompt(null);
+
+            if (!proceed) {
+                setIsExtractingPPTX(false);
+                toast.dismiss(toastId);
+                return;
+            }
+        }
+
         try {
             const allSlidesData = [];
             for (let i = 0; i < editableSlides.length; i++) {
@@ -130,5 +194,6 @@ export function useExport({ editableSlides, pptData }) {
         isExtractingPPTX,
         setIsGeneratingPDF,
         handleDownloadAsPPT,
+        overflowPrompt,
     };
 }
