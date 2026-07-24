@@ -367,7 +367,7 @@ export async function resolveImageToBase64(src, baseDir) {
 
   if (trimmedSrc.startsWith('http://') || trimmedSrc.startsWith('https://')) {
     try {
-      const response = await fetch(trimmedSrc);
+      const response = await fetch(trimmedSrc, { signal: AbortSignal.timeout(6000) });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const buffer = await response.arrayBuffer();
       const base64 = Buffer.from(buffer).toString('base64');
