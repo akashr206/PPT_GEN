@@ -40,7 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const apiToken = jwtLib.sign(
           { sub: user.id, email: user.email, userId: user.id, name: user.name },
           process.env.AUTH_SECRET,
-          { algorithm: "HS256", expiresIn: "7d" }
+          { algorithm: "HS256", expiresIn: "10s" }
         );
         token.apiToken = apiToken;
         token.userId = user.id;
