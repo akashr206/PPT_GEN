@@ -6,9 +6,10 @@ import { toast } from "sonner";
 
 export default function AuthListener() {
   useEffect(() => {
-    const handleSessionExpired = () => {
+    const handleSessionExpired = async () => {
       toast.error("Session expired. Please log in again.");
-      signOut({ callbackUrl: "/" });
+      await signOut({ redirect: false });
+      window.location.href = "/";
     };
 
     window.addEventListener("session-expired", handleSessionExpired);
