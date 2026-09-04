@@ -36,15 +36,33 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async jwt({ token, account, user }) {
-      if (account) {
-        const apiToken = jwtLib.sign(
+      if (account && user) {
+        token.userId = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        
+        token.apiToken = jwtLib.sign(
           { sub: user.id, email: user.email, userId: user.id, name: user.name },
           process.env.AUTH_SECRET,
-          { algorithm: "HS256", expiresIn: "10s" }
+          { algorithm: "HS256", expiresIn: "1h" }
         );
-        token.apiToken = apiToken;
-        token.userId = user.id;
+        token.apiTokenExpires = Date.now() + 60 * 60 * 1000;
+        return token;
       }
+
+      if (Date.now() > token.apiTokenExpires - 5 * 60 * 1000) {
+        try {
+          token.apiToken = jwtLib.sign(
+            { sub: token.userId, email: token.email, userId: token.userId, name: token.name },
+            process.env.AUTH_SECRET,
+            { algorithm: "HS256", expiresIn: "1h" }
+          );
+          token.apiTokenExpires = Date.now() + 60 * 60 * 1000;
+        } catch (error) {
+          console.error("Error refreshing apiToken:", error);
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {

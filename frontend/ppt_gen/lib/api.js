@@ -79,7 +79,7 @@ async function apiCall(endpoint, options = {}) {
       }
       const errorMessage = data?.message || data?.error || `HTTP error! Status: ${response.status}`;
       if (response.status === 401 && typeof window !== "undefined") {
-        if (!window.__isSigningOut) {
+        if (!window.__isSigningOut && token) {
           window.__isSigningOut = true;
           window.dispatchEvent(new CustomEvent("session-expired"));
         }
