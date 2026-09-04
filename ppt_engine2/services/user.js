@@ -46,8 +46,6 @@ export const addUser = async ({
             }
         ]).select().single();
 
-    console.log("DATA:", data);
-
     if (error) {
         throw error;
     }
