@@ -39,6 +39,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { HistoryProvider } from "@/contexts/history-context";
 import CustomThemesStyles from "@/components/dashboard/CustomThemesStyles";
 import BackgroundGrid from "@/components/ui/BackgroundGrid";
+import AuthListener from "@/components/auth-listener";
 
 export default function RootLayout({ children }) {
   return (
@@ -61,6 +62,7 @@ export default function RootLayout({ children }) {
                 <CustomThemesStyles />
                 <BackgroundGrid />
                 <Toaster richColors closeButton position="bottom-right" />
+                <AuthListener />
               </TooltipProvider>
             </HistoryProvider>
           </ThemeProvider>

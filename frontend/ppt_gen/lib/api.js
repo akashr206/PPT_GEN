@@ -79,18 +79,9 @@ async function apiCall(endpoint, options = {}) {
       }
       const errorMessage = data?.message || data?.error || `HTTP error! Status: ${response.status}`;
       if (response.status === 401 && typeof window !== "undefined") {
-        if (window.location.pathname !== "/" && !window.__isSigningOut) {
+        if (!window.__isSigningOut) {
           window.__isSigningOut = true;
-          Promise.all([
-            import("next-auth/react"),
-            import("sonner")
-          ]).then(([{ signOut }, { toast }]) => {
-            toast.error("Session expired. Please log in again.");
-            signOut({ callbackUrl: "/" });
-          }).catch((err) => {
-            console.error("Auth/Toast error:", err);
-            window.location.href = "/";
-          });
+          window.dispatchEvent(new CustomEvent("session-expired"));
         }
       }
       
