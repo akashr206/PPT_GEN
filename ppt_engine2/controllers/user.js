@@ -21,7 +21,7 @@ export const addUserController = async (req, res) => {
         }
         const existingUser = await getUserByEmail({ email });
         if (existingUser.length > 0) {
-            console.log(existingUser);
+            // console.log(existingUser);
 
             return sendSuccess(res, { ...existingUser[0] });
         }

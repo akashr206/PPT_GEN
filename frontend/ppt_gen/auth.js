@@ -27,7 +27,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
         );
-        console.log(data);
 
         user.id = data.id;
       } catch (err) {
