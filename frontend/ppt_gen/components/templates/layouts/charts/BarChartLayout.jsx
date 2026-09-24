@@ -14,7 +14,7 @@ const BarChartLayout = ({
     onUpdateBlock,
 }) => {
     const [isEditing, setIsEditing] = useState(() => {
-        if (typeof window !== "undefined" && window.__chartSidebarOpenForId === block?.id) {
+        if (typeof window !== "undefined" && window.__chartSidebarOpenForId && window.__chartSidebarOpenForId === block?.id) {
             window.__chartSidebarOpenForId = null;
             return true;
         }
@@ -78,26 +78,28 @@ const BarChartLayout = ({
                 </div>
             )}
             
-            <ChartDataSidebar
-                isOpen={isEditing}
-                onClose={() => setIsEditing(false)}
-                items={items}
-                onUpdateItem={onUpdateItem}
-                onAddItem={onAddItem}
-                onDeleteItem={onDeleteItem}
-                readOnly={readOnly}
-                block={block}
-                onUpdateBlock={onUpdateBlock}
-                showLegendToggle={true}
-                showLegends={showLegends}
-                onToggleLegends={onUpdateBlock ? (val) => {
-                    onUpdateBlock("layout", { ...block.layout, showLegends: val });
-                } : undefined}
-                legendLabel={block?.layout?.legendLabel}
-                onUpdateLegendLabel={onUpdateBlock ? (val) => {
-                    onUpdateBlock("layout", { ...block.layout, legendLabel: val });
-                } : undefined}
-            />
+            {!readOnly && (
+                <ChartDataSidebar
+                    isOpen={isEditing}
+                    onClose={() => setIsEditing(false)}
+                    items={items}
+                    onUpdateItem={onUpdateItem}
+                    onAddItem={onAddItem}
+                    onDeleteItem={onDeleteItem}
+                    readOnly={readOnly}
+                    block={block}
+                    onUpdateBlock={onUpdateBlock}
+                    showLegendToggle={true}
+                    showLegends={showLegends}
+                    onToggleLegends={onUpdateBlock ? (val) => {
+                        onUpdateBlock("layout", { ...block.layout, showLegends: val });
+                    } : undefined}
+                    legendLabel={block?.layout?.legendLabel}
+                    onUpdateLegendLabel={onUpdateBlock ? (val) => {
+                        onUpdateBlock("layout", { ...block.layout, legendLabel: val });
+                    } : undefined}
+                />
+            )}
 
             <div className="w-full flex-1 flex flex-col items-center justify-center pt-[2cqw] relative min-h-0 gap-[1.5cqw]">
                 {showLegends && (
