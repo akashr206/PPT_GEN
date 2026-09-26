@@ -14,12 +14,15 @@ const AnimatedItem = ({ children, index = 0, className = "", style }) => {
     return (
         <motion.div
             className={className}
-            style={style}
-            initial={{ opacity: 0, y: 30 }}
+            style={{ ...style, willChange: "transform, opacity" }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.1 }}
-            transition={{ delay: index * 0.15, duration: 0.5, ease: "easeOut" }}
-            id = "animated-item"
+            transition={{ 
+                delay: index * 0.1, 
+                duration: 0.7, 
+                ease: [0.25, 1, 0.5, 1] 
+            }}
         >
             {children}
         </motion.div>

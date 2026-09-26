@@ -128,6 +128,14 @@
         @apply font-sans;
         scrollbar-gutter: stable;
     }
+    
+    /* Animation Stutter Fixes */
+    .transition-all {
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter !important;
+    }
+    [data-state="open"], [data-state="closed"] {
+        will-change: transform, opacity;
+    }
 }
 
 @keyframes slide-in-down {
