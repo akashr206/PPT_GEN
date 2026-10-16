@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
 
@@ -21,6 +22,25 @@ export default function LandingPage() {
     const [prompt, setPrompt] = useState("");
     const [slides, setSlides] = useState(6);
     const [showLoginModal, setShowLoginModal] = useState(false);
+    
+    const loaderRef = useRef(null);
+    const logoRef = useRef(null);
+
+    useGSAP(() => {
+        const tl = gsap.timeline();
+        tl.to(logoRef.current, {
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.4,
+            ease: "power2.inOut",
+            delay: 0.8 // Show logo for a bit longer
+        });
+        tl.to(loaderRef.current, {
+            y: "-100%",
+            duration: 1.2,
+            ease: "power3.inOut"
+        });
+    }, { scope: loaderRef });
 
     useEffect(() => {
         const lenis = new Lenis({
@@ -29,12 +49,14 @@ export default function LandingPage() {
             smoothWheel: true,
         });
 
+        let animationId;
+
         function raf(time) {
             lenis.raf(time);
-            requestAnimationFrame(raf);
+            animationId = requestAnimationFrame(raf);
         }
 
-        const animationId = requestAnimationFrame(raf);
+        animationId = requestAnimationFrame(raf);
 
         return () => {
             cancelAnimationFrame(animationId);
@@ -63,22 +85,18 @@ export default function LandingPage() {
     return (
         <div className="min-h-screen bg-[#050505] text-zinc-50 font-sans selection:bg-blue-500/30 relative overflow-hidden flex flex-col">
             {/* Awwwards Style Initial Loader Overlay */}
-            <motion.div
-                initial={{ y: 0 }}
-                animate={{ y: "-100%" }}
-                transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1], delay: 0.2 }}
-                className="fixed inset-0 z-[100] bg-black flex items-center justify-center origin-top pointer-events-none"
+            <div
+                ref={loaderRef}
+                className="fixed inset-0 z-[100] bg-black flex items-center justify-center origin-top"
             >
-                <motion.div
-                    initial={{ opacity: 1, scale: 1 }}
-                    animate={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                <div
+                    ref={logoRef}
                     className="flex items-center gap-3"
                 >
                     <img src="/logo.png" alt="Logo" className="w-8 h-8 invert" />
                     <span className="text-white font-medium tracking-tight text-xl">Broadside AI</span>
-                </motion.div>
-            </motion.div>
+                </div>
+            </div>
 
 
             <InteractiveDotGrid
@@ -97,7 +115,7 @@ export default function LandingPage() {
             />
 
             {/* Main Content Sections with uniform vertical spacing */}
-            <div className="flex flex-col gap-15 pb-32">
+            <div className="flex flex-col">
                 <Hero
                     prompt={prompt}
                     setPrompt={setPrompt}

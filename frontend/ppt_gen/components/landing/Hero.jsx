@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import { useRef } from "react";
 import { ArrowUp, FileStack, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,71 +20,62 @@ export default function Hero({ prompt, setPrompt, slides, setSlides, onSearch })
     const titleText = "The Next Generation of Presentations";
     const words = titleText.split(" ");
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.08,
-                delayChildren: 0.8,
-            },
-        },
-    };
+    const heroRef = useRef(null);
 
-    const wordVariants = {
-        hidden: { y: "100%", opacity: 0, rotateZ: 5 },
-        visible: {
-            y: 0,
-            opacity: 1,
-            rotateZ: 0,
-            transition: {
-                duration: 0.9,
-                ease: [0.16, 1, 0.3, 1], // Custom cubic-bezier for snappy yet smooth awwwards feel
-            },
-        },
-    };
+    useGSAP(() => {
+        const tl = gsap.timeline({ delay: 1.6 });
 
-    const formVariants = {
-        hidden: { opacity: 0, y: 40, scale: 0.95, filter: "blur(10px)" },
-        visible: {
+        tl.fromTo(".hero-word", 
+        {
+            y: "100%",
+            opacity: 0,
+            rotationZ: 4,
+        },
+        {
+            y: "0%",
+            opacity: 1,
+            rotationZ: 0,
+            duration: 0.9,
+            stagger: 0.08,
+            ease: "power3.out"
+        });
+
+        tl.fromTo(".hero-form", 
+        {
+            opacity: 0,
+            y: 40,
+            scale: 0.95,
+            filter: "blur(10px)",
+        },
+        {
             opacity: 1,
             y: 0,
             scale: 1,
             filter: "blur(0px)",
-            transition: {
-                duration: 1.2,
-                ease: [0.16, 1, 0.3, 1],
-                delay: 1.2, // Comes in after the text
-            },
-        },
-    };
+            duration: 1.2,
+            ease: "power3.out"
+        }, "-=0.4");
+    }, { scope: heroRef });
 
     return (
-        <main className="relative z-10 min-h-[100vh] flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-6xl 2xl:max-w-7xl mx-auto">
+        <main ref={heroRef} className="relative z-10 h-screen flex flex-col items-center justify-center text-center px-4 -mt-20 w-full max-w-6xl 2xl:max-w-7xl mx-auto">
             <SilkyAurora />
-            <motion.h1 
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
+            <h1 
                 className="relative z-10 text-5xl sm:text-6xl md:text-7xl lg:text-[5.25rem] 2xl:text-[6rem] font-medium tracking-tight mb-8 text-white leading-[1.1] max-w-5xl mx-auto flex flex-wrap justify-center overflow-hidden"
             >
                 {words.map((word, i) => (
                     <div key={i} className="overflow-hidden pb-2 mr-[0.25em] last:mr-0 inline-block">
-                        <motion.span 
-                            variants={wordVariants}
-                            className="inline-block origin-bottom-left"
+                        <span 
+                            className="hero-word inline-block origin-bottom-left"
                         >
                             {word}
-                        </motion.span>
+                        </span>
                     </div>
                 ))}
-            </motion.h1>
+            </h1>
 
-            <motion.div 
-                variants={formVariants}
-                initial="hidden"
-                animate="visible"
-                className="w-full max-w-5xl mx-auto relative z-10"
+            <div 
+                className="hero-form w-full max-w-5xl mx-auto relative z-10"
             >
                 <form
                     onSubmit={onSearch}
@@ -136,7 +128,7 @@ export default function Hero({ prompt, setPrompt, slides, setSlides, onSearch })
                         </div>
                     </div>
                 </form>
-            </motion.div>
+            </div>
         </main>
     );
 }

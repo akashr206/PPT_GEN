@@ -1,23 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
+import { useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
-import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function VideoShowcase() {
     const [isMuted, setIsMuted] = useState(true);
+    const containerRef = useRef(null);
+
+    useGSAP(() => {
+        gsap.fromTo(".video-container", 
+        {
+            y: 100,
+            opacity: 0,
+            scale: 0.95,
+        },
+        {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top 80%",
+            }
+        });
+    }, { scope: containerRef });
 
     return (
-        <section className="relative z-10 w-full h-screen max-w-7xl 2xl:max-w-330 mx-auto px-4">
+        <section ref={containerRef} className="relative my-10 z-10 w-full max-w-7xl 2xl:max-w-330 mx-auto px-4">
             <div className="relative">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 100 }}
-                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.1 }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                    className="group/video"
-                >
-                    <div className="relative aspect-video transform-[translateZ(0)]">
+                <div className="group/video video-container">
+                    <div className="relative aspect-video transform-[translateZ(0)] rounded-[1.25rem] overflow-hidden border border-white/10 shadow-2xl bg-white/[0.02]">
                         <video
                             src="/broadside-ai-info.webm"
                             className="w-full h-full object-contain rounded-xl"
@@ -34,7 +53,7 @@ export default function VideoShowcase() {
                             {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                         </button>
                     </div>
-                </motion.div>
+                </div>
             </div>
         </section>
     );
