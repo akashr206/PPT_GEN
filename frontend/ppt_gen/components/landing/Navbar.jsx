@@ -1,7 +1,9 @@
 "use client";
 
-import React from "react";
+import { useRef } from "react";
 import Link from "next/link";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { Button } from "@/components/ui/button";
 import { LogOut, LayoutDashboard } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -14,16 +16,30 @@ import {
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 
 export default function Navbar({ session, status, onSignIn }) {
     const router = useRouter();
 
+    const navRef = useRef(null);
+
+    useGSAP(() => {
+        gsap.fromTo(navRef.current, 
+        {
+            y: -100,
+            opacity: 0,
+        },
+        {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            delay: 1.8,
+            ease: "power3.out",
+        });
+    }, { scope: navRef });
+
     return (
-        <motion.nav
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 1 }}
+        <nav
+            ref={navRef}
             className="relative z-50 flex items-center justify-between p-6 max-w-7xl 2xl:max-w-[1536px] w-full mx-auto"
         >
             <div className="flex items-center gap-3">
@@ -104,6 +120,6 @@ export default function Navbar({ session, status, onSignIn }) {
                     </Button>
                 )}
             </div>
-        </motion.nav>
+        </nav>
     );
 }
