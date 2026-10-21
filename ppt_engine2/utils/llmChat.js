@@ -38,7 +38,7 @@ async function chat(systemPrompt, prompt, thinking = "standard") {
     return content;
 }
 
-async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "standard") {
+async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "standard") {
     // 1. Correct Endpoint and API Key
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse", {
         method: "POST",
@@ -128,7 +128,7 @@ async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "sta
     }
 }
 
-async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "standard") {
+async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "standard") {
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {
