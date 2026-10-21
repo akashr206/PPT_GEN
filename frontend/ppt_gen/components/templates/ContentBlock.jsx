@@ -80,7 +80,11 @@ const ContentBlock = ({
         }
     };
 
-    const handleOpenLayoutPicker = () => {
+    const handleOpenLayoutPicker = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         setIsOpen(false);
         window.dispatchEvent(
             new CustomEvent("trigger-open-block-layout-picker", {

@@ -14,7 +14,7 @@ const LineChartLayout = ({
     onUpdateBlock,
 }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-        if (typeof window !== "undefined" && window.__chartSidebarOpenForId === block?.id) {
+        if (typeof window !== "undefined" && window.__chartSidebarOpenForId && window.__chartSidebarOpenForId === block?.id) {
             window.__chartSidebarOpenForId = null;
             return true;
         }
