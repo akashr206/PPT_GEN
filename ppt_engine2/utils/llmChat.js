@@ -40,7 +40,7 @@ async function chat(systemPrompt, prompt, thinking = "standard") {
 
 async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "standard") {
     // 1. Correct Endpoint and API Key
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse", {
         method: "POST",
         headers: {
             "x-goog-api-key": process.env.GEMINI_API_KEY,
@@ -136,7 +136,7 @@ async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "sta
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            model: "mimo-v2.5",
+            model: "mimo-v2.6-flash",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: prompt }
