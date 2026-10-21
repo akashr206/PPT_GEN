@@ -3,7 +3,13 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Save, Sparkles, Heading, CaseSensitive, ChevronDown } from "lucide-react";
+import {
+    Save,
+    Sparkles,
+    Heading,
+    CaseSensitive,
+    ChevronDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useThemes } from "@/hooks/use-themes";
 import Slide from "@/components/templates/Slide";
@@ -24,7 +30,7 @@ const FONTS_LIST = [
     { name: "Playfair Display (Serif)", value: '"Playfair Display", serif' },
     { name: "Poppins (Sans-serif)", value: '"Poppins", sans-serif' },
     { name: "Quicksand (Sans-serif)", value: '"Quicksand", sans-serif' },
-    { name: "Roboto (Sans-serif)", value: '"Roboto", sans-serif' }
+    { name: "Roboto (Sans-serif)", value: '"Roboto", sans-serif' },
 ];
 
 import { LayoutSelectorDropdown } from "./components/LayoutSelectorDropdown";
@@ -33,33 +39,61 @@ const getMockContent = (category) => {
         case "title":
             return {
                 title: "Defining Your Brand Identity",
-                subtitle: "Create harmonized designs dynamically compile-ready for slide decks.",
+                subtitle:
+                    "Create harmonized designs dynamically compile-ready for slide decks.",
                 presenter: "Broadside AI Team",
                 company: "Design Systems Corp",
                 date: "July 2026",
-                image: "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=800"
+                image: "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=800",
             };
         case "agenda":
             return {
                 title: "Today's Agenda",
                 subtitle: "An overview of what we will cover.",
                 items: [
-                    { header: "Introduction", description: "Welcome and opening remarks." },
-                    { header: "Design System", description: "Exploring typography and color semantics." },
-                    { header: "Implementation", description: "Technical constraints and optimizations." },
-                    { header: "Q&A Session", description: "Open floor for team questions." }
-                ]
+                    {
+                        header: "Introduction",
+                        description: "Welcome and opening remarks.",
+                    },
+                    {
+                        header: "Design System",
+                        description:
+                            "Exploring typography and color semantics.",
+                    },
+                    {
+                        header: "Implementation",
+                        description: "Technical constraints and optimizations.",
+                    },
+                    {
+                        header: "Q&A Session",
+                        description: "Open floor for team questions.",
+                    },
+                ],
             };
         case "stats":
             return {
                 title: "Metrics and Core Performance",
-                subtitle: "Significant efficiency outcomes driving layout generations.",
+                subtitle:
+                    "Significant efficiency outcomes driving layout generations.",
                 items: [
-                    { header: "99.8%", description: "Generation accuracy on standard templates." },
-                    { header: "60 FPS", description: "Direct-DOM styling rendering speed." },
-                    { header: "12+", description: "Built-in design systems fully supported." },
-                    { header: "150ms", description: "Input debouncer sync latency." }
-                ]
+                    {
+                        header: "99.8%",
+                        description:
+                            "Generation accuracy on standard templates.",
+                    },
+                    {
+                        header: "60 FPS",
+                        description: "Direct-DOM styling rendering speed.",
+                    },
+                    {
+                        header: "12+",
+                        description: "Built-in design systems fully supported.",
+                    },
+                    {
+                        header: "150ms",
+                        description: "Input debouncer sync latency.",
+                    },
+                ],
             };
         case "images":
             return {
@@ -68,20 +102,40 @@ const getMockContent = (category) => {
                 image: "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=800",
                 imageDescription: "Dynamic visual collaboration",
                 items: [
-                    { header: "Pexels Search", description: "Search thousands of assets instantly." },
-                    { header: "Layout auto-scaling", description: "Content scales gracefully with image sizes." }
-                ]
+                    {
+                        header: "Pexels Search",
+                        description: "Search thousands of assets instantly.",
+                    },
+                    {
+                        header: "Layout auto-scaling",
+                        description:
+                            "Content scales gracefully with image sizes.",
+                    },
+                ],
             };
         case "timelines":
             return {
                 title: "Implementation Milestones",
-                subtitle: "Project timeline mapping from initialization to product launch.",
+                subtitle:
+                    "Project timeline mapping from initialization to product launch.",
                 items: [
-                    { header: "Phase 1: Design", description: "System wireframing" },
-                    { header: "Phase 2: Alpha", description: "Design sync API" },
-                    { header: "Phase 3: Beta", description: "Broadside integration" },
-                    { header: "Phase 4: Launch", description: "Public release" }
-                ]
+                    {
+                        header: "Phase 1: Design",
+                        description: "System wireframing",
+                    },
+                    {
+                        header: "Phase 2: Alpha",
+                        description: "Design sync API",
+                    },
+                    {
+                        header: "Phase 3: Beta",
+                        description: "Broadside integration",
+                    },
+                    {
+                        header: "Phase 4: Launch",
+                        description: "Public release",
+                    },
+                ],
             };
         case "closing":
             return {
@@ -92,45 +146,87 @@ const getMockContent = (category) => {
                 items: [
                     { header: "Website", description: "www.broadside.ai" },
                     { header: "Email", description: "hello@broadside.ai" },
-                    { header: "Phone", description: "+1 (555) 123-4567" }
-                ]
+                    { header: "Phone", description: "+1 (555) 123-4567" },
+                ],
             };
         case "icons":
             return {
                 title: "Core Values",
                 subtitle: "What drives our product vision.",
                 items: [
-                    { header: "Innovation", description: "Pushing boundaries in web tech.", icon: "Lightbulb" },
-                    { header: "Security", description: "Protecting data and privacy.", icon: "Shield" },
-                    { header: "Speed", description: "Optimized for minimal latency.", icon: "Zap" },
-                    { header: "Simplicity", description: "Clean and intuitive user experience.", icon: "CheckCircle" }
-                ]
+                    {
+                        header: "Innovation",
+                        description: "Pushing boundaries in web tech.",
+                        icon: "Lightbulb",
+                    },
+                    {
+                        header: "Security",
+                        description: "Protecting data and privacy.",
+                        icon: "Shield",
+                    },
+                    {
+                        header: "Speed",
+                        description: "Optimized for minimal latency.",
+                        icon: "Zap",
+                    },
+                    {
+                        header: "Simplicity",
+                        description: "Clean and intuitive user experience.",
+                        icon: "CheckCircle",
+                    },
+                ],
             };
         case "table":
             return {
                 title: "Feature Comparison",
                 subtitle: "How our generator stacks up against alternatives.",
                 table: {
-                    headers: ["Feature", "Our Solution", "Alternative A", "Alternative B"],
+                    headers: [
+                        "Feature",
+                        "Our Solution",
+                        "Alternative A",
+                        "Alternative B",
+                    ],
                     rows: [
                         ["Live Preview", "Yes (60FPS)", "Yes (Laggy)", "No"],
                         ["Custom Layouts", "30+", "10", "15"],
                         ["Theme Extensibility", "Infinite", "Fixed", "Fixed"],
-                        ["Export Formats", "PDF, PPTX", "PDF", "PPTX"]
-                    ]
-                }
+                        ["Export Formats", "PDF, PPTX", "PDF", "PPTX"],
+                    ],
+                },
             };
         default:
             return {
                 title: "Defining Your Brand Identity",
-                subtitle: "Create harmonized designs dynamically compile-ready for slide decks.",
+                subtitle:
+                    "Create harmonized designs dynamically compile-ready for slide decks.",
                 items: [
-                    { header: "Define color hierarchy", description: "Establish visual guidelines for text, borders, and backgrounds." },
-                    { header: "Typography pairing", description: "Select classic heading and body fonts matching your brand." },
-                    { header: "Generate layouts", description: "Assemble custom slide structures responsive to all screen sizes." },
-                    { header: "Lorem Ipsum", description: "Lorem Ipsum dolor sit amet, consectetur adipiscing elit." },
-                    { header: "Lorem Ipsum", description: "Lorem Ipsum dolor sit amet, consectetur adipiscing elit." }
-                ]
+                    {
+                        header: "Define color hierarchy",
+                        description:
+                            "Establish visual guidelines for text, borders, and backgrounds.",
+                    },
+                    {
+                        header: "Typography pairing",
+                        description:
+                            "Select classic heading and body fonts matching your brand.",
+                    },
+                    {
+                        header: "Generate layouts",
+                        description:
+                            "Assemble custom slide structures responsive to all screen sizes.",
+                    },
+                    {
+                        header: "Lorem Ipsum",
+                        description:
+                            "Lorem Ipsum dolor sit amet, consectetur adipiscing elit.",
+                    },
+                    {
+                        header: "Lorem Ipsum",
+                        description:
+                            "Lorem Ipsum dolor sit amet, consectetur adipiscing elit.",
+                    },
+                ],
             };
     }
 };
@@ -149,41 +245,45 @@ function debounce(func, wait) {
 }
 
 // Self-contained, memoized color selector to decouple input dragging from parent re-renders
-const ColorSelector = React.memo(({ label, name, value, onChange, onInstantStyleUpdate }) => {
-    const [localVal, setLocalVal] = useState(value);
+const ColorSelector = React.memo(
+    ({ label, name, value, onChange, onInstantStyleUpdate }) => {
+        const [localVal, setLocalVal] = useState(value);
 
-    // Synchronize local input state with initial database values
-    useEffect(() => {
-        setLocalVal(value);
-    }, [value]);
+        // Synchronize local input state with initial database values
+        useEffect(() => {
+            setLocalVal(value);
+        }, [value]);
 
-    const handleChange = (e) => {
-        const val = e.target.value;
-        setLocalVal(val);
-        onInstantStyleUpdate(name, val); // GPU-accelerated style injection (0ms delay)
-        onChange(val); // Debounced parent state updater
-    };
+        const handleChange = (e) => {
+            const val = e.target.value;
+            setLocalVal(val);
+            onInstantStyleUpdate(name, val); // GPU-accelerated style injection (0ms delay)
+            onChange(val); // Debounced parent state updater
+        };
 
-    return (
-        <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] text-muted-foreground font-medium">{label}</label>
-            <div className="flex items-center gap-2">
-                <input
-                    type="color"
-                    value={localVal}
-                    onChange={handleChange}
-                    className="w-8 h-8 rounded-md border border-input p-0 cursor-pointer overflow-hidden shrink-0"
-                />
-                <input
-                    type="text"
-                    value={localVal}
-                    onChange={handleChange}
-                    className="p-1.5 bg-background border border-input rounded-md text-xs w-full text-foreground uppercase font-mono"
-                />
+        return (
+            <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-muted-foreground font-medium">
+                    {label}
+                </label>
+                <div className="flex items-center gap-2">
+                    <input
+                        type="color"
+                        value={localVal}
+                        onChange={handleChange}
+                        className="w-8 h-8 rounded-md border border-input p-0 cursor-pointer overflow-hidden shrink-0"
+                    />
+                    <input
+                        type="text"
+                        value={localVal}
+                        onChange={handleChange}
+                        className="p-1.5 bg-background border border-input rounded-md text-xs w-full text-foreground uppercase font-mono"
+                    />
+                </div>
             </div>
-        </div>
-    );
-});
+        );
+    },
+);
 ColorSelector.displayName = "ColorSelector";
 
 function ThemeGeneratorContent() {
@@ -217,10 +317,22 @@ function ThemeGeneratorContent() {
     const debouncedSetBg = React.useMemo(() => debounce(setBg, 150), []);
     const debouncedSetBgAlt = React.useMemo(() => debounce(setBgAlt, 150), []);
     const debouncedSetFg = React.useMemo(() => debounce(setFg, 150), []);
-    const debouncedSetFgMuted = React.useMemo(() => debounce(setFgMuted, 150), []);
-    const debouncedSetPrimaryColor = React.useMemo(() => debounce(setPrimaryColor, 150), []);
-    const debouncedSetCardBg = React.useMemo(() => debounce(setCardBg, 150), []);
-    const debouncedSetCardBorder = React.useMemo(() => debounce(setCardBorder, 150), []);
+    const debouncedSetFgMuted = React.useMemo(
+        () => debounce(setFgMuted, 150),
+        [],
+    );
+    const debouncedSetPrimaryColor = React.useMemo(
+        () => debounce(setPrimaryColor, 150),
+        [],
+    );
+    const debouncedSetCardBg = React.useMemo(
+        () => debounce(setCardBg, 150),
+        [],
+    );
+    const debouncedSetCardBorder = React.useMemo(
+        () => debounce(setCardBorder, 150),
+        [],
+    );
 
     // Instant style update handler (writes directly to preview container element style properties)
     const handleInstantStyleUpdate = React.useCallback((varName, value) => {
@@ -241,7 +353,12 @@ function ThemeGeneratorContent() {
 
     useEffect(() => {
         /* eslint-disable react-hooks/set-state-in-effect */
-        if (themeId && customThemes && customThemes.length > 0 && !hasLoadedTheme) {
+        if (
+            themeId &&
+            customThemes &&
+            customThemes.length > 0 &&
+            !hasLoadedTheme
+        ) {
             const theme = customThemes.find((t) => t.id === themeId);
             if (theme) {
                 setName(theme.name);
@@ -264,10 +381,14 @@ function ThemeGeneratorContent() {
 
         // Check for duplicate names (excluding current theme if editing)
         const isDuplicate = (customThemes || []).some(
-            (t) => t.name.toLowerCase().trim() === name.toLowerCase().trim() && t.id !== themeId
+            (t) =>
+                t.name.toLowerCase().trim() === name.toLowerCase().trim() &&
+                t.id !== themeId,
         );
         if (isDuplicate) {
-            toast.error(`A custom theme with the name "${name}" already exists. Please choose a unique name.`);
+            toast.error(
+                `A custom theme with the name "${name}" already exists. Please choose a unique name.`,
+            );
             return;
         }
 
@@ -281,7 +402,7 @@ function ThemeGeneratorContent() {
             card_bg: cardBg,
             card_border: cardBorder,
             font_heading: fontHeading,
-            font_body: fontBody
+            font_body: fontBody,
         };
         try {
             if (themeId) {
@@ -298,24 +419,28 @@ function ThemeGeneratorContent() {
     // Memoize the layout structure of the slide preview to prevent JSX rebuilds
     const memoizedSlide = React.useMemo(() => {
         const mockContent = getMockContent(layoutCategory);
-        const isHeaderlessLayout = layoutCategory === "title" || layoutCategory === "closing";
+        const isHeaderlessLayout =
+            layoutCategory === "title" || layoutCategory === "closing";
 
         return (
-            <Slide 
+            <Slide
                 slide_content={{
                     type: "normal",
-                    header: isHeaderlessLayout ? null : {
-                        id: "preview-header",
-                        type: "header",
-                        title: mockContent.title || "Preview Title",
-                        subtitle: mockContent.subtitle || "Preview Subtitle",
-                    },
+                    header: isHeaderlessLayout
+                        ? null
+                        : {
+                              id: "preview-header",
+                              type: "header",
+                              title: mockContent.title || "Preview Title",
+                              subtitle:
+                                  mockContent.subtitle || "Preview Subtitle",
+                          },
                     contentTree: {
                         id: "preview-block",
                         type: "leaf",
                         layout: { category: layoutCategory, type: layoutType },
-                        ...mockContent
-                    }
+                        ...mockContent,
+                    },
                 }}
                 theme="editing-theme"
             />
@@ -325,8 +450,14 @@ function ThemeGeneratorContent() {
     // Update typography CSS variables directly when select changes
     useEffect(() => {
         if (previewContainerRef.current) {
-            previewContainerRef.current.style.setProperty("--theme-font-heading", fontHeading);
-            previewContainerRef.current.style.setProperty("--theme-font-body", fontBody);
+            previewContainerRef.current.style.setProperty(
+                "--theme-font-heading",
+                fontHeading,
+            );
+            previewContainerRef.current.style.setProperty(
+                "--theme-font-body",
+                fontBody,
+            );
         }
     }, [fontHeading, fontBody]);
 
@@ -339,10 +470,15 @@ function ThemeGeneratorContent() {
                 <aside className="w-full lg:w-96 lg:h-full max-lg:h-auto bg-card text-card-foreground flex flex-col border-r border-border shrink-0 select-none lg:min-h-0">
                     {/* Sidebar Header */}
                     <div className="p-4 border-b border-border flex items-center justify-start gap-1.5 shrink-0">
-                        <span className="font-bold text-foreground">Theme Creator</span>
+                        <span className="font-bold text-foreground">
+                            Theme Creator
+                        </span>
                     </div>
 
-                    <form onSubmit={handleSave} className="flex-1 lg:overflow-y-auto p-5 flex flex-col gap-5 lg:min-h-0">
+                    <form
+                        onSubmit={handleSave}
+                        className="flex-1 lg:overflow-y-auto p-5 flex flex-col gap-5 lg:min-h-0"
+                    >
                         {/* Theme Name input */}
                         <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
@@ -371,7 +507,13 @@ function ThemeGeneratorContent() {
                                             className="w-full justify-between text-xs h-9 bg-background border-input text-foreground font-normal px-3 rounded-md cursor-pointer border hover:bg-accent/50"
                                         >
                                             <span>
-                                                {FONTS_LIST.find((f) => f.value === fontHeading)?.name.split(" ")[0]}
+                                                {
+                                                    FONTS_LIST.find(
+                                                        (f) =>
+                                                            f.value ===
+                                                            fontHeading,
+                                                    )?.name.split(" ")[0]
+                                                }
                                             </span>
                                             <ChevronDown className="w-3.5 h-3.5 text-muted-foreground opacity-60 ml-2" />
                                         </Button>
@@ -380,7 +522,9 @@ function ThemeGeneratorContent() {
                                         {FONTS_LIST.map((font) => (
                                             <DropdownMenuItem
                                                 key={font.value}
-                                                onClick={() => setFontHeading(font.value)}
+                                                onClick={() =>
+                                                    setFontHeading(font.value)
+                                                }
                                                 className="text-xs px-2 py-1.5 cursor-pointer rounded-sm hover:bg-accent hover:text-accent-foreground"
                                             >
                                                 {font.name.split(" ")[0]}
@@ -391,7 +535,8 @@ function ThemeGeneratorContent() {
                             </div>
                             <div className="flex flex-col gap-1.5">
                                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase flex items-center gap-1">
-                                    <CaseSensitive className="w-3 h-3" /> Body Font
+                                    <CaseSensitive className="w-3 h-3" /> Body
+                                    Font
                                 </span>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -400,7 +545,13 @@ function ThemeGeneratorContent() {
                                             className="w-full justify-between text-xs h-9 bg-background border-input text-foreground font-normal px-3 rounded-md cursor-pointer border hover:bg-accent/50"
                                         >
                                             <span>
-                                                {FONTS_LIST.find((f) => f.value === fontBody)?.name.split(" ")[0]}
+                                                {
+                                                    FONTS_LIST.find(
+                                                        (f) =>
+                                                            f.value ===
+                                                            fontBody,
+                                                    )?.name.split(" ")[0]
+                                                }
                                             </span>
                                             <ChevronDown className="w-3.5 h-3.5 text-muted-foreground opacity-60 ml-2" />
                                         </Button>
@@ -409,7 +560,9 @@ function ThemeGeneratorContent() {
                                         {FONTS_LIST.map((font) => (
                                             <DropdownMenuItem
                                                 key={font.value}
-                                                onClick={() => setFontBody(font.value)}
+                                                onClick={() =>
+                                                    setFontBody(font.value)
+                                                }
                                                 className="text-xs px-2 py-1.5 cursor-pointer rounded-sm hover:bg-accent hover:text-accent-foreground"
                                             >
                                                 {font.name.split(" ")[0]}
@@ -427,13 +580,69 @@ function ThemeGeneratorContent() {
                             </h4>
 
                             <div className="grid grid-cols-2 gap-3.5 pb-4">
-                                <ColorSelector label="Background" name="bg" value={bg} onChange={debouncedSetBg} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Background Alt" name="bgAlt" value={bgAlt} onChange={debouncedSetBgAlt} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Primary Accent" name="primaryColor" value={primaryColor} onChange={debouncedSetPrimaryColor} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Text (Foreground)" name="fg" value={fg} onChange={debouncedSetFg} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Muted Text" name="fgMuted" value={fgMuted} onChange={debouncedSetFgMuted} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Card Background" name="cardBg" value={cardBg} onChange={debouncedSetCardBg} onInstantStyleUpdate={handleInstantStyleUpdate} />
-                                <ColorSelector label="Card Border" name="cardBorder" value={cardBorder} onChange={debouncedSetCardBorder} onInstantStyleUpdate={handleInstantStyleUpdate} />
+                                <ColorSelector
+                                    label="Background"
+                                    name="bg"
+                                    value={bg}
+                                    onChange={debouncedSetBg}
+                                    onInstantStyleUpdate={
+                                        handleInstantStyleUpdate
+                                    }
+                                />
+                                <ColorSelector
+                                    label="Background Alt"
+                                    name="bgAlt"
+                                    value={bgAlt}
+                                    onChange={debouncedSetBgAlt}
+                                    onInstantStyleUpdate={
+                                        handleInstantStyleUpdate
+                                    }
+                                />
+                                <ColorSelector
+                                    label="Primary Accent"
+                                    name="primaryColor"
+                                    value={primaryColor}
+                                    onChange={debouncedSetPrimaryColor}
+                                    onInstantStyleUpdate={
+                                        handleInstantStyleUpdate
+                                    }
+                                />
+                                <ColorSelector
+                                    label="Text (Foreground)"
+                                    name="fg"
+                                    value={fg}
+                                    onChange={debouncedSetFg}
+                                    onInstantStyleUpdate={
+                                        handleInstantStyleUpdate
+                                    }
+                                />
+                                <ColorSelector
+                                    label="Muted Text"
+                                    name="fgMuted"
+                                    value={fgMuted}
+                                    onChange={debouncedSetFgMuted}
+                                    onInstantStyleUpdate={
+                                        handleInstantStyleUpdate
+                                    }
+                                />
+                                <ColorSelector
+                                    label="Card Background"
+                                    name="cardBg"
+                                    value={cardBg}
+                                    onChange={debouncedSetCardBg}
+                                    onInstantStyleUpdate={
+                                        handleInstantStyleUpdate
+                                    }
+                                />
+                                <ColorSelector
+                                    label="Card Border"
+                                    name="cardBorder"
+                                    value={cardBorder}
+                                    onChange={debouncedSetCardBorder}
+                                    onInstantStyleUpdate={
+                                        handleInstantStyleUpdate
+                                    }
+                                />
                             </div>
                         </div>
 
@@ -456,11 +665,13 @@ function ThemeGeneratorContent() {
                     {/* Layout Selector Bar */}
                     <div className="w-full max-w-[1000px] flex items-center justify-between bg-card text-card-foreground border border-border px-4 py-2.5 rounded-lg shadow-sm shrink-0">
                         <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                             Slide Layout Preview
+                            Slide Layout Preview
                         </span>
-                        
+
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground font-medium">Layout:</span>
+                            <span className="text-xs text-muted-foreground font-medium">
+                                Layout:
+                            </span>
                             <LayoutSelectorDropdown
                                 category={layoutCategory}
                                 type={layoutType}
@@ -472,7 +683,7 @@ function ThemeGeneratorContent() {
                         </div>
                     </div>
 
-                    <div 
+                    <div
                         ref={previewContainerRef}
                         style={{
                             "--theme-bg": bg,
@@ -497,14 +708,18 @@ function ThemeGeneratorContent() {
 
 export default function ThemeGeneratorPage() {
     return (
-        <Suspense fallback={
-            <div className="flex h-screen w-full items-center justify-center bg-background">
-                <div className="flex flex-col items-center gap-2">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-                    <p className="text-sm text-muted-foreground">Loading theme generator...</p>
+        <Suspense
+            fallback={
+                <div className="flex h-screen w-full items-center justify-center bg-background">
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                        <p className="text-sm text-muted-foreground">
+                            Loading theme generator...
+                        </p>
+                    </div>
                 </div>
-            </div>
-        }>
+            }
+        >
             <ThemeGeneratorContent />
         </Suspense>
     );

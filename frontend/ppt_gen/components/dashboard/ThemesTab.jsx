@@ -34,8 +34,9 @@ const PREVIEW_SLIDE = normalizeSlides([
             id: "header_1",
             type: "header",
             title: "Defining Brand Identity",
-            subtitle: "Harmonized color palettes and responsive design systems.",
-            align: "left"
+            subtitle:
+                "Harmonized color palettes and responsive design systems.",
+            align: "left",
         },
         contentTree: {
             id: "block_1",
@@ -45,40 +46,118 @@ const PREVIEW_SLIDE = normalizeSlides([
             items: [
                 {
                     header: "Color Hierarchy",
-                    description: "Establish clear visual rules for text, accents, and backgrounds.",
+                    description:
+                        "Establish clear visual rules for text, accents, and backgrounds.",
                 },
                 {
                     header: "Typography Pairing",
-                    description: "Select expressive headings paired with clean body fonts.",
+                    description:
+                        "Select expressive headings paired with clean body fonts.",
                 },
                 {
                     header: "Adaptive Layouts",
-                    description: "Structured components designed for seamless presentation flow.",
+                    description:
+                        "Structured components designed for seamless presentation flow.",
                 },
-            ]
-        }
-    }
+            ],
+        },
+    },
 ])[0];
 
 const THEME_COLORS = {
-    "default": { bg: "#ffffff", primary: "#3b82f6", fg: "#1f2937", accent: "#8b5cf6" },
-    "dark": { bg: "#111827", primary: "#60a5fa", fg: "#f9fafb", accent: "#a78bfa" },
-    "corporate": { bg: "#f8fafc", primary: "#0369a1", fg: "#0f172a", accent: "#0284c7" },
-    "creative": { bg: "#fff1f2", primary: "#f43f5e", fg: "#4c1d95", accent: "#ec4899" },
-    "elegant": { bg: "#fafaf9", primary: "#78716c", fg: "#44403c", accent: "#a8a29e" },
-    "playful": { bg: "#fefce8", primary: "#eab308", fg: "#3f6212", accent: "#fb923c" },
-    "nature": { bg: "#f4f6f0", primary: "#2d5a3c", fg: "#1c2e24", accent: "#8fa882" },
-    "sunset": { bg: "#fdf8f5", primary: "#ea580c", fg: "#451a03", accent: "#f97316" },
-    "ocean": { bg: "#f0f7fa", primary: "#0284c7", fg: "#0c4a6e", accent: "#06b6d4" },
-    "minimalist": { bg: "#ffffff", primary: "#111827", fg: "#111827", accent: "#374151" },
-    "lavender": { bg: "#faf9fe", primary: "#6366f1", fg: "#1e1b4b", accent: "#d946ef" },
-    "dracula": { bg: "#1e1e2e", primary: "#cba6f7", fg: "#f8f8f2", accent: "#f5c2e7" },
-    "nord-dark": { bg: "#2e3440", primary: "#88c0d0", fg: "#eceff4", accent: "#81a1c1" },
-    "forest-dark": { bg: "#0f1715", primary: "#52b788", fg: "#e6ede9", accent: "#74c69d" },
-    "luxury-dark": { bg: "#141414", primary: "#d4af37", fg: "#f5f5f0", accent: "#c5a880" }
+    default: {
+        bg: "#ffffff",
+        primary: "#3b82f6",
+        fg: "#1f2937",
+        accent: "#8b5cf6",
+    },
+    dark: {
+        bg: "#111827",
+        primary: "#60a5fa",
+        fg: "#f9fafb",
+        accent: "#a78bfa",
+    },
+    corporate: {
+        bg: "#f8fafc",
+        primary: "#0369a1",
+        fg: "#0f172a",
+        accent: "#0284c7",
+    },
+    creative: {
+        bg: "#fff1f2",
+        primary: "#f43f5e",
+        fg: "#4c1d95",
+        accent: "#ec4899",
+    },
+    elegant: {
+        bg: "#fafaf9",
+        primary: "#78716c",
+        fg: "#44403c",
+        accent: "#a8a29e",
+    },
+    playful: {
+        bg: "#fefce8",
+        primary: "#eab308",
+        fg: "#3f6212",
+        accent: "#fb923c",
+    },
+    nature: {
+        bg: "#f4f6f0",
+        primary: "#2d5a3c",
+        fg: "#1c2e24",
+        accent: "#8fa882",
+    },
+    sunset: {
+        bg: "#fdf8f5",
+        primary: "#ea580c",
+        fg: "#451a03",
+        accent: "#f97316",
+    },
+    ocean: {
+        bg: "#f0f7fa",
+        primary: "#0284c7",
+        fg: "#0c4a6e",
+        accent: "#06b6d4",
+    },
+    minimalist: {
+        bg: "#ffffff",
+        primary: "#111827",
+        fg: "#111827",
+        accent: "#374151",
+    },
+    lavender: {
+        bg: "#faf9fe",
+        primary: "#6366f1",
+        fg: "#1e1b4b",
+        accent: "#d946ef",
+    },
+    dracula: {
+        bg: "#1e1e2e",
+        primary: "#cba6f7",
+        fg: "#f8f8f2",
+        accent: "#f5c2e7",
+    },
+    "nord-dark": {
+        bg: "#2e3440",
+        primary: "#88c0d0",
+        fg: "#eceff4",
+        accent: "#81a1c1",
+    },
+    "forest-dark": {
+        bg: "#0f1715",
+        primary: "#52b788",
+        fg: "#e6ede9",
+        accent: "#74c69d",
+    },
+    "luxury-dark": {
+        bg: "#141414",
+        primary: "#d4af37",
+        fg: "#f5f5f0",
+        accent: "#c5a880",
+    },
 };
 
-const SYSTEM_THEMES = metadata.themes.map(theme => ({
+const SYSTEM_THEMES = metadata.themes.map((theme) => ({
     ...theme,
     desc: theme.description,
     bg: THEME_COLORS[theme.id]?.bg || "#ffffff",

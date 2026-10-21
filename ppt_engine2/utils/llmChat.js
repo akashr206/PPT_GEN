@@ -9,7 +9,7 @@ async function chat(systemPrompt, prompt, thinking = "standard") {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            model: "mimo-v2.5",
+            model: "mimo-v2.6-flash",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: prompt }
@@ -38,7 +38,7 @@ async function chat(systemPrompt, prompt, thinking = "standard") {
     return content;
 }
 
-async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "standard") {
+async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "standard") {
     // 1. Correct Endpoint and API Key
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent?alt=sse", {
         method: "POST",
@@ -128,7 +128,7 @@ async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "st
     }
 }
 
-async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "standard") {
+async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "standard") {
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {

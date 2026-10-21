@@ -43,18 +43,18 @@ export const postTheme = async (req, res) => {
         const theme = await createTheme({
             user_id: userId,
             name,
-            bg,
-            bg_alt,
-            fg,
-            fg_muted,
-            primary_color,
-            secondary,
-            accent,
-            card_bg,
-            card_border,
-            bullet,
-            font_heading,
-            font_body
+            bg: bg || "#ffffff",
+            bg_alt: bg_alt || "#f9fafb",
+            fg: fg || "#1f2937",
+            fg_muted: fg_muted || "#4b5563",
+            primary_color: primary_color || "#3b82f6",
+            secondary: secondary || "#f3f4f6",
+            accent: accent || "#8b5cf6",
+            card_bg: card_bg || "#ffffff",
+            card_border: card_border || "#e5e7eb",
+            bullet: bullet || primary_color || "#3b82f6",
+            font_heading: font_heading || '"Inter", sans-serif',
+            font_body: font_body || '"Inter", sans-serif'
         });
 
         sendSuccess(res, theme, "Theme created successfully", 201);
