@@ -21,6 +21,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Navbar } from "@/components/generate/navbar";
+import { ModernColorPicker } from "@/components/ui/ModernColorPicker";
 
 const FONTS_LIST = [
     { name: "Inter (Sans-serif)", value: '"Inter", sans-serif' },
@@ -244,47 +245,8 @@ function debounce(func, wait) {
     };
 }
 
-// Self-contained, memoized color selector to decouple input dragging from parent re-renders
-const ColorSelector = React.memo(
-    ({ label, name, value, onChange, onInstantStyleUpdate }) => {
-        const [localVal, setLocalVal] = useState(value);
-
-        // Synchronize local input state with initial database values
-        useEffect(() => {
-            setLocalVal(value);
-        }, [value]);
-
-        const handleChange = (e) => {
-            const val = e.target.value;
-            setLocalVal(val);
-            onInstantStyleUpdate(name, val); // GPU-accelerated style injection (0ms delay)
-            onChange(val); // Debounced parent state updater
-        };
-
-        return (
-            <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-muted-foreground font-medium">
-                    {label}
-                </label>
-                <div className="flex items-center gap-2">
-                    <input
-                        type="color"
-                        value={localVal}
-                        onChange={handleChange}
-                        className="w-8 h-8 rounded-md border border-input p-0 cursor-pointer overflow-hidden shrink-0"
-                    />
-                    <input
-                        type="text"
-                        value={localVal}
-                        onChange={handleChange}
-                        className="p-1.5 bg-background border border-input rounded-md text-xs w-full text-foreground uppercase font-mono"
-                    />
-                </div>
-            </div>
-        );
-    },
-);
-ColorSelector.displayName = "ColorSelector";
+// Use modern, interactive popover color picker with 2D gradient, hue slider & presets
+const ColorSelector = ModernColorPicker;
 
 function ThemeGeneratorContent() {
     const router = useRouter();
@@ -574,75 +536,104 @@ function ThemeGeneratorContent() {
                         </div>
 
                         {/* Colors Settings Grid */}
-                        <div className="border-t border-border pt-4 flex flex-col gap-3.5">
-                            <h4 className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
-                                Theme Colors
-                            </h4>
+                        <div className="border-t border-border pt-4 flex flex-col gap-4">
+                            {/* Slide Surfaces */}
+                            <div className="flex flex-col gap-1.5">
+                                <h4 className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                                    Slide Surfaces
+                                </h4>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <ColorSelector
+                                        label="Slide Background"
+                                        description="Main slide canvas"
+                                        name="bg"
+                                        value={bg}
+                                        onChange={debouncedSetBg}
+                                        onInstantStyleUpdate={
+                                            handleInstantStyleUpdate
+                                        }
+                                    />
+                                    <ColorSelector
+                                        label="Section Background"
+                                        description="Panels & split layouts"
+                                        name="bgAlt"
+                                        value={bgAlt}
+                                        onChange={debouncedSetBgAlt}
+                                        onInstantStyleUpdate={
+                                            handleInstantStyleUpdate
+                                        }
+                                    />
+                                </div>
+                            </div>
 
-                            <div className="grid grid-cols-2 gap-3.5 pb-4">
-                                <ColorSelector
-                                    label="Background"
-                                    name="bg"
-                                    value={bg}
-                                    onChange={debouncedSetBg}
-                                    onInstantStyleUpdate={
-                                        handleInstantStyleUpdate
-                                    }
-                                />
-                                <ColorSelector
-                                    label="Background Alt"
-                                    name="bgAlt"
-                                    value={bgAlt}
-                                    onChange={debouncedSetBgAlt}
-                                    onInstantStyleUpdate={
-                                        handleInstantStyleUpdate
-                                    }
-                                />
-                                <ColorSelector
-                                    label="Primary Accent"
-                                    name="primaryColor"
-                                    value={primaryColor}
-                                    onChange={debouncedSetPrimaryColor}
-                                    onInstantStyleUpdate={
-                                        handleInstantStyleUpdate
-                                    }
-                                />
-                                <ColorSelector
-                                    label="Text (Foreground)"
-                                    name="fg"
-                                    value={fg}
-                                    onChange={debouncedSetFg}
-                                    onInstantStyleUpdate={
-                                        handleInstantStyleUpdate
-                                    }
-                                />
-                                <ColorSelector
-                                    label="Muted Text"
-                                    name="fgMuted"
-                                    value={fgMuted}
-                                    onChange={debouncedSetFgMuted}
-                                    onInstantStyleUpdate={
-                                        handleInstantStyleUpdate
-                                    }
-                                />
-                                <ColorSelector
-                                    label="Card Background"
-                                    name="cardBg"
-                                    value={cardBg}
-                                    onChange={debouncedSetCardBg}
-                                    onInstantStyleUpdate={
-                                        handleInstantStyleUpdate
-                                    }
-                                />
-                                <ColorSelector
-                                    label="Card Border"
-                                    name="cardBorder"
-                                    value={cardBorder}
-                                    onChange={debouncedSetCardBorder}
-                                    onInstantStyleUpdate={
-                                        handleInstantStyleUpdate
-                                    }
-                                />
+                            {/* Typography Colors */}
+                            <div className="flex flex-col gap-1.5">
+                                <h4 className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                                    Typography Colors
+                                </h4>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <ColorSelector
+                                        label="Header & Title Text"
+                                        description="Titles & block headings"
+                                        name="fg"
+                                        value={fg}
+                                        onChange={debouncedSetFg}
+                                        onInstantStyleUpdate={
+                                            handleInstantStyleUpdate
+                                        }
+                                    />
+                                    <ColorSelector
+                                        label="Body & Subtitle Text"
+                                        description="Paragraphs & captions"
+                                        name="fgMuted"
+                                        value={fgMuted}
+                                        onChange={debouncedSetFgMuted}
+                                        onInstantStyleUpdate={
+                                            handleInstantStyleUpdate
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Cards & Accents */}
+                            <div className="flex flex-col gap-1.5 pb-2">
+                                <h4 className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                                    Cards & Accents
+                                </h4>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <ColorSelector
+                                        label="Card Background"
+                                        description="Boxes & card items"
+                                        name="cardBg"
+                                        value={cardBg}
+                                        onChange={debouncedSetCardBg}
+                                        onInstantStyleUpdate={
+                                            handleInstantStyleUpdate
+                                        }
+                                    />
+                                    <ColorSelector
+                                        label="Card Border"
+                                        description="Outlines & dividers"
+                                        name="cardBorder"
+                                        value={cardBorder}
+                                        onChange={debouncedSetCardBorder}
+                                        onInstantStyleUpdate={
+                                            handleInstantStyleUpdate
+                                        }
+                                    />
+                                    <div className="col-span-2">
+                                        <ColorSelector
+                                            label="Accent & Highlights"
+                                            description="Icons, bullets, badges & key numbers"
+                                            name="primaryColor"
+                                            value={primaryColor}
+                                            onChange={debouncedSetPrimaryColor}
+                                            onInstantStyleUpdate={
+                                                handleInstantStyleUpdate
+                                            }
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

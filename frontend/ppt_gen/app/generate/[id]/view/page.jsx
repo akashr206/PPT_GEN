@@ -898,7 +898,9 @@ export default function PPTSlidesViewerPage({ params }) {
                 isLoading={isShareLoading}
                 shareUrl={
                     typeof window !== "undefined"
-                        ? `${window.location.origin}/share/${pptId}`
+                        ? process.env.NEXT_PUBLIC_HOSTED_URL
+                            ? `${process.env.NEXT_PUBLIC_HOSTED_URL}/share/${pptId}`
+                            : `${window.location.origin}/share/${pptId}`
                         : ""
                 }
             />
