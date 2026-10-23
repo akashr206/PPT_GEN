@@ -83,17 +83,31 @@ export const useThemeStore = create((set, get) => ({
             toast.error("Failed to delete theme", { id: toastId });
             throw err;
         }
+    },
+
+    extractThemeFromImage: async (imageBase64) => {
+        const toastId = toast.loading("Analyzing template colors with AI...");
+        try {
+            const res = await api.post("/api/themes/extract-from-image", { image: imageBase64 });
+            toast.success("Theme extracted from template!", { id: toastId });
+            return res?.data || res;
+        } catch (err) {
+            console.error("Failed to extract theme from image:", err);
+            toast.error(err?.message || "Failed to extract theme from image", { id: toastId });
+            throw err;
+        }
     }
 }));
 
 export function useThemes(options = { fetchOnMount: true }) {
     const store = useThemeStore();
+    const fetchThemes = store.fetchThemes;
     
     useEffect(() => {
         if (options.fetchOnMount) {
-            store.fetchThemes();
+            fetchThemes();
         }
-    }, [store.fetchThemes, options.fetchOnMount]);
+    }, [fetchThemes, options.fetchOnMount]);
 
     return store;
 }

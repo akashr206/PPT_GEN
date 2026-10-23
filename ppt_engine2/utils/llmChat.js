@@ -1,7 +1,7 @@
 import { configDotenv } from "dotenv";
 configDotenv();
 
-async function chat(systemPrompt, prompt, thinking = "standard") {
+async function chatMimo(systemPrompt, prompt, thinking = "standard", maxTokens = 8192) {
     const response = await fetch("https://api.xiaomimimo.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -14,7 +14,7 @@ async function chat(systemPrompt, prompt, thinking = "standard") {
                 { role: "system", content: systemPrompt },
                 { role: "user", content: prompt }
             ],
-            max_completion_tokens: 8192,
+            max_completion_tokens: maxTokens,
             temperature: 0.5,
             top_p: 0.9,
             stream: false,
@@ -37,6 +37,77 @@ async function chat(systemPrompt, prompt, thinking = "standard") {
 
     return content;
 }
+
+async function chat(systemPrompt, prompt, thinking = "standard", maxTokens = 8192, image = null, jsonMode = false) {
+    const userParts = [{ text: prompt }];
+
+    if (image) {
+        let mimeType = "image/jpeg";
+        let base64Data = image;
+        if (typeof image === "string" && image.startsWith("data:")) {
+            const matches = image.match(/^data:([^;]+);base64,(.+)$/);
+            if (matches) {
+                mimeType = matches[1];
+                base64Data = matches[2];
+            }
+        } else if (typeof image === "object" && image.data) {
+            mimeType = image.mimeType || "image/jpeg";
+            base64Data = image.data;
+        }
+
+        userParts.push({
+            inlineData: {
+                mimeType,
+                data: base64Data
+            }
+        });
+    }
+
+    const generationConfig = {
+        maxOutputTokens: maxTokens,
+        ...(jsonMode ? { responseMimeType: "application/json" } : {}),
+        ...(thinking === "extended" || thinking === "advanced" ? {
+            thinkingConfig: { thinkingBudget: 1024 }
+        } : {})
+    };
+
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent", {
+        method: "POST",
+        headers: {
+            "x-goog-api-key": process.env.GEMINI_API_KEY,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            system_instruction: {
+                parts: [{ text: systemPrompt }]
+            },
+            contents: [
+                {
+                    role: "user",
+                    parts: userParts
+                }
+            ],
+            generationConfig
+        })
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Gemini API error! status: ${response.status}, body: ${errorText}`);
+    }
+
+    const data = await response.json();
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const textPart = parts.find((p) => typeof p.text === "string" && !p.thought);
+    const content = textPart ? textPart.text : (parts[0]?.text || "");
+
+    if (!content) {
+        throw new Error("No text content returned from Gemini model.");
+    }
+
+    return content;
+}
+
 
 async function chatStream1(systemPrompt, prompt, onToken, signal, thinking = "standard") {
     // 1. Correct Endpoint and API Key
@@ -211,4 +282,4 @@ async function chatStream(systemPrompt, prompt, onToken, signal, thinking = "sta
     }
 }
 
-export { chat, chatStream }
+export { chat, chatMimo, chatStream }

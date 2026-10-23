@@ -220,7 +220,7 @@ export default function PPTSlidesViewerPage({ params }) {
         pptData,
     });
 
-    const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX;
+    const isBusy = isStreamGenerating || isGeneratingPDF || isExtractingPPTX || isEditWithAILoading;
 
     const handleToggleShare = useCallback(
         async (checked) => {
@@ -566,9 +566,10 @@ export default function PPTSlidesViewerPage({ params }) {
         };
     }, [pptData, isBusy, handleDownloadAsPPT]);
 
-    // --- AI slide edit ---
+    // --- AI slide edit (Optimized fast flow) ---
     const handleEditSlideWithAI = useCallback(async () => {
-        if (!editWithAIPrompt.trim()) {
+        const promptToApply = editWithAIPrompt.trim();
+        if (!promptToApply) {
             toast.error("Please enter a prompt.");
             return;
         }
@@ -576,24 +577,41 @@ export default function PPTSlidesViewerPage({ params }) {
         const currentSlides = editableSlidesRef.current;
         const activeSlide = currentSlides[activeIndex];
 
+        // 1. Immediately dismiss modal & display live ambient AI editing state on the slide canvas
+        setIsEditWithAIModalOpen(false);
+        setEditWithAIPrompt("");
         setIsEditWithAILoading(true);
-        const toastId = toast.loading("AI is editing your slide");
+        toast.loading("AI is editing your slide...", { id: "edit-slide-ai" });
+
         try {
             const res = await api.post(`/api/ppt/edit-slide`, {
                 slide: denormalizeSlide(activeSlide),
-                prompt: editWithAIPrompt,
+                prompt: promptToApply,
                 presentationTitle: pptData?.title || "Presentation",
                 slideTitles: currentSlides.map(
                     (s) => s.title || "Untitled Slide",
                 ),
                 slideIndex: activeIndex,
             });
+
             if (res?.success && res.data) {
                 let updatedSlide = normalizeSlides([res.data])[0];
 
+                // Preserve existing macro image if the prompt didn't request a replacement
+                if (activeSlide?.image && !updatedSlide.image) {
+                    updatedSlide.image = activeSlide.image;
+                }
+
+                // 2. Commit slide state immediately! User sees updated layout & copy in ~1-2 seconds
+                const updatedSlides = [...currentSlides];
+                updatedSlides[activeIndex] = updatedSlide;
+                updateSlidesState(updatedSlides);
+                setIsEditWithAILoading(false);
+                toast.success("AI successfully edited the Slide!", { id: "edit-slide-ai" });
+
+                // 3. Resolve any missing media in parallel in the background without blocking the UI
                 const searchImages = useMediaStore.getState().searchImages;
                 const searchIcons = useMediaStore.getState().searchIcons;
-
                 const isRealUrl = (str) =>
                     str &&
                     (str.startsWith("http://") ||
@@ -602,41 +620,37 @@ export default function PPTSlidesViewerPage({ params }) {
                         str.startsWith("/") ||
                         str.startsWith("blob:"));
 
-                const resolveNode = async (node) => {
+                const mediaTasks = [];
+
+                const collectMediaTasks = (node) => {
                     if (!node) return;
                     if (node.type === "split") {
-                        await Promise.all([
-                            resolveNode(node.first),
-                            resolveNode(node.second),
-                        ]);
-                    } else if (
-                        node.type === "leaf" ||
-                        node.type === "content"
-                    ) {
-                        if (node.items) {
-                            for (const item of node.items) {
-                                if (
-                                    !item.icon &&
-                                    (item.iconKeywords || item.header)
-                                ) {
-                                    const query =
-                                        item.iconKeywords || item.header;
-                                    const data = await searchIcons(query);
-                                    if (data && data.length > 0) {
-                                        item.icon = data[0].name;
-                                    } else {
-                                        item.icon = "Star";
-                                    }
+                        collectMediaTasks(node.first);
+                        collectMediaTasks(node.second);
+                    } else if (node.type === "leaf" || node.type === "content") {
+                        if (node.items && Array.isArray(node.items)) {
+                            node.items.forEach((item) => {
+                                if (!item.icon && (item.iconKeywords || item.header)) {
+                                    const q = item.iconKeywords || item.header;
+                                    mediaTasks.push(
+                                        searchIcons(q).then((data) => {
+                                            if (data && data.length > 0) {
+                                                item.icon = data[0].name;
+                                            } else {
+                                                item.icon = "Star";
+                                            }
+                                        }).catch(() => { item.icon = "Star"; })
+                                    );
                                 }
                                 if (item.image && !isRealUrl(item.image)) {
-                                    const query =
-                                        item.image ||
-                                        item.imageDescription ||
-                                        item.header;
-                                    const data = await searchImages(query);
-                                    if (data && data.length > 0) {
-                                        item.image = data[0].imageURL;
-                                    }
+                                    const q = item.image || item.imageDescription || item.header;
+                                    mediaTasks.push(
+                                        searchImages(q).then((data) => {
+                                            if (data && data.length > 0) {
+                                                item.image = data[0].imageURL;
+                                            }
+                                        }).catch(() => {})
+                                    );
                                 } else if (
                                     !item.image &&
                                     (node.layout?.category === "images" ||
@@ -644,64 +658,61 @@ export default function PPTSlidesViewerPage({ params }) {
                                         node.layout?.type === "image" ||
                                         (node.layout?.category === "basic" &&
                                             (node.layout?.type === "gallery" ||
-                                                node.layout?.type ===
-                                                    "single")))
+                                                node.layout?.type === "single")))
                                 ) {
-                                    const query =
-                                        item.imageDescription ||
-                                        item.header ||
-                                        "placeholder";
-                                    const data = await searchImages(query);
-                                    if (data && data.length > 0) {
-                                        item.image = data[0].imageURL;
-                                    }
+                                    const q = item.imageDescription || item.header || "placeholder";
+                                    mediaTasks.push(
+                                        searchImages(q).then((data) => {
+                                            if (data && data.length > 0) {
+                                                item.image = data[0].imageURL;
+                                            }
+                                        }).catch(() => {})
+                                    );
                                 }
-                            }
+                            });
                         }
                     }
                 };
 
                 if (updatedSlide.contentTree) {
-                    await resolveNode(updatedSlide.contentTree);
+                    collectMediaTasks(updatedSlide.contentTree);
                 }
 
                 if (
-                    [
-                        "full-image",
-                        "split-left-image",
-                        "split-right-image",
-                        "top-image-banner",
-                    ].includes(updatedSlide.type)
+                    ["full-image", "split-left-image", "split-right-image", "top-image-banner"].includes(updatedSlide.type) &&
+                    !isRealUrl(updatedSlide.image)
                 ) {
-                    if (!isRealUrl(updatedSlide.image)) {
-                        const query =
-                            updatedSlide.imageDescription || updatedSlide.image;
-                        if (query) {
-                            const data = await searchImages(query);
-                            if (data && data.length > 0) {
-                                updatedSlide.image = data[0].imageURL;
-                            }
-                        }
+                    const q = updatedSlide.imageDescription || updatedSlide.image;
+                    if (q) {
+                        mediaTasks.push(
+                            searchImages(q).then((data) => {
+                                if (data && data.length > 0) {
+                                    updatedSlide.image = data[0].imageURL;
+                                }
+                            }).catch(() => {})
+                        );
                     }
                 }
 
-                const updatedSlides = [...currentSlides];
-                updatedSlides[activeIndex] = updatedSlide;
-                updateSlidesState(updatedSlides);
-                toast.success("AI successfully edited the Slide!");
-                setIsEditWithAIModalOpen(false);
-                setEditWithAIPrompt("");
+                if (mediaTasks.length > 0) {
+                    Promise.all(mediaTasks).then(() => {
+                        const finalSlides = [...editableSlidesRef.current];
+                        if (finalSlides[activeIndex]) {
+                            finalSlides[activeIndex] = { ...updatedSlide };
+                            updateSlidesState(finalSlides);
+                        }
+                    });
+                }
             } else {
                 throw new Error(res?.message || "Failed to edit slide");
             }
         } catch (err) {
             console.error("AI Slide Edit failed:", err);
-            toast.error("Failed to edit slide with AI");
+            toast.error("Failed to edit slide with AI", { id: "edit-slide-ai" });
         } finally {
             setIsEditWithAILoading(false);
-            toast.dismiss(toastId);
         }
-    }, [editWithAIPrompt]);
+    }, [editWithAIPrompt, pptData?.title, updateSlidesState]);
 
     const theme = pptData?.theme || "sunset";
     const activeSlide = editableSlides?.[activeSlideIndex];
@@ -802,6 +813,7 @@ export default function PPTSlidesViewerPage({ params }) {
                                 theme={theme}
                                 isBusy={isBusy}
                                 isStreamGenerating={isStreamGenerating}
+                                isEditingWithAI={isEditWithAILoading}
                                 isFullscreen={isFullscreen}
                                 isTouchDevice={isTouchDevice}
                                 onEditWithAI={openEditWithAI}

@@ -191,13 +191,16 @@ export default function ThemesTab() {
                             className="h-full border border-dashed border-border bg-card text-card-foreground hover:bg-accent/30 transition-all rounded-xl flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none group min-h-[120px]"
                         >
                             <div className="w-10 h-10 rounded-full border border-primary/20 bg-primary/5 group-hover:bg-primary/10 transition-colors flex items-center justify-center mb-3">
-                                <Plus className="w-5 h-5 text-primary" />
+                                <Sparkles className="w-5 h-5 text-primary" />
                             </div>
-                            <h3 className="font-semibold text-xs text-card-foreground group-hover:text-primary transition-colors">
-                                Create Custom Theme
+                            <h3 className="font-semibold text-xs text-card-foreground group-hover:text-primary transition-colors flex items-center gap-1.5 justify-center">
+                                <span>Create Custom Theme</span>
+                                <span className="text-[9px] px-1.5 py-0.2 bg-primary/15 text-primary rounded-full font-bold uppercase tracking-wider">
+                                    AI
+                                </span>
                             </h3>
                             <p className="text-[10px] text-muted-foreground mt-1 font-light max-w-[200px]">
-                                Custom colors, cards, icons and font families
+                                Custom palette, or paste any template slide screenshot
                             </p>
                         </motion.div>
                     </Link>

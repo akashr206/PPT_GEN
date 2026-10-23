@@ -1,4 +1,4 @@
-import { chat, chatStream } from "../utils/llmChat.js";
+import { chat, chatMimo, chatStream } from "../utils/llmChat.js";
 import partialJsonParser from "partial-json-parser";
 import { pptSystemPrompt, editSlideSystemPrompt } from "../utils/prompts.js";
 import { sendSuccess, sendError } from "../utils/response.js";
@@ -415,16 +415,29 @@ Presentation Context:
 - Topic/Title: ${presentationTitle || 'N/A'}
 - Total Slides: ${slideTitles?.length || 0}
 - Current Slide Position: Slide ${slideIndex !== undefined ? slideIndex + 1 : 'N/A'} of ${slideTitles?.length || 0}
-- Sequence of Slide Titles in Deck: ${slideTitles ? slideTitles.map((t, idx) => `\n  ${idx + 1}. ${t}`).join('') : 'N/A'}
 `.trim();
 
-        const userPrompt = `${contextInfo}\n\n====================\n\nCurrent Slide JSON to Edit:\n${JSON.stringify(slide, null, 2)}\n\nEdit Instruction:\n${prompt}`;
+        // Sanitize slide before sending to LLM: replace long asset URLs with placeholders
+        // to minimize prompt tokens and prevent the model from wasting time reproducing massive CDN URLs
+        const originalMacroImage = slide?.image;
+        const cleanSlide = JSON.parse(JSON.stringify(slide || {}));
+        if (cleanSlide.image && typeof cleanSlide.image === 'string' && cleanSlide.image.startsWith('http')) {
+            cleanSlide.image = '[KEEP_EXISTING_IMAGE]';
+        }
 
-        const response = await chat(editSlideSystemPrompt, userPrompt);
+        const userPrompt = `${contextInfo}\n\n====================\n\nCurrent Slide JSON to Edit:\n${JSON.stringify(cleanSlide, null, 2)}\n\nEdit Instruction:\n${prompt}`;
+
+        const response = await chatMimo(editSlideSystemPrompt, userPrompt, "disabled", 2048);
         const parsedSlide = parseLLMJson(response);
 
-        // Fetch icons if needed
-        await insertIconsToContent([parsedSlide]);
+        // Restore existing macro image if preserved or unchanged
+        if (parsedSlide) {
+            if (parsedSlide.image === '[KEEP_EXISTING_IMAGE]' || (!parsedSlide.image && originalMacroImage)) {
+                parsedSlide.image = originalMacroImage;
+            }
+            // Fetch and match icons in parallel via Supabase RPC directly on backend
+            await insertIconsToContent([parsedSlide]);
+        }
 
         return sendSuccess(res, parsedSlide, "Slide edited successfully");
     } catch (error) {

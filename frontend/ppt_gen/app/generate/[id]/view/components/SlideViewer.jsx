@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Diamond, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Diamond, Loader2, Sparkles } from "lucide-react";
 import Slide from "@/components/templates/Slide";
 import SlideFloatingControls from "@/components/generate/SlideFloatingControls";
 import { PresentationContext } from "@/contexts/presentation-context";
@@ -28,6 +28,7 @@ const SlideViewer = React.memo(function SlideViewer({
     theme,
     isBusy,
     isStreamGenerating,
+    isEditingWithAI = false,
     isFullscreen,
     isTouchDevice,
     onUpdateSlide,
@@ -318,6 +319,14 @@ const SlideViewer = React.memo(function SlideViewer({
                                                 e.preventDefault();
                                             }}
                                         />
+                                    )}
+                                    {isEditingWithAI && (
+                                        <div className="absolute inset-0 z-30 bg-background/35 backdrop-blur-[2px] rounded-md flex flex-col items-center justify-center gap-2 border-2 border-primary/50 animate-pulse pointer-events-none">
+                                            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-background/95 border border-primary/30 shadow-lg text-xs font-semibold text-foreground">
+                                                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                                                <span>AI is redesigning this slide</span>
+                                            </div>
+                                        </div>
                                     )}
                                     <Slide
                                         slide_content={{

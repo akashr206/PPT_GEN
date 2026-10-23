@@ -60,11 +60,25 @@ export const insertIconsToContent = async (slidesContent) => {
                 }
             }
         }
+        if (slide.contentTree) {
+            const traverseTree = (node) => {
+                if (!node) return;
+                if (node.items && Array.isArray(node.items)) {
+                    allItems = allItems.concat(node.items);
+                }
+                if (node.type === "split") {
+                    traverseTree(node.first);
+                    traverseTree(node.second);
+                }
+            };
+            traverseTree(slide.contentTree);
+        }
 
         if (allItems.length === 0) continue;
 
         for (const item of allItems) {
-            const parsedKeywords = parseIconKeywords(item.iconKeywords);
+            if (item.icon) continue;
+            const parsedKeywords = parseIconKeywords(item.iconKeywords || item.header);
             if (parsedKeywords.length > 0) {
                 // Ensure keywords are trimmed, lowercase, and unique
                 const keywords = [...new Set(parsedKeywords.map(k => k.toLowerCase().trim()))];

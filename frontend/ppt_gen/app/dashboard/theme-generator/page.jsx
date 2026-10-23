@@ -9,6 +9,7 @@ import {
     Heading,
     CaseSensitive,
     ChevronDown,
+    Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useThemes } from "@/hooks/use-themes";
@@ -252,7 +253,13 @@ function ThemeGeneratorContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const themeId = searchParams.get("id");
-    const { customThemes, createTheme, updateTheme } = useThemes();
+    const { customThemes, createTheme, updateTheme, extractThemeFromImage } = useThemes();
+
+    // Smart Theme Builder State
+    const [isExtracting, setIsExtracting] = useState(false);
+    const [extractedPreview, setExtractedPreview] = useState(null);
+    const [isDraggingOver, setIsDraggingOver] = useState(false);
+    const fileInputRef = useRef(null);
 
     // Theme Variables State
     const [name, setName] = useState("My Custom Brand");
@@ -310,6 +317,12 @@ function ThemeGeneratorContent() {
             };
             const customVarName = cssMap[varName] || `--theme-${varName}`;
             previewContainerRef.current.style.setProperty(customVarName, value);
+            if (varName === "primaryColor") {
+                previewContainerRef.current.style.setProperty("--theme-accent", value);
+            }
+            if (varName === "bgAlt") {
+                previewContainerRef.current.style.setProperty("--theme-secondary", value);
+            }
         }
     }, []);
 
@@ -337,6 +350,136 @@ function ThemeGeneratorContent() {
             }
         }
     }, [themeId, customThemes, hasLoadedTheme]);
+
+    // Handle extraction from template image file
+    const processImageFile = React.useCallback(
+        async (file) => {
+            if (!file || !file.type.startsWith("image/")) {
+                toast.error("Please provide a valid image file.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const dataUrl = e.target?.result;
+                if (!dataUrl) return;
+
+                setIsExtracting(true);
+                try {
+                    const result = await extractThemeFromImage(dataUrl);
+                    if (result) {
+                        if (result.name) setName(result.name);
+                        if (result.bg) setBg(result.bg);
+                        if (result.bg_alt) setBgAlt(result.bg_alt);
+                        if (result.fg) setFg(result.fg);
+                        if (result.fg_muted) setFgMuted(result.fg_muted);
+                        if (result.primary_color) setPrimaryColor(result.primary_color);
+                        if (result.card_bg) setCardBg(result.card_bg);
+                        if (result.card_border) setCardBorder(result.card_border);
+                        if (result.font_heading) setFontHeading(result.font_heading);
+                        if (result.font_body) setFontBody(result.font_body);
+
+                        // Direct-DOM instant update for seamless 60FPS preview
+                        if (result.bg) handleInstantStyleUpdate("bg", result.bg);
+                        if (result.bg_alt) handleInstantStyleUpdate("bgAlt", result.bg_alt);
+                        if (result.fg) handleInstantStyleUpdate("fg", result.fg);
+                        if (result.fg_muted) handleInstantStyleUpdate("fgMuted", result.fg_muted);
+                        if (result.primary_color) handleInstantStyleUpdate("primaryColor", result.primary_color);
+                        if (result.card_bg) handleInstantStyleUpdate("cardBg", result.card_bg);
+                        if (result.card_border) handleInstantStyleUpdate("cardBorder", result.card_border);
+                        if (previewContainerRef.current) {
+                            if (result.font_heading) {
+                                previewContainerRef.current.style.setProperty(
+                                    "--theme-font-heading",
+                                    result.font_heading,
+                                );
+                            }
+                            if (result.font_body) {
+                                previewContainerRef.current.style.setProperty(
+                                    "--theme-font-body",
+                                    result.font_body,
+                                );
+                            }
+                        }
+
+                        setExtractedPreview(dataUrl);
+                    }
+                } catch (err) {
+                    console.error("Failed to extract theme:", err);
+                } finally {
+                    setIsExtracting(false);
+                }
+            };
+            reader.readAsDataURL(file);
+        },
+        [extractThemeFromImage, handleInstantStyleUpdate],
+    );
+
+    // Global Clipboard Paste Listener
+    useEffect(() => {
+        const handlePaste = (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf("image") !== -1) {
+                    const file = items[i].getAsFile();
+                    if (file) {
+                        e.preventDefault();
+                        processImageFile(file);
+                        return;
+                    }
+                }
+            }
+        };
+
+        window.addEventListener("paste", handlePaste);
+        return () => window.removeEventListener("paste", handlePaste);
+    }, [processImageFile]);
+
+    // Drag-and-drop listener across the window
+    useEffect(() => {
+        let dragCounter = 0;
+        const handleDragEnter = (e) => {
+            if (e.dataTransfer?.types?.includes("Files")) {
+                dragCounter++;
+                setIsDraggingOver(true);
+            }
+        };
+        const handleDragLeave = () => {
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                setIsDraggingOver(false);
+            }
+        };
+        const handleDragOver = (e) => {
+            if (e.dataTransfer?.types?.includes("Files")) {
+                e.preventDefault();
+            }
+        };
+        const handleDrop = (e) => {
+            e.preventDefault();
+            dragCounter = 0;
+            setIsDraggingOver(false);
+            const file = e.dataTransfer.files?.[0];
+            if (file && file.type.startsWith("image/")) {
+                processImageFile(file);
+            }
+        };
+
+        window.addEventListener("dragenter", handleDragEnter);
+        window.addEventListener("dragleave", handleDragLeave);
+        window.addEventListener("dragover", handleDragOver);
+        window.addEventListener("drop", handleDrop);
+
+        return () => {
+            window.removeEventListener("dragenter", handleDragEnter);
+            window.removeEventListener("dragleave", handleDragLeave);
+            window.removeEventListener("dragover", handleDragOver);
+            window.removeEventListener("drop", handleDrop);
+        };
+    }, [processImageFile]);
 
     const handleSave = async (e) => {
         e.preventDefault();
@@ -431,21 +574,82 @@ function ThemeGeneratorContent() {
                 {/* Sidebar color controls */}
                 <aside className="w-full lg:w-96 lg:h-full max-lg:h-auto bg-card text-card-foreground flex flex-col border-r border-border shrink-0 select-none lg:min-h-0">
                     {/* Sidebar Header */}
-                    <div className="p-4 border-b border-border flex items-center justify-start gap-1.5 shrink-0">
-                        <span className="font-bold text-foreground">
+                    <div className="p-3.5 px-5 border-b border-border flex items-center justify-between shrink-0">
+                        <span className="font-bold text-sm text-foreground">
                             Theme Creator
                         </span>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isExtracting}
+                            onClick={() => fileInputRef.current?.click()}
+                            title="Paste screenshot (Ctrl+V) or click to upload"
+                            className="h-7 px-2.5 text-[11px] gap-1.5 font-medium border-border/80 hover:border-primary/50 text-muted-foreground hover:text-foreground cursor-pointer shadow-xs"
+                        >
+                            {isExtracting ? (
+                                <>
+                                    <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                                    <span>Extracting...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles className="w-3 h-3 text-primary" />
+                                    <span>Extract from Slide</span>
+                                </>
+                            )}
+                        </Button>
                     </div>
 
                     <form
                         onSubmit={handleSave}
                         className="flex-1 lg:overflow-y-auto p-5 flex flex-col gap-5 lg:min-h-0"
                     >
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    processImageFile(file);
+                                    e.target.value = "";
+                                }
+                            }}
+                        />
+
                         {/* Theme Name input */}
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
-                                Theme Name
-                            </label>
+                            <div className="flex items-center justify-between">
+                                <label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                                    Theme Name
+                                </label>
+                                {extractedPreview && (
+                                    <div className="flex items-center gap-1.5 text-[10px] bg-accent/40 border border-border/70 rounded-full px-2 py-0.5">
+                                        <div className="w-3.5 h-3.5 rounded-xs overflow-hidden border border-border shrink-0 bg-muted">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={extractedPreview}
+                                                alt="Source template"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <span className="text-foreground/80 font-medium">
+                                            From Template
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setExtractedPreview(null)}
+                                            className="text-muted-foreground hover:text-foreground ml-0.5 text-xs font-bold leading-none cursor-pointer"
+                                            title="Clear extracted source"
+                                        >
+                                            &times;
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                             <input
                                 type="text"
                                 value={name}
@@ -659,18 +863,23 @@ function ThemeGeneratorContent() {
                             Slide Layout Preview
                         </span>
 
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground font-medium">
-                                Layout:
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] text-muted-foreground/70 hidden md:inline-flex items-center gap-1">
+                                <kbd className="px-1 py-0.2 bg-muted rounded border text-[9px] font-mono">Ctrl + V</kbd> to paste template
                             </span>
-                            <LayoutSelectorDropdown
-                                category={layoutCategory}
-                                type={layoutType}
-                                onSelect={(cat, typ) => {
-                                    setLayoutCategory(cat);
-                                    setLayoutType(typ);
-                                }}
-                            />
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground font-medium">
+                                    Layout:
+                                </span>
+                                <LayoutSelectorDropdown
+                                    category={layoutCategory}
+                                    type={layoutType}
+                                    onSelect={(cat, typ) => {
+                                        setLayoutCategory(cat);
+                                        setLayoutType(typ);
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -682,17 +891,40 @@ function ThemeGeneratorContent() {
                             "--theme-fg": fg,
                             "--theme-fg-muted": fgMuted,
                             "--theme-primary": primaryColor,
+                            "--theme-accent": primaryColor,
+                            "--theme-secondary": bgAlt,
                             "--theme-card-bg": cardBg,
                             "--theme-card-border": cardBorder,
                             "--theme-font-heading": fontHeading,
                             "--theme-font-body": fontBody,
                         }}
-                        className="w-full rounded-md overflow-hidden pointer-events-none max-w-[1000px] border shadow @container"
+                        className="w-full rounded-md overflow-hidden pointer-events-none max-w-[1000px] border shadow @container relative"
                     >
+                        {isExtracting && (
+                            <div className="absolute inset-0 bg-background/60 backdrop-blur-xs flex flex-col items-center justify-center gap-2 z-30 pointer-events-auto">
+                                <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                                <p className="text-xs font-semibold text-foreground">
+                                    Extracting palette from template...
+                                </p>
+                                <span className="text-[10px] text-muted-foreground">
+                                    Gemini AI is analyzing colors & typography
+                                </span>
+                            </div>
+                        )}
                         {memoizedSlide}
                     </div>
                 </main>
             </div>
+
+            {isDraggingOver && (
+                <div className="fixed inset-0 z-50 bg-background/70 backdrop-blur-xs border-2 border-dashed border-primary flex flex-col items-center justify-center gap-2 pointer-events-none">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center animate-bounce">
+                        <Sparkles className="w-6 h-6" />
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">Drop presentation image to extract theme</p>
+                    <p className="text-xs text-muted-foreground">Gemini AI will automatically extract colors and typography</p>
+                </div>
+            )}
         </div>
     );
 }

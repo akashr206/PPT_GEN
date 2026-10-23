@@ -113,12 +113,18 @@ Example Structure:
 }
 `
 
+// Streamlined metadata specifically for single slide edits (excludes redundant global themes & deck rules)
+const editSlideMetadata = {
+    slideTypes: metadata.slideTypes,
+    layouts: metadata.layouts,
+};
+
 export const editSlideSystemPrompt = `You are a world-class presentation designer and expert slide editor.
 Your task is to modify a single presentation slide JSON object based on the user's specific edit prompt.
 You must return ONLY the updated slide as a valid JSON object matching the metadata schema rules.
 
-Template Metadata:
-${encode(metadata)}
+Template Layout Metadata:
+${encode(editSlideMetadata)}
 
 OBJECTIVE
 Carefully analyze the user's edit request and adapt the slide's content, layout, and structure to fulfill it perfectly, while maintaining a highly engaging and visually stunning design.
